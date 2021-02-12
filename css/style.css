@@ -769,7 +769,7 @@ h2.article-head {
   width: 100%;
   position: relative;
   background-repeat: no-repeat;
-  background-position: center;
+  background-position: bottom;
   background-size: cover;
   height: 350px;
 }
