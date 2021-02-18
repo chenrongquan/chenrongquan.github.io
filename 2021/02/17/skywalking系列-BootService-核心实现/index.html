@@ -161,23 +161,19 @@
   <!-- Article START -->
   <article class="post-article">
     <section class="markdown-content"><h2 id="网络连接管理GRPCChannelManager"><a href="#网络连接管理GRPCChannelManager" class="headerlink" title="网络连接管理GRPCChannelManager"></a>网络连接管理GRPCChannelManager</h2><ul>
-<li><p>GRPCChannelManager 负责维护Agent与后端OAP集群通信时使用的网络连接</p>
-</li>
-<li><p>GRPCChannel: gRPC客户端的核心类之一，逻辑上表示一个Channel，底层持有一个TCP链接，负责维护此连接的活性。在RPC调用的任何时机，如果检测到底层连接处于关闭状态(terminated)，会尝试重建连接。通常情况下，不需要在RPC调用结束后就关闭Channel，该Channel可以被一直重用，直到整个客户端程序关闭。当然，可以在客户端内以连接池的方式使用多个ManagedChannel，在每次RPC请求时选择使用轮训或是随机等算法选择一个可用的Channel，这样可以提高客户端整体的并发能力。</p>
-</li>
-<li><p>ManagedChannelBuilder：负责创建客户端Channel，ManagedChannelBuilder使用了provider机制，具体是创建了哪种Channel由provider决定，常用的ManagedChannelBuilder有三种</p>
-<ul>
+<li>GRPCChannelManager 负责维护Agent与后端OAP集群通信时使用的网络连接</li>
+<li>GRPCChannel: gRPC客户端的核心类之一，逻辑上表示一个Channel，底层持有一个TCP链接，负责维护此连接的活性。在RPC调用的任何时机，如果检测到底层连接处于关闭状态(terminated)，会尝试重建连接。通常情况下，不需要在RPC调用结束后就关闭Channel，该Channel可以被一直重用，直到整个客户端程序关闭。</li>
+<li>ManagedChannelBuilder：负责创建客户端Channel，ManagedChannelBuilder使用了provider机制，常用有三种<ul>
 <li>NettyChannelBuilder：创建的Channel底层是基于Netty实现的；SkyWalking Agent中用的是NettyChannelBuilder</li>
 <li>OkHttpChannelBuilder：创建的Channel底层是基于OkHttp库实现的</li>
 <li>InProcessChannelBuilder：创建进程内通信使用的Channel</li>
 </ul>
 </li>
-<li><p>SkyWalking 在ManagedChannel的基础上封装了自己的Channel实现——GRPCChannel；可以添加一些装饰器，如验证权限的修饰器AuthenticationDecorator</p>
-</li>
-<li><p>GRPCChannelManager，其中维护了一个GRPCChannel连接以及注册在其上的Listener监听； 另外还会维护一个后台线程定期检测该GRPCChannel的连接状态，如果发现连接断开，则会进行重连</p>
-</li>
-<li><p>boot() 方法</p>
-</li>
+<li>SkyWalking 在ManagedChannel的基础上封装了自己的Channel实现——GRPCChannel；可以添加一些装饰器，如验证权限的修饰器AuthenticationDecorator</li>
+<li>GRPCChannelManager，维护了一个GRPCChannel连接以及注册在其上的Listener监听； 还维护一个后台线程定期检测该GRPCChannel的连接状态，如果发现连接断开，则会进行重连</li>
+</ul>
+<ul>
+<li>boot() 方法</li>
 </ul>
 <ol>
 <li>首先会解析 agent.config配置文件指定的后端OAP实例地址初始化grpcServers字段</li>
@@ -186,10 +182,14 @@
 <li>设置 reconnect字段为false，暂时不会再重建连接了</li>
 <li>GRPCChannelManager 对外提供了 reportError() 方法，在其他依赖该网络连接的 BootService 实现发送请求失败时，可以通过该方法将 reconnect 字段设置为 true，并由后台线程重新创建 GRPCChannel。</li>
 </ol>
-<ul>
-<li>GRPCChannelListener 是一个监听器接口，有多个需要发送网络请求的 BootService 实现类同时实现了该接口</li>
-<li></li>
+<h2 id="服务及实例注册ServiceManagementClient"><a href="#服务及实例注册ServiceManagementClient" class="headerlink" title="服务及实例注册ServiceManagementClient"></a>服务及实例注册ServiceManagementClient</h2><ul>
+<li>Agent 启动过程中会依次调用BootService实现的prepare()方法 → boot()方法 → onComplete()方法之后，才能真正对外提供服务</li>
 </ul>
+<ol>
+<li>prepare()方法中首先会将其注册到GRPCChannelManager来监听网络连接，然后生成当前instanceName；优先使用gent.config文件中配置Agent.INSTANCE_NAME，若未配置则随机生成</li>
+<li>statusChanged()：网络连接建立之后，依赖该链接创建stub客户端；更新status字段，记录网络状态；Stub是gRPC框架生成的一个客户端辅助类，可以帮助我们轻松的完成请求的序列化、数据发送以及响应的反序列化。</li>
+<li>boot()方法：启动一个定时任务，默认每30s执行一次其run()方法，该定时任务进行心跳检测</li>
+</ol>
 </section>
     <!-- Tags START -->
     
@@ -247,7 +247,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BD%91%E7%BB%9C%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86GRPCChannelManager"><span class="toc-nav-text">网络连接管理GRPCChannelManager</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BD%91%E7%BB%9C%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86GRPCChannelManager"><span class="toc-nav-text">网络连接管理GRPCChannelManager</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%8A%E5%AE%9E%E4%BE%8B%E6%B3%A8%E5%86%8CServiceManagementClient"><span class="toc-nav-text">服务及实例注册ServiceManagementClient</span></a></li></ol>
     
   </div>
 </aside>
