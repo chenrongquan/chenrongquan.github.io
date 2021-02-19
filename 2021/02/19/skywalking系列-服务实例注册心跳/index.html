@@ -172,9 +172,8 @@
 <li>启动一个定时任务线程，主要做与OAP心跳检测；默认每隔30秒进行一次检测，也可由Config.Collector.HEARTBEAT_PERIOD指定</li>
 </ul>
 </li>
-</ul>
+<li><p>statusChanged()方法</p>
 <ul>
-<li>statusChanged()方法<ul>
 <li>网络连接创建成功时，会依赖该连接创建stub客户端</li>
 </ul>
 </li>
@@ -188,17 +187,17 @@
 </ul>
 </li>
 </ul>
-<h2 id="OAP端-ManagementServiceHandler"><a href="#OAP端-ManagementServiceHandler" class="headerlink" title="OAP端 ManagementServiceHandler"></a>OAP端 ManagementServiceHandler</h2><h3 id="信息注册-reportInstanceProperties-方法"><a href="#信息注册-reportInstanceProperties-方法" class="headerlink" title="信息注册 reportInstanceProperties()方法"></a>信息注册 reportInstanceProperties()方法</h3><ul>
-<li>(包含首次)上送数据: InstanceProperties<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">service: &quot;demo::projectA&quot;</span><br><span class="line">serviceInstance: &quot;7ff3e127186d45848e7371ffae1f6f73@192.168.31.36&quot;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;OS Name&quot;</span><br><span class="line">  value: &quot;Mac OS X&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;hostname&quot;</span><br><span class="line">  value: &quot;chenrqmac&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;ipv4&quot;</span><br><span class="line">  value: &quot;192.168.31.36&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;Process No.&quot;</span><br><span class="line">  value: &quot;76357&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;language&quot;</span><br><span class="line">  value: &quot;java&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-<li>落库(插入或更新last_ping) instance_traffic  </li>
-<li>entity_id = serviceId + Base64(instanceName)</li>
+<h2 id="OAP端-ManagementServiceHandler"><a href="#OAP端-ManagementServiceHandler" class="headerlink" title="OAP端 ManagementServiceHandler"></a>OAP端 ManagementServiceHandler</h2><h3 id="实例注册-reportInstanceProperties-方法"><a href="#实例注册-reportInstanceProperties-方法" class="headerlink" title="实例注册 reportInstanceProperties()方法"></a>实例注册 reportInstanceProperties()方法</h3><ul>
+<li>上送数据: InstanceProperties<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">service: &quot;demo::projectA&quot;</span><br><span class="line">serviceInstance: &quot;7ff3e127186d45848e7371ffae1f6f73@192.168.31.36&quot;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;OS Name&quot;</span><br><span class="line">  value: &quot;Mac OS X&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;hostname&quot;</span><br><span class="line">  value: &quot;chenrqmac&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;ipv4&quot;</span><br><span class="line">  value: &quot;192.168.31.36&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;Process No.&quot;</span><br><span class="line">  value: &quot;76357&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;language&quot;</span><br><span class="line">  value: &quot;java&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>落库(首次插入或后续更新last_ping) instance_traffic  </li>
+<li>entity_id = serviceId + Base64(instanceName) 唯一标识</li>
 </ul>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;_index&quot;</span> : <span class="string">&quot;ali02_instance_traffic-20210219&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_type&quot;</span> : <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1_ZGVjNDU3YWE1MmZiNDM1Nzg4Y2E4YjY1N2I4NzQ4NjNAMTkyLjE2OC4zMS4zNg==&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_score&quot;</span> : <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">&quot;_source&quot;</span> : &#123;</span><br><span class="line">    <span class="attr">&quot;last_ping&quot;</span> : <span class="number">202102190959</span>,</span><br><span class="line">    <span class="attr">&quot;service_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;name&quot;</span> : <span class="string">&quot;dec457aa52fb435788ca8b657b874863@192.168.31.36&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;time_bucket&quot;</span> : <span class="number">202102190957</span>,</span><br><span class="line">    <span class="attr">&quot;properties&quot;</span> : <span class="string">&quot;&quot;</span><span class="string">&quot;&#123;&quot;</span>OS Name<span class="string">&quot;:&quot;</span>Mac OS X<span class="string">&quot;,&quot;</span>hostname<span class="string">&quot;:&quot;</span>chenrqmac<span class="string">&quot;,&quot;</span>Process No.<span class="string">&quot;:&quot;</span><span class="number">82671</span><span class="string">&quot;,&quot;</span>language<span class="string">&quot;:&quot;</span>java<span class="string">&quot;,&quot;</span>ipv4s<span class="string">&quot;:&quot;</span><span class="number">192.168</span><span class="number">.31</span><span class="number">.36</span><span class="string">&quot;&#125;&quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="心跳检测-keepAlive-方法"><a href="#心跳检测-keepAlive-方法" class="headerlink" title="心跳检测 keepAlive()方法"></a>心跳检测 keepAlive()方法</h3><ul>
 <li><p>首次注册30秒后</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">service: &quot;demo::projectA&quot;</span><br><span class="line">serviceInstance: &quot;121454622972403eb6490293f4e51f86@192.168.31.36&quot;</span><br></pre></td></tr></table></figure>
 </li>
-<li><p>落库(插入或更新last_ping) instance_traffic  </p>
+<li><p>落库(更新last_ping) instance_traffic</p>
 </li>
 <li><p>entity_id = serviceId + Base64(instanceName)</p>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;_index&quot;</span> : <span class="string">&quot;ali02_service_traffic-20210219&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_type&quot;</span> : <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_score&quot;</span> : <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">&quot;_source&quot;</span> : </span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">&quot;node_type&quot;</span> : <span class="number">0</span>,</span><br><span class="line">    <span class="attr">&quot;name&quot;</span> : <span class="string">&quot;demo::projectA&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;service_group&quot;</span> : <span class="string">&quot;demo&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -215,50 +214,7 @@
 <li>落 service_traffic 时机: 首次心跳检测</li>
 </ol>
 </blockquote>
-<h3 id="相关Model、dispatcher、worker、DAO"><a href="#相关Model、dispatcher、worker、DAO" class="headerlink" title="相关Model、dispatcher、worker、DAO"></a>相关Model、dispatcher、worker、DAO</h3><ul>
-<li><p>Modle</p>
-<ul>
-<li>ServiceTraffic  继承 Metrics</li>
-<li>InstanceTraffic 继承 Metrics</li>
-</ul>
-</li>
-<li><p>Dispatcher</p>
-<ul>
-<li>InstanceUpdateDispatcher </li>
-<li>ServiceMetaDispatcher</li>
-</ul>
-</li>
-<li><p>StreanProcessor</p>
-<ul>
-<li>MetricsStreamProcessor</li>
-<li>指定DAO ： MetricsEs7DAO</li>
-<li>指定Model</li>
-<li>指定ReceiverWorker：<ul>
-<li>key: stream.getName() + “_rec” 即 service_traffic_rec 与 instance_traffic_rec</li>
-<li>value: RemoteHandleWorker(worker: MetricsPersistentWorker, streamDataClass: <?extends Metrics?>)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>worker</p>
-<ul>
-<li>入队dataCarrier：MetricsAggregateWorker#in()</li>
-<li>出队dataCarrier：MetricsRemoteWorker#in() </li>
-<li>指标计算-发送指定OAP节点：RemoteSenderService#send()</li>
-<li>OAP单节点：SelfRemoteClient#push()</li>
-<li>存储：MetricsPersistentWorker#in()方法</li>
-<li>入队：MetricsPersistentWorker.dataCarrier   name: MetricsPersistentWorker.serviceName 与 MetricsPersistentWorker.instanceName</li>
-<li>消费：</li>
-</ul>
-</li>
-<li><p>DAO</p>
-<ul>
-<li>MetricsEs7DAO</li>
-<li>MetricsEsDAO </li>
-</ul>
-</li>
-</ul>
-</section>
+<h2 id="存储原理"><a href="#存储原理" class="headerlink" title="存储原理"></a>存储原理</h2></section>
     <!-- Tags START -->
     
       <div class="tags">
@@ -319,7 +275,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Agent%E7%AB%AF-ServiceManagementClient"><span class="toc-nav-text">Agent端 ServiceManagementClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%8A%E5%AE%9E%E4%BE%8B%E4%BF%A1%E6%81%AF%E4%B8%8A%E9%80%81"><span class="toc-nav-text">服务及实例信息上送</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#OAP%E7%AB%AF-ManagementServiceHandler"><span class="toc-nav-text">OAP端 ManagementServiceHandler</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%BF%A1%E6%81%AF%E6%B3%A8%E5%86%8C-reportInstanceProperties-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">信息注册 reportInstanceProperties()方法</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BF%83%E8%B7%B3%E6%A3%80%E6%B5%8B-keepAlive-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">心跳检测 keepAlive()方法</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%9B%B8%E5%85%B3Model%E3%80%81dispatcher%E3%80%81worker%E3%80%81DAO"><span class="toc-nav-text">相关Model、dispatcher、worker、DAO</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Agent%E7%AB%AF-ServiceManagementClient"><span class="toc-nav-text">Agent端 ServiceManagementClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%8A%E5%AE%9E%E4%BE%8B%E4%BF%A1%E6%81%AF%E4%B8%8A%E9%80%81"><span class="toc-nav-text">服务及实例信息上送</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#OAP%E7%AB%AF-ManagementServiceHandler"><span class="toc-nav-text">OAP端 ManagementServiceHandler</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AE%9E%E4%BE%8B%E6%B3%A8%E5%86%8C-reportInstanceProperties-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">实例注册 reportInstanceProperties()方法</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BF%83%E8%B7%B3%E6%A3%80%E6%B5%8B-keepAlive-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">心跳检测 keepAlive()方法</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86"><span class="toc-nav-text">存储原理</span></a></li></ol>
     
   </div>
 </aside>
