@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      skywalking系列-服务实例注册心跳 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>skywalking系列-服务实例注册心跳</h2>
+  <p class="post-date">2021-02-19</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="Agent端-ServiceManagementClient"><a href="#Agent端-ServiceManagementClient" class="headerlink" title="Agent端 ServiceManagementClient"></a>Agent端 ServiceManagementClient</h2><h3 id="服务及实例信息上送"><a href="#服务及实例信息上送" class="headerlink" title="服务及实例信息上送"></a>服务及实例信息上送</h3><ul>
+<li><p>prepare()方法</p>
+<ul>
+<li>将其注册到 GRPCChannelManager 来监听网络连接</li>
+<li>生成当前ServiceInstance的唯一标识  UUID@ip或者Config.Agent.INSTANCE_NAME指定</li>
+</ul>
+</li>
+<li><p>boot()方法</p>
+<ul>
+<li>启动一个定时任务线程，主要做与OAP心跳检测；默认每隔30秒进行一次检测，也可由Config.Collector.HEARTBEAT_PERIOD指定</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>statusChanged()方法<ul>
+<li>网络连接创建成功时，会依赖该连接创建stub客户端</li>
+</ul>
+</li>
+</ul>
+<p>===30s后===</p>
+<ul>
+<li>定时任务run()方法<ul>
+<li>判断Channel连接状态</li>
+<li>每第10次调用(即30*10s)进行一次服务及实例的注册及更新</li>
+<li>每次调用进行心跳检测(不包含每第10次)</li>
+</ul>
+</li>
+</ul>
+<h2 id="OAP端-ManagementServiceHandler"><a href="#OAP端-ManagementServiceHandler" class="headerlink" title="OAP端 ManagementServiceHandler"></a>OAP端 ManagementServiceHandler</h2><h3 id="信息注册-reportInstanceProperties-方法"><a href="#信息注册-reportInstanceProperties-方法" class="headerlink" title="信息注册 reportInstanceProperties()方法"></a>信息注册 reportInstanceProperties()方法</h3><ul>
+<li>(包含首次)上送数据: InstanceProperties<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">service: &quot;demo::projectA&quot;</span><br><span class="line">serviceInstance: &quot;7ff3e127186d45848e7371ffae1f6f73@192.168.31.36&quot;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;OS Name&quot;</span><br><span class="line">  value: &quot;Mac OS X&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;hostname&quot;</span><br><span class="line">  value: &quot;chenrqmac&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;ipv4&quot;</span><br><span class="line">  value: &quot;192.168.31.36&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;Process No.&quot;</span><br><span class="line">  value: &quot;76357&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;language&quot;</span><br><span class="line">  value: &quot;java&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>落库(插入或更新last_ping) instance_traffic  </li>
+<li>entity_id = serviceId + Base64(instanceName)</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;_index&quot;</span> : <span class="string">&quot;ali02_instance_traffic-20210219&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_type&quot;</span> : <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1_ZGVjNDU3YWE1MmZiNDM1Nzg4Y2E4YjY1N2I4NzQ4NjNAMTkyLjE2OC4zMS4zNg==&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_score&quot;</span> : <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">&quot;_source&quot;</span> : &#123;</span><br><span class="line">    <span class="attr">&quot;last_ping&quot;</span> : <span class="number">202102190959</span>,</span><br><span class="line">    <span class="attr">&quot;service_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;name&quot;</span> : <span class="string">&quot;dec457aa52fb435788ca8b657b874863@192.168.31.36&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;time_bucket&quot;</span> : <span class="number">202102190957</span>,</span><br><span class="line">    <span class="attr">&quot;properties&quot;</span> : <span class="string">&quot;&quot;</span><span class="string">&quot;&#123;&quot;</span>OS Name<span class="string">&quot;:&quot;</span>Mac OS X<span class="string">&quot;,&quot;</span>hostname<span class="string">&quot;:&quot;</span>chenrqmac<span class="string">&quot;,&quot;</span>Process No.<span class="string">&quot;:&quot;</span><span class="number">82671</span><span class="string">&quot;,&quot;</span>language<span class="string">&quot;:&quot;</span>java<span class="string">&quot;,&quot;</span>ipv4s<span class="string">&quot;:&quot;</span><span class="number">192.168</span><span class="number">.31</span><span class="number">.36</span><span class="string">&quot;&#125;&quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="心跳检测-keepAlive-方法"><a href="#心跳检测-keepAlive-方法" class="headerlink" title="心跳检测 keepAlive()方法"></a>心跳检测 keepAlive()方法</h3><ul>
+<li><p>首次注册30秒后</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">service: &quot;demo::projectA&quot;</span><br><span class="line">serviceInstance: &quot;121454622972403eb6490293f4e51f86@192.168.31.36&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>落库(插入或更新last_ping) instance_traffic  </p>
+</li>
+<li><p>entity_id = serviceId + Base64(instanceName)</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;_index&quot;</span> : <span class="string">&quot;ali02_service_traffic-20210219&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_type&quot;</span> : <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_score&quot;</span> : <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">&quot;_source&quot;</span> : </span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">&quot;node_type&quot;</span> : <span class="number">0</span>,</span><br><span class="line">    <span class="attr">&quot;name&quot;</span> : <span class="string">&quot;demo::projectA&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;service_group&quot;</span> : <span class="string">&quot;demo&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>落库(不存在插入，存在不更新) service_traffic</p>
+</li>
+<li><p>entity_id = Base64(serviceName) + NodeType      </p>
+</li>
+</ul>
+<blockquote>
+<p>注：</p>
+<ol>
+<li>落 instance_traffic 时机：首次注册</li>
+<li>落 service_traffic 时机: 首次心跳检测</li>
+</ol>
+</blockquote>
+<h3 id="相关Model、dispatcher、worker、DAO"><a href="#相关Model、dispatcher、worker、DAO" class="headerlink" title="相关Model、dispatcher、worker、DAO"></a>相关Model、dispatcher、worker、DAO</h3><ul>
+<li><p>Modle</p>
+<ul>
+<li>ServiceTraffic  继承 Metrics</li>
+<li>InstanceTraffic 继承 Metrics</li>
+</ul>
+</li>
+<li><p>Dispatcher</p>
+<ul>
+<li>InstanceUpdateDispatcher </li>
+<li>ServiceMetaDispatcher</li>
+</ul>
+</li>
+<li><p>StreanProcessor</p>
+<ul>
+<li>MetricsStreamProcessor</li>
+<li>指定DAO ： MetricsEs7DAO</li>
+<li>指定Model</li>
+<li>指定ReceiverWorker：<ul>
+<li>key: stream.getName() + “_rec” 即 service_traffic_rec 与 instance_traffic_rec</li>
+<li>value: RemoteHandleWorker(worker: MetricsPersistentWorker, streamDataClass: <?extends Metrics?>)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>worker</p>
+<ul>
+<li>入队dataCarrier：MetricsAggregateWorker#in()</li>
+<li>出队dataCarrier：MetricsRemoteWorker#in() </li>
+<li>指标计算-发送指定OAP节点：RemoteSenderService#send()</li>
+<li>OAP单节点：SelfRemoteClient#push()</li>
+<li>存储：MetricsPersistentWorker#in()方法</li>
+<li>入队：MetricsPersistentWorker.dataCarrier   name: MetricsPersistentWorker.serviceName 与 MetricsPersistentWorker.instanceName</li>
+<li>消费：</li>
+</ul>
+</li>
+<li><p>DAO</p>
+<ul>
+<li>MetricsEs7DAO</li>
+<li>MetricsEsDAO </li>
+</ul>
+</li>
+</ul>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#skywalking" >
+    <span class="tag-code">skywalking</span>
+  </a>
+
+  <a href="/tags#agent" >
+    <span class="tag-code">agent</span>
+  </a>
+
+  <a href="/tags#oap" >
+    <span class="tag-code">oap</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-BootService-%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0/">
+        <span class="nav-arrow">← </span>
+        
+          skywalking系列 | BootService核心实现
+        
+      </a>
+    
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">Catalog</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Agent%E7%AB%AF-ServiceManagementClient"><span class="toc-nav-text">Agent端 ServiceManagementClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%8A%E5%AE%9E%E4%BE%8B%E4%BF%A1%E6%81%AF%E4%B8%8A%E9%80%81"><span class="toc-nav-text">服务及实例信息上送</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#OAP%E7%AB%AF-ManagementServiceHandler"><span class="toc-nav-text">OAP端 ManagementServiceHandler</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%BF%A1%E6%81%AF%E6%B3%A8%E5%86%8C-reportInstanceProperties-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">信息注册 reportInstanceProperties()方法</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BF%83%E8%B7%B3%E6%A3%80%E6%B5%8B-keepAlive-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">心跳检测 keepAlive()方法</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%9B%B8%E5%85%B3Model%E3%80%81dispatcher%E3%80%81worker%E3%80%81DAO"><span class="toc-nav-text">相关Model、dispatcher、worker、DAO</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/02/19/skywalking系列-服务实例注册心跳/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "skywalking系列-服务实例注册心跳",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+      <br>
+      Theme by <a target="_blank" rel="noopener" href="https://github.com/yanm1ng">yanm1ng</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
