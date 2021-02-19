@@ -160,10 +160,10 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="实例信息-Instance"><a href="#实例信息-Instance" class="headerlink" title="实例信息 Instance"></a>实例信息 Instance</h2><h3 id="索引名"><a href="#索引名" class="headerlink" title="索引名"></a>索引名</h3><ul>
+    <section class="markdown-content"><h2 id="InstanceMeta"><a href="#InstanceMeta" class="headerlink" title="InstanceMeta"></a>InstanceMeta</h2><h3 id="Index"><a href="#Index" class="headerlink" title="Index"></a>Index</h3><ul>
 <li>instance_traffic</li>
 </ul>
-<h3 id="字段信息"><a href="#字段信息" class="headerlink" title="字段信息"></a>字段信息</h3><table>
+<h3 id="Field"><a href="#Field" class="headerlink" title="Field"></a>Field</h3><table>
 <thead>
 <tr>
 <th align="left">字段</th>
@@ -251,18 +251,18 @@
 <td align="left">serviceId_base64(instanceName)</td>
 </tr>
 </tbody></table>
-<h3 id="数据聚合规则"><a href="#数据聚合规则" class="headerlink" title="数据聚合规则"></a>数据聚合规则</h3><ul>
+<h3 id="Combine"><a href="#Combine" class="headerlink" title="Combine"></a>Combine</h3><ul>
 <li>更新 lastPingTimestamp</li>
 <li>更新 properties (为空不更新)</li>
 <li>更新 timeBucket 保持为首次注册时间</li>
 </ul>
-<h3 id="对象比较规则"><a href="#对象比较规则" class="headerlink" title="对象比较规则"></a>对象比较规则</h3><ul>
+<h3 id="equals-amp-amp-hashCode"><a href="#equals-amp-amp-hashCode" class="headerlink" title="equals&amp;&amp;hashCode"></a>equals&amp;&amp;hashCode</h3><ul>
 <li>serviceId + instanceName</li>
 </ul>
-<h2 id="服务信息"><a href="#服务信息" class="headerlink" title="服务信息"></a>服务信息</h2><h3 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h3><ul>
+<h2 id="ServiceMeta"><a href="#ServiceMeta" class="headerlink" title="ServiceMeta"></a>ServiceMeta</h2><h3 id="Index-1"><a href="#Index-1" class="headerlink" title="Index"></a>Index</h3><ul>
 <li>service_traffic</li>
 </ul>
-<h3 id="字段信息-1"><a href="#字段信息-1" class="headerlink" title="字段信息"></a>字段信息</h3><table>
+<h3 id="Field-1"><a href="#Field-1" class="headerlink" title="Field"></a>Field</h3><table>
 <thead>
 <tr>
 <th align="left">字段</th>
@@ -301,10 +301,10 @@
 <td align="left">base64(serviceName).(normalType 0/1)</td>
 </tr>
 </tbody></table>
-<h3 id="数据聚合规则-1"><a href="#数据聚合规则-1" class="headerlink" title="数据聚合规则"></a>数据聚合规则</h3><ul>
+<h3 id="combine"><a href="#combine" class="headerlink" title="combine"></a>combine</h3><ul>
 <li>永不聚合</li>
 </ul>
-<h3 id="对象比较规则-1"><a href="#对象比较规则-1" class="headerlink" title="对象比较规则"></a>对象比较规则</h3><ul>
+<h3 id="equals-amp-amp-hashCode-1"><a href="#equals-amp-amp-hashCode-1" class="headerlink" title="equals&amp;&amp;hashCode"></a>equals&amp;&amp;hashCode</h3><ul>
 <li>serviceName + nodeType</li>
 </ul>
 </section>
@@ -341,6 +341,13 @@
       </a>
     
     
+      <a class="nav-right" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E7%AB%AF%E5%8F%A3%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%86/">
+        
+          skywalking系列 | 端口信息处理
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
   </div>
 
     <!-- NAV END -->
@@ -368,7 +375,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%9E%E4%BE%8B%E4%BF%A1%E6%81%AF-Instance"><span class="toc-nav-text">实例信息 Instance</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%B4%A2%E5%BC%95%E5%90%8D"><span class="toc-nav-text">索引名</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AD%97%E6%AE%B5%E4%BF%A1%E6%81%AF"><span class="toc-nav-text">字段信息</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E8%81%9A%E5%90%88%E8%A7%84%E5%88%99"><span class="toc-nav-text">数据聚合规则</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AF%B9%E8%B1%A1%E6%AF%94%E8%BE%83%E8%A7%84%E5%88%99"><span class="toc-nav-text">对象比较规则</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%9C%8D%E5%8A%A1%E4%BF%A1%E6%81%AF"><span class="toc-nav-text">服务信息</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%B4%A2%E5%BC%95"><span class="toc-nav-text">索引</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AD%97%E6%AE%B5%E4%BF%A1%E6%81%AF-1"><span class="toc-nav-text">字段信息</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E8%81%9A%E5%90%88%E8%A7%84%E5%88%99-1"><span class="toc-nav-text">数据聚合规则</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AF%B9%E8%B1%A1%E6%AF%94%E8%BE%83%E8%A7%84%E5%88%99-1"><span class="toc-nav-text">对象比较规则</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#InstanceMeta"><span class="toc-nav-text">InstanceMeta</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Index"><span class="toc-nav-text">Index</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Field"><span class="toc-nav-text">Field</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Combine"><span class="toc-nav-text">Combine</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#equals-amp-amp-hashCode"><span class="toc-nav-text">equals&amp;&amp;hashCode</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#ServiceMeta"><span class="toc-nav-text">ServiceMeta</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Index-1"><span class="toc-nav-text">Index</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Field-1"><span class="toc-nav-text">Field</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#combine"><span class="toc-nav-text">combine</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#equals-amp-amp-hashCode-1"><span class="toc-nav-text">equals&amp;&amp;hashCode</span></a></li></ol></li></ol>
     
   </div>
 </aside>

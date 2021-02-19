@@ -160,7 +160,7 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="微内核架构-与-SPI机制"><a href="#微内核架构-与-SPI机制" class="headerlink" title="微内核架构 与 SPI机制"></a>微内核架构 与 SPI机制</h2><h3 id="微内核架构-Microkernel-Architecture"><a href="#微内核架构-Microkernel-Architecture" class="headerlink" title="微内核架构(Microkernel Architecture)"></a>微内核架构(Microkernel Architecture)</h3><ul>
+    <section class="markdown-content"><h2 id="Microkernel-Architecture-amp-amp-SPI"><a href="#Microkernel-Architecture-amp-amp-SPI" class="headerlink" title="Microkernel Architecture &amp;&amp; SPI"></a>Microkernel Architecture &amp;&amp; SPI</h2><h3 id="Microkernel-Architecture"><a href="#Microkernel-Architecture" class="headerlink" title="Microkernel Architecture"></a>Microkernel Architecture</h3><ul>
 <li>微内核架构(Microkernel Architecture) 也称插件化架构（Plug-in Architecture），是一种面向功能进行拆分的可扩展性架构</li>
 </ul>
 <p><img src="https://s0.lgstatic.com/i/image3/M01/08/53/Ciqah16FsIuAY29rAADXS1mP1qk235.png" alt="微内核架构图：核心系统和插件模块"></p>
@@ -168,7 +168,7 @@
 <li>内核系统：负责管理插件的生命周期，保证系统不因功能扩展而不断进行修改。  </li>
 <li>插件模块：独立存在的模块，包括特定的功能，用于扩展核心系统的功能。相互模块之间应保持最小依赖原则，避免过分依赖带来扩展性问题。<blockquote>
 </blockquote>
-<h3 id="SPI-Service-Provider-Interface-机制"><a href="#SPI-Service-Provider-Interface-机制" class="headerlink" title="SPI(Service Provider Interface)机制"></a>SPI(Service Provider Interface)机制</h3></li>
+<h3 id="SPI"><a href="#SPI" class="headerlink" title="SPI"></a>SPI</h3></li>
 <li>服务的提供者提供了接口的实现之后，在Classpath的META-INF/services/ 目录里创建以服务接口命名的文件，此文件记录了该jar包提供的服务接口的具体实现类。</li>
 <li>当某个应用引入了该jar包且需要使用该服务时，SPI机制通过查找这个jar包的META-INF/services/ 中配置文件来获得具体的实现类名，进行实现类的加载和实例化，最终使用该实现类完成业务功能。</li>
 <li> JDK SPI加载步骤</li>
@@ -187,7 +187,7 @@
 </ul>
 </li>
 </ul>
-<h2 id="Skywalking-Agent-启动流程"><a href="#Skywalking-Agent-启动流程" class="headerlink" title="Skywalking Agent 启动流程"></a>Skywalking Agent 启动流程</h2><ul>
+<h2 id="Skywalking-Agent-Starter-Flow"><a href="#Skywalking-Agent-Starter-Flow" class="headerlink" title="Skywalking Agent Starter Flow"></a>Skywalking Agent Starter Flow</h2><ul>
 <li>入口是apm-agent模块中的SkyWalkingAgent类的premain()方法，完成了Agent启动流程</li>
 </ul>
 <ol>
@@ -360,7 +360,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%BE%AE%E5%86%85%E6%A0%B8%E6%9E%B6%E6%9E%84-%E4%B8%8E-SPI%E6%9C%BA%E5%88%B6"><span class="toc-nav-text">微内核架构 与 SPI机制</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BE%AE%E5%86%85%E6%A0%B8%E6%9E%B6%E6%9E%84-Microkernel-Architecture"><span class="toc-nav-text">微内核架构(Microkernel Architecture)</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#SPI-Service-Provider-Interface-%E6%9C%BA%E5%88%B6"><span class="toc-nav-text">SPI(Service Provider Interface)机制</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Skywalking-Agent-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="toc-nav-text">Skywalking Agent 启动流程</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Config"><span class="toc-nav-text">Config</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#PluginBootstrap"><span class="toc-nav-text">PluginBootstrap</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#PluginResourcesResolver"><span class="toc-nav-text">PluginResourcesResolver</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#AbstractClassEnhancePluginDefine"><span class="toc-nav-text">AbstractClassEnhancePluginDefine</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ClassMatch"><span class="toc-nav-text">ClassMatch</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#PluginFinder"><span class="toc-nav-text">PluginFinder</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#AgentBuilder"><span class="toc-nav-text">AgentBuilder</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ServiceManager"><span class="toc-nav-text">ServiceManager</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#JVM-ShutdownHook"><span class="toc-nav-text">JVM ShutdownHook</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Microkernel-Architecture-amp-amp-SPI"><span class="toc-nav-text">Microkernel Architecture &amp;&amp; SPI</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Microkernel-Architecture"><span class="toc-nav-text">Microkernel Architecture</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#SPI"><span class="toc-nav-text">SPI</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Skywalking-Agent-Starter-Flow"><span class="toc-nav-text">Skywalking Agent Starter Flow</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Config"><span class="toc-nav-text">Config</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#PluginBootstrap"><span class="toc-nav-text">PluginBootstrap</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#PluginResourcesResolver"><span class="toc-nav-text">PluginResourcesResolver</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#AbstractClassEnhancePluginDefine"><span class="toc-nav-text">AbstractClassEnhancePluginDefine</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ClassMatch"><span class="toc-nav-text">ClassMatch</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#PluginFinder"><span class="toc-nav-text">PluginFinder</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#AgentBuilder"><span class="toc-nav-text">AgentBuilder</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ServiceManager"><span class="toc-nav-text">ServiceManager</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#JVM-ShutdownHook"><span class="toc-nav-text">JVM ShutdownHook</span></a></li></ol></li></ol>
     
   </div>
 </aside>

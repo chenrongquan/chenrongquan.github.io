@@ -154,6 +154,50 @@
   
     <article class="article-card">
       <h2 class="article-head">
+        <a href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E7%AB%AF%E5%8F%A3%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%86/">skywalking系列 | 端口信息处理</a>
+      </h2>
+      <p class="article-date">February 19, 2021</p>
+      
+        
+  <a href="/tags#skywalking" >
+    <span class="tag-code">skywalking</span>
+  </a>
+
+  <a href="/tags#elasticsearch" >
+    <span class="tag-code">elasticsearch</span>
+  </a>
+
+  <a href="/tags#oap" >
+    <span class="tag-code">oap</span>
+  </a>
+
+  <a href="/tags#stream" >
+    <span class="tag-code">stream</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          Agent-TraceSegmentServiceClientbootService flow
+prepare()方法
+
+将自身注册到GRPCChannelManager来监听网络连接状态的改变
+
+
+boot()方法
+
+
+
+
+
+
+        
+      </div>
+      <a class="more" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E7%AB%AF%E5%8F%A3%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%86/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
         <a href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF/">skywalking系列 | 元数据信息</a>
       </h2>
       <p class="article-date">February 19, 2021</p>
@@ -174,10 +218,10 @@
       
       <div class="article-summary">
         
-          实例信息 Instance索引名
+          InstanceMetaIndex
 instance_traffic
 
-字段信息
+Field
 
 
 字段
@@ -199,7 +243,7 @@ instanceName
 String
 默认70
 -
-长度 ...
+ ...
         
       </div>
       <a class="more" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF/">Read more</a>
@@ -220,26 +264,18 @@ String
     <span class="tag-code">agent</span>
   </a>
 
-  <a href="/tags#elasticsearch" >
-    <span class="tag-code">elasticsearch</span>
-  </a>
-
   <a href="/tags#oap" >
     <span class="tag-code">oap</span>
-  </a>
-
-  <a href="/tags#stream" >
-    <span class="tag-code">stream</span>
   </a>
 
       
       <div class="article-summary">
         
-          Agent采集端 ServiceManagementClient服务及实例信息上送
+          Agent-ServiceManagementClientbootService flow
 prepare()方法
 
 将自身注册到GRPCChannelManager来监听网络连接状态的改变
-生成当前InstanceName=UUID@ip 或者 Config.Agent.INSTANCE_NAME ...
+生成当前InstanceName=UUID@ip 或者 Config.Agent.INSTANCE_ ...
         
       </div>
       <a class="more" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E6%9C%8D%E5%8A%A1%E5%AE%9E%E4%BE%8B%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%86/">Read more</a>
@@ -263,9 +299,9 @@ prepare()方法
       
       <div class="article-summary">
         
-          网络连接管理GRPCChannelManager
+          GRPCChannelManager
 GRPCChannelManager 负责维护Agent与后端OAP集群通信时使用的网络连接
-GRPCChannel: gRPC客户端的核心类之一，逻辑上表示一个Channel，底层持有一个TCP链接，负责维护此连接的活性。在RPC调用的任何 ...
+GRPCChannel: gRPC客户端的核心类之一，逻辑上表示一个Channel，底层持有一个TCP链接，负责维护此连接的活性。在RPC调用的任何时机，如果检 ...
         
       </div>
       <a class="more" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-BootService-%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0/">Read more</a>
@@ -289,10 +325,10 @@ GRPCChannel: gRPC客户端的核心类之一，逻辑上表示一个Channel，�
       
       <div class="article-summary">
         
-          字节码增强Java Agent
+          Java Agent
 Java Agent是java命令的一个参数(即 -javaagent)，参数之后需要指定一个jar包
 
-在Java虚拟机启动时，执行main()函数之前，虚拟机会先找到-javaagent命令指定jar包，然后执行 premain-class中的premai ...
+在Java虚拟机启动时，执行main()函数之前，虚拟机会先找到-javaagent命令指定jar包，然后执行 premain-class中的premain()方法 ...
         
       </div>
       <a class="more" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-Agent%E6%8F%92%E4%BB%B6%E5%8E%9F%E7%90%86/">Read more</a>
@@ -316,12 +352,10 @@ Java Agent是java命令的一个参数(即 -javaagent)，参数之后需要指�
       
       <div class="article-summary">
         
-          微内核架构 与 SPI机制微内核架构(Microkernel Architecture)
+          Microkernel Architecture &amp;&amp; SPIMicrokernel Architecture
 微内核架构(Microkernel Architecture) 也称插件化架构（Plug-in Architecture），是一种面向功能进行拆分的可扩展性架构
 
-
-
-内核系统：负责管理插件的生命周期， ...
+ ...
         
       </div>
       <a class="more" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-Agent%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/">Read more</a>

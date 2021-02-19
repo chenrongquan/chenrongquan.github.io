@@ -160,7 +160,7 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="网络连接管理GRPCChannelManager"><a href="#网络连接管理GRPCChannelManager" class="headerlink" title="网络连接管理GRPCChannelManager"></a>网络连接管理GRPCChannelManager</h2><ul>
+    <section class="markdown-content"><h2 id="GRPCChannelManager"><a href="#GRPCChannelManager" class="headerlink" title="GRPCChannelManager"></a>GRPCChannelManager</h2><ul>
 <li>GRPCChannelManager 负责维护Agent与后端OAP集群通信时使用的网络连接</li>
 <li>GRPCChannel: gRPC客户端的核心类之一，逻辑上表示一个Channel，底层持有一个TCP链接，负责维护此连接的活性。在RPC调用的任何时机，如果检测到底层连接处于关闭状态(terminated)，会尝试重建连接。通常情况下，不需要在RPC调用结束后就关闭Channel，该Channel可以被一直重用，直到整个客户端程序关闭。</li>
 <li>ManagedChannelBuilder：负责创建客户端Channel，ManagedChannelBuilder使用了provider机制，常用有三种<ul>
@@ -246,7 +246,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BD%91%E7%BB%9C%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86GRPCChannelManager"><span class="toc-nav-text">网络连接管理GRPCChannelManager</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#GRPCChannelManager"><span class="toc-nav-text">GRPCChannelManager</span></a></li></ol>
     
   </div>
 </aside>
