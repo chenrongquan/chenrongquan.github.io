@@ -204,7 +204,10 @@
 <li>落 service_traffic 时机: 首次心跳检测</li>
 </ol>
 </blockquote>
-<h2 id="流计算处理"><a href="#流计算处理" class="headerlink" title="流计算处理"></a>流计算处理</h2><h3 id="数据源处理"><a href="#数据源处理" class="headerlink" title="数据源处理"></a>数据源处理</h3><ul>
+<h2 id="流计算处理"><a href="#流计算处理" class="headerlink" title="流计算处理"></a>流计算处理</h2><blockquote>
+<p>以实例信息为例</p>
+</blockquote>
+<h3 id="数据源处理"><a href="#数据源处理" class="headerlink" title="数据源处理"></a>数据源处理</h3><ul>
 <li>数据源Source：ServiceInstanceUpdate</li>
 <li>类型转换Dispatcher：InstanceTrafficDispatcher </li>
 <li>指标数据Metrics：InstanceTraffic   流计算可接受的原始数据类型</li>
@@ -214,10 +217,55 @@
 <li>处理逻辑</li>
 </ul>
 <ol>
-<li>阶段L1: 针对相同的ID的实体，在当前OAP节点进行汇集计算</li>
+<li>阶段L1: 针对相同的ID的实体，在当前OAP节点进行汇集计算 </li>
 <li>阶段L2: 通过ID进行hash路由，在分布式环境中，对离散数据进行二次汇集；在通过与存储中的数据的汇集计算，完成入库。</li>
 </ol>
-<h3 id="Metrics"><a href="#Metrics" class="headerlink" title="Metrics"></a>Metrics</h3></section>
+<h3 id="L1数据接收和解析"><a href="#L1数据接收和解析" class="headerlink" title="L1数据接收和解析"></a>L1数据接收和解析</h3><ul>
+<li>职责：数据接收和解析，并进行当前OAP节点内的数据聚合，使用OAL或者其他聚合模式；对应阶段L1</li>
+<li>MetricsAggregateWorker 采用内存队列dataCarrier, MetricsAggregateWorker.instanceName<ul>
+<li>数据接收 in()方法  对应 入队 </li>
+<li>数据解析 onWorker()方法  accept()数据处理，规则 InstanceTraffic#combine()方法</li>
+<li>数据发送L2 nextWorker.in()<blockquote>
+<p>规则</p>
+<ol>
+<li>更新 lastPingTimestamp</li>
+<li>若 properties 不为空  更新 properties</li>
+<li>保持 timeBucket 为注册时间 </li>
+</ol>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="L2分布式聚合"><a href="#L2分布式聚合" class="headerlink" title="L2分布式聚合"></a>L2分布式聚合</h3><ul>
+<li>职责：分布式聚合，根据一定的路由规则，将经过Receiver聚合后的数据路由到指定节点后，进行二次汇集，并入库。 对应阶段L2</li>
+<li>使用 hash select 路由策略，根据计算的实体的hash值来选择对应的OAP Server</li>
+<li>MetricsPersistentWorker 采用内存队列dataCarrier, MetricsPersistentWorker.instanceName<ul>
+<li>数据接收 in()方法</li>
+<li>数据解析 onWorker()方法  数据写入缓存，二次汇集 MergableBufferedData#accept() 规则同L1</li>
+</ul>
+</li>
+</ul>
+<h2 id="存储模型"><a href="#存储模型" class="headerlink" title="存储模型"></a>存储模型</h2><h3 id="存储定时器-PersistenceTimer"><a href="#存储定时器-PersistenceTimer" class="headerlink" title="存储定时器 PersistenceTimer"></a>存储定时器 PersistenceTimer</h3><ul>
+<li><p>启动定时任务 每隔5秒进行批量存储</p>
+</li>
+<li><p>数据组装buildBatchRequests()方法，读取缓存，批量保存</p>
+</li>
+<li><p>MetricsPersistentWorker#prepareBatch 批量落库</p>
+<ul>
+<li>批量大小上线 2000 硬编码 </li>
+</ul>
+</li>
+<li><p>落库flushDataToStorage() </p>
+<ul>
+<li>查库，MetricsEs7DAO#multiGet() </li>
+<li>比较 缓存Metrics 和 库中 noInCacheMetrics  比较规则 InstanceTraffic @EqualsAndHashCode  serviceId+name</li>
+<li>新增 prepareBatchInsert</li>
+<li>更新 combine处理后更新 prepareBatchUpdate</li>
+</ul>
+</li>
+</ul>
+</section>
     <!-- Tags START -->
     
       <div class="tags">
@@ -286,7 +334,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Agent%E9%87%87%E9%9B%86%E7%AB%AF-ServiceManagementClient"><span class="toc-nav-text">Agent采集端 ServiceManagementClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%8A%E5%AE%9E%E4%BE%8B%E4%BF%A1%E6%81%AF%E4%B8%8A%E9%80%81"><span class="toc-nav-text">服务及实例信息上送</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#OAP%E6%8E%A5%E6%94%B6%E7%AB%AF-ManagementServiceHandler"><span class="toc-nav-text">OAP接收端 ManagementServiceHandler</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AE%9E%E4%BE%8B%E6%B3%A8%E5%86%8C-reportInstanceProperties-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">实例注册 reportInstanceProperties()方法</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BF%83%E8%B7%B3%E6%A3%80%E6%B5%8B-keepAlive-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">心跳检测 keepAlive()方法</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%B5%81%E8%AE%A1%E7%AE%97%E5%A4%84%E7%90%86"><span class="toc-nav-text">流计算处理</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E6%BA%90%E5%A4%84%E7%90%86"><span class="toc-nav-text">数据源处理</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B5%81%E8%AE%A1%E7%AE%97%E6%A8%A1%E5%9E%8B"><span class="toc-nav-text">流计算模型</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Metrics"><span class="toc-nav-text">Metrics</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Agent%E9%87%87%E9%9B%86%E7%AB%AF-ServiceManagementClient"><span class="toc-nav-text">Agent采集端 ServiceManagementClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%8A%E5%AE%9E%E4%BE%8B%E4%BF%A1%E6%81%AF%E4%B8%8A%E9%80%81"><span class="toc-nav-text">服务及实例信息上送</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#OAP%E6%8E%A5%E6%94%B6%E7%AB%AF-ManagementServiceHandler"><span class="toc-nav-text">OAP接收端 ManagementServiceHandler</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AE%9E%E4%BE%8B%E6%B3%A8%E5%86%8C-reportInstanceProperties-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">实例注册 reportInstanceProperties()方法</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BF%83%E8%B7%B3%E6%A3%80%E6%B5%8B-keepAlive-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">心跳检测 keepAlive()方法</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%B5%81%E8%AE%A1%E7%AE%97%E5%A4%84%E7%90%86"><span class="toc-nav-text">流计算处理</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E6%BA%90%E5%A4%84%E7%90%86"><span class="toc-nav-text">数据源处理</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B5%81%E8%AE%A1%E7%AE%97%E6%A8%A1%E5%9E%8B"><span class="toc-nav-text">流计算模型</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#L1%E6%95%B0%E6%8D%AE%E6%8E%A5%E6%94%B6%E5%92%8C%E8%A7%A3%E6%9E%90"><span class="toc-nav-text">L1数据接收和解析</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#L2%E5%88%86%E5%B8%83%E5%BC%8F%E8%81%9A%E5%90%88"><span class="toc-nav-text">L2分布式聚合</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AD%98%E5%82%A8%E6%A8%A1%E5%9E%8B"><span class="toc-nav-text">存储模型</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AD%98%E5%82%A8%E5%AE%9A%E6%97%B6%E5%99%A8-PersistenceTimer"><span class="toc-nav-text">存储定时器 PersistenceTimer</span></a></li></ol></li></ol>
     
   </div>
 </aside>
