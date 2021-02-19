@@ -10,7 +10,7 @@
   
   <title>
      
-      skywalking系列-服务实例注册心跳 | ™技术博客 
+      skywalking系列 | 服务实例信息处理 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,7 +151,7 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>skywalking系列-服务实例注册心跳</h2>
+  <h2>skywalking系列 | 服务实例信息处理</h2>
   <p class="post-date">2021-02-19</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
@@ -160,16 +160,16 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="Agent端-ServiceManagementClient"><a href="#Agent端-ServiceManagementClient" class="headerlink" title="Agent端 ServiceManagementClient"></a>Agent端 ServiceManagementClient</h2><h3 id="服务及实例信息上送"><a href="#服务及实例信息上送" class="headerlink" title="服务及实例信息上送"></a>服务及实例信息上送</h3><ul>
+    <section class="markdown-content"><h2 id="Agent采集端-ServiceManagementClient"><a href="#Agent采集端-ServiceManagementClient" class="headerlink" title="Agent采集端 ServiceManagementClient"></a>Agent采集端 ServiceManagementClient</h2><h3 id="服务及实例信息上送"><a href="#服务及实例信息上送" class="headerlink" title="服务及实例信息上送"></a>服务及实例信息上送</h3><ul>
 <li><p>prepare()方法</p>
 <ul>
-<li>将其注册到 GRPCChannelManager 来监听网络连接</li>
-<li>生成当前ServiceInstance的唯一标识  UUID@ip或者Config.Agent.INSTANCE_NAME指定</li>
+<li>将自身注册到GRPCChannelManager来监听网络连接</li>
+<li>生成当前InstanceName=UUID@ip 或者 Config.Agent.INSTANCE_NAME指定</li>
 </ul>
 </li>
 <li><p>boot()方法</p>
 <ul>
-<li>启动一个定时任务线程，主要做与OAP心跳检测；默认每隔30秒进行一次检测，也可由Config.Collector.HEARTBEAT_PERIOD指定</li>
+<li>启动一个定时任务线程，实现定时服务注册与心跳检测；默认每隔30秒进行一次检测，也可由Config.Collector.HEARTBEAT_PERIOD指定</li>
 </ul>
 </li>
 <li><p>statusChanged()方法</p>
@@ -187,24 +187,14 @@
 </ul>
 </li>
 </ul>
-<h2 id="OAP端-ManagementServiceHandler"><a href="#OAP端-ManagementServiceHandler" class="headerlink" title="OAP端 ManagementServiceHandler"></a>OAP端 ManagementServiceHandler</h2><h3 id="实例注册-reportInstanceProperties-方法"><a href="#实例注册-reportInstanceProperties-方法" class="headerlink" title="实例注册 reportInstanceProperties()方法"></a>实例注册 reportInstanceProperties()方法</h3><ul>
-<li>上送数据: InstanceProperties<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">service: &quot;demo::projectA&quot;</span><br><span class="line">serviceInstance: &quot;7ff3e127186d45848e7371ffae1f6f73@192.168.31.36&quot;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;OS Name&quot;</span><br><span class="line">  value: &quot;Mac OS X&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;hostname&quot;</span><br><span class="line">  value: &quot;chenrqmac&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;ipv4&quot;</span><br><span class="line">  value: &quot;192.168.31.36&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;Process No.&quot;</span><br><span class="line">  value: &quot;76357&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;language&quot;</span><br><span class="line">  value: &quot;java&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-<li>落库(首次插入或后续更新last_ping) instance_traffic  </li>
-<li>entity_id = serviceId + Base64(instanceName) 唯一标识</li>
-</ul>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;_index&quot;</span> : <span class="string">&quot;ali02_instance_traffic-20210219&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_type&quot;</span> : <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1_ZGVjNDU3YWE1MmZiNDM1Nzg4Y2E4YjY1N2I4NzQ4NjNAMTkyLjE2OC4zMS4zNg==&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_score&quot;</span> : <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">&quot;_source&quot;</span> : &#123;</span><br><span class="line">    <span class="attr">&quot;last_ping&quot;</span> : <span class="number">202102190959</span>,</span><br><span class="line">    <span class="attr">&quot;service_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;name&quot;</span> : <span class="string">&quot;dec457aa52fb435788ca8b657b874863@192.168.31.36&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;time_bucket&quot;</span> : <span class="number">202102190957</span>,</span><br><span class="line">    <span class="attr">&quot;properties&quot;</span> : <span class="string">&quot;&quot;</span><span class="string">&quot;&#123;&quot;</span>OS Name<span class="string">&quot;:&quot;</span>Mac OS X<span class="string">&quot;,&quot;</span>hostname<span class="string">&quot;:&quot;</span>chenrqmac<span class="string">&quot;,&quot;</span>Process No.<span class="string">&quot;:&quot;</span><span class="number">82671</span><span class="string">&quot;,&quot;</span>language<span class="string">&quot;:&quot;</span>java<span class="string">&quot;,&quot;</span>ipv4s<span class="string">&quot;:&quot;</span><span class="number">192.168</span><span class="number">.31</span><span class="number">.36</span><span class="string">&quot;&#125;&quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="心跳检测-keepAlive-方法"><a href="#心跳检测-keepAlive-方法" class="headerlink" title="心跳检测 keepAlive()方法"></a>心跳检测 keepAlive()方法</h3><ul>
-<li><p>首次注册30秒后</p>
+<h2 id="OAP接收端-ManagementServiceHandler"><a href="#OAP接收端-ManagementServiceHandler" class="headerlink" title="OAP接收端 ManagementServiceHandler"></a>OAP接收端 ManagementServiceHandler</h2><h3 id="实例注册-reportInstanceProperties-方法"><a href="#实例注册-reportInstanceProperties-方法" class="headerlink" title="实例注册 reportInstanceProperties()方法"></a>实例注册 reportInstanceProperties()方法</h3><ul>
+<li><p>上送数据: InstanceProperties</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">service: &quot;demo::projectA&quot;</span><br><span class="line">serviceInstance: &quot;7ff3e127186d45848e7371ffae1f6f73@192.168.31.36&quot;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;OS Name&quot;</span><br><span class="line">  value: &quot;Mac OS X&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;hostname&quot;</span><br><span class="line">  value: &quot;chenrqmac&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;ipv4&quot;</span><br><span class="line">  value: &quot;192.168.31.36&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;Process No.&quot;</span><br><span class="line">  value: &quot;76357&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;language&quot;</span><br><span class="line">  value: &quot;java&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="心跳检测-keepAlive-方法"><a href="#心跳检测-keepAlive-方法" class="headerlink" title="心跳检测 keepAlive()方法"></a>心跳检测 keepAlive()方法</h3></li>
+<li><p>首次注册30秒后 上送数据</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">service: &quot;demo::projectA&quot;</span><br><span class="line">serviceInstance: &quot;121454622972403eb6490293f4e51f86@192.168.31.36&quot;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>落库(更新last_ping) instance_traffic</p>
-</li>
-<li><p>entity_id = serviceId + Base64(instanceName)</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;_index&quot;</span> : <span class="string">&quot;ali02_service_traffic-20210219&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_type&quot;</span> : <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_score&quot;</span> : <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">&quot;_source&quot;</span> : </span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">&quot;node_type&quot;</span> : <span class="number">0</span>,</span><br><span class="line">    <span class="attr">&quot;name&quot;</span> : <span class="string">&quot;demo::projectA&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;service_group&quot;</span> : <span class="string">&quot;demo&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>落库(不存在插入，存在不更新) service_traffic</p>
-</li>
-<li><p>entity_id = Base64(serviceName) + NodeType      </p>
+
+
 </li>
 </ul>
 <blockquote>
@@ -214,7 +204,20 @@
 <li>落 service_traffic 时机: 首次心跳检测</li>
 </ol>
 </blockquote>
-<h2 id="存储原理"><a href="#存储原理" class="headerlink" title="存储原理"></a>存储原理</h2></section>
+<h2 id="流计算处理"><a href="#流计算处理" class="headerlink" title="流计算处理"></a>流计算处理</h2><h3 id="数据源处理"><a href="#数据源处理" class="headerlink" title="数据源处理"></a>数据源处理</h3><ul>
+<li>数据源Source：ServiceInstanceUpdate</li>
+<li>类型转换Dispatcher：InstanceTrafficDispatcher </li>
+<li>指标数据Metrics：InstanceTraffic   流计算可接受的原始数据类型</li>
+</ul>
+<h3 id="流计算模型"><a href="#流计算模型" class="headerlink" title="流计算模型"></a>流计算模型</h3><ul>
+<li>指标模型：MetricsStreamProcessor  针对Metrics数据</li>
+<li>处理逻辑</li>
+</ul>
+<ol>
+<li>阶段L1: 针对相同的ID的实体，在当前OAP节点进行汇集计算</li>
+<li>阶段L2: 通过ID进行hash路由，在分布式环境中，对离散数据进行二次汇集；在通过与存储中的数据的汇集计算，完成入库。</li>
+</ol>
+<h3 id="Metrics"><a href="#Metrics" class="headerlink" title="Metrics"></a>Metrics</h3></section>
     <!-- Tags START -->
     
       <div class="tags">
@@ -275,7 +278,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Agent%E7%AB%AF-ServiceManagementClient"><span class="toc-nav-text">Agent端 ServiceManagementClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%8A%E5%AE%9E%E4%BE%8B%E4%BF%A1%E6%81%AF%E4%B8%8A%E9%80%81"><span class="toc-nav-text">服务及实例信息上送</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#OAP%E7%AB%AF-ManagementServiceHandler"><span class="toc-nav-text">OAP端 ManagementServiceHandler</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AE%9E%E4%BE%8B%E6%B3%A8%E5%86%8C-reportInstanceProperties-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">实例注册 reportInstanceProperties()方法</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BF%83%E8%B7%B3%E6%A3%80%E6%B5%8B-keepAlive-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">心跳检测 keepAlive()方法</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86"><span class="toc-nav-text">存储原理</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Agent%E9%87%87%E9%9B%86%E7%AB%AF-ServiceManagementClient"><span class="toc-nav-text">Agent采集端 ServiceManagementClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%8F%8A%E5%AE%9E%E4%BE%8B%E4%BF%A1%E6%81%AF%E4%B8%8A%E9%80%81"><span class="toc-nav-text">服务及实例信息上送</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#OAP%E6%8E%A5%E6%94%B6%E7%AB%AF-ManagementServiceHandler"><span class="toc-nav-text">OAP接收端 ManagementServiceHandler</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AE%9E%E4%BE%8B%E6%B3%A8%E5%86%8C-reportInstanceProperties-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">实例注册 reportInstanceProperties()方法</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BF%83%E8%B7%B3%E6%A3%80%E6%B5%8B-keepAlive-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">心跳检测 keepAlive()方法</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%B5%81%E8%AE%A1%E7%AE%97%E5%A4%84%E7%90%86"><span class="toc-nav-text">流计算处理</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E6%BA%90%E5%A4%84%E7%90%86"><span class="toc-nav-text">数据源处理</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B5%81%E8%AE%A1%E7%AE%97%E6%A8%A1%E5%9E%8B"><span class="toc-nav-text">流计算模型</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Metrics"><span class="toc-nav-text">Metrics</span></a></li></ol></li></ol>
     
   </div>
 </aside>
@@ -349,7 +352,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "skywalking系列-服务实例注册心跳",
+        id: "skywalking系列 | 服务实例信息处理",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
