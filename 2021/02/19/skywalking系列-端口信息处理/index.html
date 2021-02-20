@@ -10,7 +10,7 @@
   
   <title>
      
-      skywalking系列 | 端口信息处理 | ™技术博客 
+      skywalking系列 | 端口及网络信息处理 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,7 +151,7 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>skywalking系列 | 端口信息处理</h2>
+  <h2>skywalking系列 | 端口及网络信息处理</h2>
   <p class="post-date">2021-02-19</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
@@ -168,10 +168,100 @@
 </li>
 <li><p>boot()方法</p>
 <ul>
-<li>初始化内存队列</li>
+<li>初始化队列内核：CHANNEL_SIZE=3， BUFFER_SIZE=300，BufferStrategy=IF_POSSIBLE</li>
+<li>指定消费对象类型 自身；消费线程数量=1；即每个服务实例一个trace消费线程</li>
+</ul>
+</li>
+<li><p>onComplete()</p>
+<ul>
+<li>将自身注册到TracingContext中来监听TracingContext#finish关闭事件</li>
+<li>当TracingContext通过stopSpan()方法关闭最后一个Span时，会调用finish()方法关闭相应的TraceSegment</li>
+</ul>
+</li>
+<li><p>statusChanged()方法</p>
+<ul>
+<li>GRPCChannelManager网络连接状态GRPCChannelStatus改变触发该事件</li>
+<li>网络 首次连接或断线重连成功时 CONNECTED，会依赖该连接重新创建stub客户端</li>
+</ul>
+</li>
+<li><p>V3协议 language-agent/Tracing.proto</p>
+<ul>
+<li>数据上报 TraceSegmentReportServiceGrpc.TraceSegmentReportServiceStub#collect()方法</li>
 </ul>
 </li>
 </ul>
+<p><img src="https://s0.lgstatic.com/i/image3/M01/14/4A/Ciqah16hMNGAO2HOAAEZleWtX24011.png" alt="TraceSegmentServiceClient功能"></p>
+<h3 id="producer-afterFinished"><a href="#producer-afterFinished" class="headerlink" title="producer-afterFinished()"></a>producer-afterFinished()</h3><ul>
+<li>TracingContextListener#notifyFinish()方法中调用</li>
+<li>将刚刚结束的 TraceSegment 写入到 DataCarrier 中缓存</li>
+</ul>
+<h3 id="consume-consume-List-data"><a href="#consume-consume-List-data" class="headerlink" title="consume-consume(List data)"></a>consume-consume(List<TraceSegment> data)</h3><ol>
+<li>根据网络连接的状态GRPCChannelStatus决定是否发送</li>
+<li>创建GRPCStreamServiceStatus对象</li>
+<li>创建观察者观察SegmentObject对象，提供回调函数 onNext\onError\onCompleted<blockquote>
+<p>参考gRPC观察者模式 StreamObserver</p>
+</blockquote>
+</li>
+<li>TraceSegment#transform()方法：将TraceSegment转换成SegmentObject对象</li>
+<li>上报OAP</li>
+<li>等待全部TraceSegment数据发送结束</li>
+<li>统计发送的数据量segmentUplinkedCounter</li>
+<li>printUplinkStatus()：每隔 30s打印一下发送日志</li>
+</ol>
+<h2 id="OAP-TraceSegmentReportServiceHandler"><a href="#OAP-TraceSegmentReportServiceHandler" class="headerlink" title="OAP-TraceSegmentReportServiceHandler"></a>OAP-TraceSegmentReportServiceHandler</h2><h3 id="TraceReceiver-collect"><a href="#TraceReceiver-collect" class="headerlink" title="TraceReceiver-collect"></a>TraceReceiver-collect</h3><ul>
+<li>Agent端上送数据 SegmentObject<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line">traceId: &quot;44c236493f14470fbac8ed17b379f1db.80.16138398133700001&quot;</span><br><span class="line">traceSegmentId: &quot;e712b5d6854e4c52b3763977255c3b52.68.16138398146810000&quot;</span><br><span class="line">spans &#123;</span><br><span class="line">  spanId: 2</span><br><span class="line">  parentSpanId: 1</span><br><span class="line">  startTime: 1613839816016</span><br><span class="line">  endTime: 1613839816466</span><br><span class="line">  operationName: &quot;H2&#x2F;JDBI&#x2F;PreparedStatement&#x2F;execute&quot;</span><br><span class="line">  peer: &quot;localhost:-1&quot;</span><br><span class="line">  spanType: Exit</span><br><span class="line">  spanLayer: Database</span><br><span class="line">  componentId: 32</span><br><span class="line">  tags &#123;</span><br><span class="line">    key: &quot;db.type&quot;</span><br><span class="line">    value: &quot;sql&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  tags &#123;</span><br><span class="line">    key: &quot;db.instance&quot;</span><br><span class="line">    value: &quot;test&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  tags &#123;</span><br><span class="line">    key: &quot;db.statement&quot;</span><br><span class="line">    value: &quot;INSERT INTO user(name) VALUES(?)&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">spans &#123;</span><br><span class="line">  spanId: 1</span><br><span class="line">  startTime: 1613839815952</span><br><span class="line">  endTime: 1613839816467</span><br><span class="line">  operationName: &quot;test.skywalking.springcloud.test.projectb.dao.DatabaseOperateDao.saveUser(java.lang.String)&quot;</span><br><span class="line">  spanType: Local</span><br><span class="line">  tags &#123;</span><br><span class="line">    key: &quot;user.name&quot;</span><br><span class="line">    value: &quot;test&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">spans &#123;</span><br><span class="line">  spanId: 4</span><br><span class="line">  parentSpanId: 3</span><br><span class="line">  startTime: 1613839816471</span><br><span class="line">  endTime: 1613839816899</span><br><span class="line">  operationName: &quot;H2&#x2F;JDBI&#x2F;PreparedStatement&#x2F;execute&quot;</span><br><span class="line">  peer: &quot;localhost:-1&quot;</span><br><span class="line">  spanType: Exit</span><br><span class="line">  spanLayer: Database</span><br><span class="line">  componentId: 32</span><br><span class="line">  tags &#123;</span><br><span class="line">    key: &quot;db.type&quot;</span><br><span class="line">    value: &quot;sql&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  tags &#123;</span><br><span class="line">    key: &quot;db.instance&quot;</span><br><span class="line">    value: &quot;test&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  tags &#123;</span><br><span class="line">    key: &quot;db.statement&quot;</span><br><span class="line">    value: &quot;SELECT * FROM user WHERE name &#x3D;?&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">spans &#123;</span><br><span class="line">  spanId: 3</span><br><span class="line">  startTime: 1613839816471</span><br><span class="line">  endTime: 1613839816900</span><br><span class="line">  operationName: &quot;selectUser&quot;</span><br><span class="line">  spanType: Local</span><br><span class="line">  tags &#123;</span><br><span class="line">    key: &quot;user.name&quot;</span><br><span class="line">    value: &quot;test&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">spans &#123;</span><br><span class="line">  parentSpanId: -1</span><br><span class="line">  startTime: 1613839814682</span><br><span class="line">  endTime: 1613839816935</span><br><span class="line">  refs &#123;</span><br><span class="line">    traceId: &quot;44c236493f14470fbac8ed17b379f1db.80.16138398133700001&quot;</span><br><span class="line">    parentTraceSegmentId: &quot;44c236493f14470fbac8ed17b379f1db.80.16138398133700000&quot;</span><br><span class="line">    parentSpanId: 1</span><br><span class="line">    parentService: &quot;demo::projectA&quot;</span><br><span class="line">    parentServiceInstance: &quot;795dfc767ab144cd9add2964fa657b2c@192.168.31.36&quot;</span><br><span class="line">    parentEndpoint: &quot;&#x2F;projectA&#x2F;&#123;name&#125;&quot;</span><br><span class="line">    networkAddressUsedAtPeer: &quot;PROJECTB:80&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  operationName: &quot;&#x2F;projectB&#x2F;&#123;value&#125;&quot;</span><br><span class="line">  spanLayer: Http</span><br><span class="line">  componentId: 14</span><br><span class="line">  tags &#123;</span><br><span class="line">    key: &quot;url&quot;</span><br><span class="line">    value: &quot;http:&#x2F;&#x2F;192.168.31.36:8762&#x2F;projectB&#x2F;test&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  tags &#123;</span><br><span class="line">    key: &quot;http.method&quot;</span><br><span class="line">    value: &quot;GET&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">service: &quot;demo::projectB&quot;</span><br><span class="line">serviceInstance: &quot;3d312f128bc94f2ea70b310037ed9eec@192.168.31.36&quot;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="NetworkAddressAliasMappingListener"><a href="#NetworkAddressAliasMappingListener" class="headerlink" title="NetworkAddressAliasMappingListener"></a>NetworkAddressAliasMappingListener</h2><h3 id="Source-amp-amp-Dispatcher-amp-amp-StreamProcessor"><a href="#Source-amp-amp-Dispatcher-amp-amp-StreamProcessor" class="headerlink" title="Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor"></a>Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor</h3><ul>
+<li>agent-analyzer.TraceAnalyzer#notifyEntryListener</li>
+<li>建立网络地址与当前服务和实例的别名关系，可利用该别名关系定位准确的目标服务和实例</li>
+<li>数据源Source：NetworkAddressAliasSetup</li>
+<li>类型转换Dispatcher：NetworkAddressAliasSetupDispatcher</li>
+<li>指标数据Metrics：NetworkAddressAlias</li>
+<li>指标模型：MetricsStreamProcessor</li>
+<li>Combine规则<ul>
+<li>更新 lastUpdateTimeBucket、representServiceInstanceId、representServiceId</li>
+<li>更新 timeBucket 保持为首次注册时间</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;_index&quot;</span> : <span class="string">&quot;ali02_network_address_alias-20210221&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;_type&quot;</span> : <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;_id&quot;</span> : <span class="string">&quot;UFJPSkVDVEI6ODA=&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;_score&quot;</span> : <span class="number">1.0</span>,</span><br><span class="line">    <span class="attr">&quot;_source&quot;</span> : &#123;</span><br><span class="line">      <span class="attr">&quot;address&quot;</span> : <span class="string">&quot;PROJECTB:80&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;last_update_time_bucket&quot;</span> : <span class="number">202102210050</span>,</span><br><span class="line">      <span class="attr">&quot;represent_service_instance_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEI=.1_M2QzMTJmMTI4YmM5NGYyZWE3MGIzMTAwMzdlZDllZWNAMTkyLjE2OC4zMS4zNg==&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;represent_service_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEI=.1&quot;</span>,</span><br><span class="line">      <span class="attr">&quot;time_bucket&quot;</span> : <span class="number">202102210050</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Endpoint"><a href="#Endpoint" class="headerlink" title="Endpoint"></a>Endpoint</h2><h3 id="Source-amp-amp-Dispatcher-amp-amp-StreamProcessor-1"><a href="#Source-amp-amp-Dispatcher-amp-amp-StreamProcessor-1" class="headerlink" title="Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor"></a>Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor</h3><ul>
+<li>建立端口信息</li>
+<li>数据源Source：Endpoint</li>
+<li>类型转换Dispatcher：EndpointTrafficDispatcher</li>
+<li>指标数据Metrics：EndpointTraffic</li>
+<li>指标模型：MetricsStreamProcessor</li>
+<li>Combine规则：无 即直接覆盖</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;_index&quot;</span> : <span class="string">&quot;ali02_endpoint_traffic-20210221&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_type&quot;</span> : <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEM=.1_L3Byb2plY3RDL3t2YWx1ZX0=&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_score&quot;</span> : <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">&quot;_source&quot;</span> : &#123;</span><br><span class="line">    <span class="attr">&quot;service_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEM=.1&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;name&quot;</span> : <span class="string">&quot;/projectC/&#123;value&#125;&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;time_bucket&quot;</span> : <span class="number">202102210050</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h2><h3 id="Source-amp-amp-Dispatcher-amp-amp-StreamProcessor-2"><a href="#Source-amp-amp-Dispatcher-amp-amp-StreamProcessor-2" class="headerlink" title="Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor"></a>Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor</h3><ul>
+<li>建立服务信息</li>
+<li>数据源Source：Service</li>
+<li>类型转换Dispatcher：ServiceTrafficDispatcher</li>
+<li>指标数据Metrics：ServiceTraffic</li>
+<li>指标模型：MetricsStreamProcessor</li>
+<li>Combine规则：无  即直接覆盖</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;_index&quot;</span> : <span class="string">&quot;ali02_service_traffic-20210219&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_type&quot;</span> : <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_score&quot;</span> : <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">&quot;_source&quot;</span> : &#123;</span><br><span class="line">    <span class="attr">&quot;node_type&quot;</span> : <span class="number">0</span>,</span><br><span class="line">    <span class="attr">&quot;name&quot;</span> : <span class="string">&quot;demo::projectA&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;service_group&quot;</span> : <span class="string">&quot;demo&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Instance"><a href="#Instance" class="headerlink" title="Instance"></a>Instance</h2><h3 id="Source-amp-amp-Dispatcher-amp-amp-StreamProcessor-3"><a href="#Source-amp-amp-Dispatcher-amp-amp-StreamProcessor-3" class="headerlink" title="Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor"></a>Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor</h3><ul>
+<li>建立实例信息</li>
+<li>数据源Source：ServiceInstance</li>
+<li>类型转换Dispatcher：InstanceTrafficDispatcher</li>
+<li>指标数据Metrics：InstanceTraffic</li>
+<li>指标模型：MetricsStreamProcessor</li>
+<li>Combine规则：支持更新<ul>
+<li>更新 lastPingTimestamp</li>
+<li>更新 properties (为空，不处理)</li>
+<li>更新 timeBucket 保持为首次注册时间</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;_index&quot;</span> : <span class="string">&quot;ali02_instance_traffic-20210219&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_type&quot;</span> : <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1_NjE1MTIxN2EyZjdiNGU2NWIxZDIyOTZmMjg5YTU3NTNAMTkyLjE2OC4zMS4zNg==&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_score&quot;</span> : <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">&quot;_source&quot;</span> : &#123;</span><br><span class="line">    <span class="attr">&quot;last_ping&quot;</span> : <span class="number">202102191528</span>,</span><br><span class="line">    <span class="attr">&quot;service_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;name&quot;</span> : <span class="string">&quot;6151217a2f7b4e65b1d2296f289a5753@192.168.31.36&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;time_bucket&quot;</span> : <span class="number">202102191527</span>,</span><br><span class="line">    <span class="attr">&quot;properties&quot;</span> : <span class="string">&quot;&quot;</span><span class="string">&quot;&#123;&quot;</span>OS Name<span class="string">&quot;:&quot;</span>Mac OS X<span class="string">&quot;,&quot;</span>hostname<span class="string">&quot;:&quot;</span>chenrqmac<span class="string">&quot;,&quot;</span>Process No.<span class="string">&quot;:&quot;</span><span class="number">86312</span><span class="string">&quot;,&quot;</span>language<span class="string">&quot;:&quot;</span>java<span class="string">&quot;,&quot;</span>ipv4s<span class="string">&quot;:&quot;</span><span class="number">192.168</span><span class="number">.31</span><span class="number">.36</span><span class="string">&quot;&#125;&quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
 </section>
     <!-- Tags START -->
     
@@ -240,7 +330,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Agent-TraceSegmentServiceClient"><span class="toc-nav-text">Agent-TraceSegmentServiceClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#bootService-flow"><span class="toc-nav-text">bootService flow</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Agent-TraceSegmentServiceClient"><span class="toc-nav-text">Agent-TraceSegmentServiceClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#bootService-flow"><span class="toc-nav-text">bootService flow</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#producer-afterFinished"><span class="toc-nav-text">producer-afterFinished()</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#consume-consume-List-data"><span class="toc-nav-text">consume-consume(List data)</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#OAP-TraceSegmentReportServiceHandler"><span class="toc-nav-text">OAP-TraceSegmentReportServiceHandler</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#TraceReceiver-collect"><span class="toc-nav-text">TraceReceiver-collect</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#NetworkAddressAliasMappingListener"><span class="toc-nav-text">NetworkAddressAliasMappingListener</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Source-amp-amp-Dispatcher-amp-amp-StreamProcessor"><span class="toc-nav-text">Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Endpoint"><span class="toc-nav-text">Endpoint</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Source-amp-amp-Dispatcher-amp-amp-StreamProcessor-1"><span class="toc-nav-text">Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Service"><span class="toc-nav-text">Service</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Source-amp-amp-Dispatcher-amp-amp-StreamProcessor-2"><span class="toc-nav-text">Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Instance"><span class="toc-nav-text">Instance</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Source-amp-amp-Dispatcher-amp-amp-StreamProcessor-3"><span class="toc-nav-text">Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor</span></a></li></ol></li></ol>
     
   </div>
 </aside>
@@ -314,7 +404,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "skywalking系列 | 端口信息处理",
+        id: "skywalking系列 | 端口及网络信息处理",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
