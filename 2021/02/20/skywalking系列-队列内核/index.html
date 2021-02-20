@@ -273,7 +273,13 @@
 <li>每个 ConsumerThread 初始化一个初始容量在1500的consumeList；</li>
 <li>从每个dataSource取数存入 consumeList</li>
 <li>由消费者对象重写的 consume()方法进行消费，如TraceSegmentServiceClient</li>
-<li>每隔 consumeCycle 毫秒 循环消费</li>
+<li>每次消费完毕，清空consumeList，休眠consumeCycle毫秒 循环消费</li>
+</ul>
+</li>
+<li>关闭逻辑 <ul>
+<li>退出时，显示调用 consumerThread.shutdown() 修改 running 状态</li>
+<li>线程退出循环，执行最后一次保障消费逻辑</li>
+<li>调用 onExit() 执行消费对象退出前动作</li>
 </ul>
 </li>
 </ul>
