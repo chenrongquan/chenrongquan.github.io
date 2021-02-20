@@ -10,7 +10,7 @@
   
   <title>
      
-      skywalking系列 | 端口信息处理 | ™技术博客 
+      skywalking系列 | 队列内核 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>skywalking系列 | 端口信息处理</h2>
-  <p class="post-date">2021-02-19</p>
+  <h2>skywalking系列 | 队列内核</h2>
+  <p class="post-date">2021-02-20</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,17 +160,94 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="Agent-TraceSegmentServiceClient"><a href="#Agent-TraceSegmentServiceClient" class="headerlink" title="Agent-TraceSegmentServiceClient"></a>Agent-TraceSegmentServiceClient</h2><h3 id="bootService-flow"><a href="#bootService-flow" class="headerlink" title="bootService flow"></a>bootService flow</h3><ul>
-<li><p>prepare()方法</p>
-<ul>
-<li>将自身注册到GRPCChannelManager来监听网络连接状态的改变</li>
+    <section class="markdown-content"><h2 id="DataCarrier"><a href="#DataCarrier" class="headerlink" title="DataCarrier"></a>DataCarrier</h2><ul>
+<li>基于无锁环状队列，生产者-消费者 内存消息队列模型；</li>
+<li>作用是在生产者和消费者之间创建一个缓冲异步内存队列，防止因skywalking收集数据方生产数据的速度大于往后端发送数据的速度而造成数据积压和生产方阻塞</li>
+</ul>
+<h3 id="Buffer"><a href="#Buffer" class="headerlink" title="Buffer"></a>Buffer</h3><ul>
+<li>两种实现方式：ArrayBlockingQueueBuffer 和 Buffer </li>
+<li>skywalking队列内核中数据的载体，队列之中的数据都存储在buffer中。</li>
+<li>属性<ul>
+<li>Object[] buffer：存储数据数组, 固定长度(由buffer.bufferSize决定)</li>
+<li>BufferStrategy strategy：入队策略；存在新旧数据冲突时的处理策略<ul>
+<li>默认OVERRIDE：直接覆盖旧数据</li>
+<li>BLOCKING：使用ArrayBlockingQueueBuffer，基于ArrayBlockingQueue；不适合Agent端</li>
+<li>IF_POSSIBLE 策略：直接返回false</li>
 </ul>
 </li>
-<li><p>boot()方法</p>
-<ul>
-<li>初始化内存队列</li>
+<li>AtomicRangeInteger index：原子循环索引，基于AtomicIntegerArray，范围同bufferSize。</li>
 </ul>
 </li>
+<li>方法<ul>
+<li>obtain() 方法：一次性读取（并清理）Buffer中全部数据的功能，同时也提供了部分读取的重载</li>
+<li>save() 方法负责向底层数组中填充数据<blockquote>
+<p>buffer数据存储介质 和 AtomicRangeInteger原子性和循环性 组成skywalking队列内核</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h3><ul>
+<li>Channel是管理Buffer的载体</li>
+<li>属性<ul>
+<li>QueueBuffer<T>[] bufferChannels：Buffer的数组集合，是队列内核中的数据载体</li>
+<li>IDataPartitioner<T> dataPartitioner：决定数据存储位置与重试次数<ul>
+<li>ProducerThreadPartitioner：根据ThreadID，保证相同线程数据在一个Buffer中。</li>
+<li>SimpleRollingPartitioner：简单循环自增选择器，使用无锁整型（volatile修饰）的自增并取模，选择要写入的 Buffer 。</li>
+</ul>
+</li>
+<li>BufferStrategy strategy：队列策略，与Buffer保持一致</li>
+<li>long size：Channel能够容纳的数据大小。其值 = 1 * channelSize * bufferSize<ul>
+<li>channelSize 参数：指定 Channels 底层 Buffer 的数量</li>
+<li>bufferSize：指定每个 Buffer 的大小<br><img src="https://s0.lgstatic.com/i/image3/M01/05/95/CgoCgV6enVKAMtBMAABQyIHkIPs184.png" alt=" bufferSize 、channelSize 参数与 Channels之间的关系"></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="DataCarrier-1"><a href="#DataCarrier-1" class="headerlink" title="DataCarrier"></a>DataCarrier</h3><ul>
+<li>队列内核的门户：与skywalking其他模块进行交互</li>
+<li>初始化必须参数：channelSize、bufferSize</li>
+<li>属性<ul>
+<li>Channels<T> channels</li>
+<li>IDriver driver</li>
+<li>String name</li>
+</ul>
+</li>
+</ul>
+<h2 id="Implemention"><a href="#Implemention" class="headerlink" title="Implemention"></a>Implemention</h2><blockquote>
+<p>以 TraceSegmentServiceClient 为例 </p>
+</blockquote>
+<h3 id="Producer"><a href="#Producer" class="headerlink" title="Producer"></a>Producer</h3><ul>
+<li>初始化<ul>
+<li>CHANNEL_SIZE = Buffer.CHANNEL_SIZE=5</li>
+<li>BUFFER_SIZE = Buffer.BUFFER_SIZE=300</li>
+<li>BufferStrategy = IF_POSSIBLE</li>
+</ul>
+</li>
+<li>生产消息<ul>
+<li>produce()方法：调用Channels#save()</li>
+</ul>
+</li>
+<li>数据分发<ul>
+<li>判断当前数据应该存储在bufferChannels</li>
+<li>判断当前数据应该存储在buffer的具体位置</li>
+</ul>
+</li>
+<li>判断逻辑 dataPartitioner#partition() 默认使用 SimpleRollingPartitioner<ul>
+<li>确定bufferChannels位置： i++ % bufferChannels.length</li>
+<li>确定buffer位置：index.getAndIncrement()</li>
+</ul>
+</li>
+<li>IF_POSSIBLE策略下可设置重试次数 dataPartitioner.maxRetryCount() 默认为 3</li>
+</ul>
+<h3 id="IDriver"><a href="#IDriver" class="headerlink" title="IDriver"></a>IDriver</h3><ul>
+<li>IConsumer消费者和ConsumerThread线程组，按照一定的消费模式集成到一起，提供更加简单易用的 API。<ul>
+<li> 依赖 ConsumerThread 的实现是 ConsumerDriver </li>
+<li> 依赖 MultipleChannelsConsumer 的实现是 BulkConsumerPool </li>
+</ul>
+</li>
+<li></li>
 </ul>
 </section>
     <!-- Tags START -->
@@ -182,12 +259,8 @@
     <span class="tag-code">skywalking</span>
   </a>
 
-  <a href="/tags#agent" >
-    <span class="tag-code">agent</span>
-  </a>
-
-  <a href="/tags#oap" >
-    <span class="tag-code">oap</span>
+  <a href="/tags#common" >
+    <span class="tag-code">common</span>
   </a>
 
       </div>
@@ -198,20 +271,13 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF/">
+      <a class="nav-left" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E7%AB%AF%E5%8F%A3%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%86/">
         <span class="nav-arrow">← </span>
         
-          skywalking系列 | 元数据信息
+          skywalking系列 | 端口信息处理
         
       </a>
     
-    
-      <a class="nav-right" href="/2021/02/20/skywalking%E7%B3%BB%E5%88%97-%E9%98%9F%E5%88%97%E5%86%85%E6%A0%B8/">
-        
-          skywalking系列 | 队列内核
-        
-        <span class="nav-arrow"> →</span>
-      </a>
     
   </div>
 
@@ -240,7 +306,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Agent-TraceSegmentServiceClient"><span class="toc-nav-text">Agent-TraceSegmentServiceClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#bootService-flow"><span class="toc-nav-text">bootService flow</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#DataCarrier"><span class="toc-nav-text">DataCarrier</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Buffer"><span class="toc-nav-text">Buffer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Channel"><span class="toc-nav-text">Channel</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#DataCarrier-1"><span class="toc-nav-text">DataCarrier</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Implemention"><span class="toc-nav-text">Implemention</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Producer"><span class="toc-nav-text">Producer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#IDriver"><span class="toc-nav-text">IDriver</span></a></li></ol></li></ol>
     
   </div>
 </aside>
@@ -250,7 +316,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/02/19/skywalking系列-端口信息处理/';
+    var url = 'http://chenrongquan.github.com/2021/02/20/skywalking系列-队列内核/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -314,7 +380,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "skywalking系列 | 端口信息处理",
+        id: "skywalking系列 | 队列内核",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
