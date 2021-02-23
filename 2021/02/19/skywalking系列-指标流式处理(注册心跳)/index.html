@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      skywalking系列 | 指标流式处理(注册心跳) | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>skywalking系列 | 指标流式处理(注册心跳)</h2>
+  <p class="post-date">2021年2月19日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="数据协议"><a href="#数据协议" class="headerlink" title="数据协议"></a>数据协议</h2><h3 id="proto文件"><a href="#proto文件" class="headerlink" title="proto文件"></a>proto文件</h3><ul>
+<li>proto文件：<code>management/Management.proto</code></li>
+</ul>
+<h3 id="方法及参数"><a href="#方法及参数" class="headerlink" title="方法及参数"></a>方法及参数</h3><ul>
+<li>注册方法定义： <code>reportInstanceProperties</code></li>
+<li>心跳方法定义：<code>keepAlive</code></li>
+<li>注册数据定义：<code>InstanceProperties</code>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">message InstanceProperties &#123;</span><br><span class="line">    string service &#x3D; 1;</span><br><span class="line">    string serviceInstance &#x3D; 2;</span><br><span class="line">    repeated KeyStringValuePair properties &#x3D; 3;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>心跳数据定义: <code>InstancePingPkg</code><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">message InstancePingPkg &#123;</span><br><span class="line">    string service &#x3D; 1;</span><br><span class="line">    string serviceInstance &#x3D; 2;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="数据采集"><a href="#数据采集" class="headerlink" title="数据采集"></a>数据采集</h2><h3 id="gRPC客户端"><a href="#gRPC客户端" class="headerlink" title="gRPC客户端"></a>gRPC客户端</h3><p><code>ServiceManagementClient</code></p>
+<h3 id="处理逻辑"><a href="#处理逻辑" class="headerlink" title="处理逻辑"></a>处理逻辑</h3><p><code>prepare()</code>方法</p>
+<ul>
+<li>监听注册：将自身注册到<code>GRPCChannelManager</code>, 监听gRPC底层网络连接状态</li>
+<li>实例名生成：规则 <code>InstanceName=UUID@ip</code> 或 <code>Config.Agent.INSTANCE_NAME</code> 配置指定<blockquote>
+<p>定制化为 <code>ip@hostname</code></p>
+</blockquote>
+</li>
+</ul>
+<p><code>boot()</code>方法</p>
+<ul>
+<li>定时任务：启动定时注册及心跳任务；间隔30秒，或<code>Config.Collector.HEARTBEAT_PERIOD</code>指定</li>
+</ul>
+<p><code>statusChanged()</code>方法</p>
+<ul>
+<li>监听事件：<code>GRPCChannelManager</code> gRPC网络连接状态<code>GRPCChannelStatus</code>改变时触发</li>
+<li>处理逻辑： 连接成功，重建本地存根<code>Stub</code></li>
+</ul>
+<p><code>Runnable#run()</code>方法</p>
+<ul>
+<li>网络未连接，不处理</li>
+<li>循环次数%10==0，进行实例注册与更新</li>
+<li>循环次数%10!=0，进行服务与实例的心跳检测</li>
+</ul>
+<h2 id="数据接收"><a href="#数据接收" class="headerlink" title="数据接收"></a>数据接收</h2><h3 id="gRPC服务端"><a href="#gRPC服务端" class="headerlink" title="gRPC服务端"></a>gRPC服务端</h3><p><code>ManagementServiceHandler</code></p>
+<h3 id="传输数据"><a href="#传输数据" class="headerlink" title="传输数据"></a>传输数据</h3><p>注册信息demo</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">service: &quot;demo::projectA&quot;</span><br><span class="line">serviceInstance: &quot;7ff3e127186d45848e7371ffae1f6f73@192.168.31.36&quot;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;OS Name&quot;</span><br><span class="line">  value: &quot;Mac OS X&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;hostname&quot;</span><br><span class="line">  value: &quot;chenrqmac&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;ipv4&quot;</span><br><span class="line">  value: &quot;192.168.31.36&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;Process No.&quot;</span><br><span class="line">  value: &quot;76357&quot;</span><br><span class="line">&#125;</span><br><span class="line">properties &#123;</span><br><span class="line">  key: &quot;language&quot;</span><br><span class="line">  value: &quot;java&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>心跳信息demo</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">service: &quot;demo::projectA&quot;</span><br><span class="line">serviceInstance: &quot;121454622972403eb6490293f4e51f86@192.168.31.36&quot;</span><br></pre></td></tr></table></figure>
+<blockquote>
+</blockquote>
+<h2 id="数据处理"><a href="#数据处理" class="headerlink" title="数据处理"></a>数据处理</h2><h3 id="数据源及转换器"><a href="#数据源及转换器" class="headerlink" title="数据源及转换器"></a>数据源及转换器</h3><ul>
+<li>数据源：<code>ServiceInstanceUpdate</code>  继承 <code>Source</code></li>
+<li>类型转换：<code>InstanceTrafficDispatcher</code> 实现 <code>SourceDispatcher</code></li>
+<li>原始数据类型： <code>InstanceTraffic</code>  继承 <code>Metrics</code> 指标数据</li>
+</ul>
+<h3 id="流计算模型"><a href="#流计算模型" class="headerlink" title="流计算模型"></a>流计算模型</h3><ul>
+<li>指标计算模型：<code>MetricsStreamProcessor</code></li>
+<li>分布式计算，分为两个极端</li>
+</ul>
+<ol>
+<li>阶段L1: 针对相同ID的实体，在当前OAP节点进行汇集计算； </li>
+<li>阶段L2: 通过ID进行hash路由，在分布式环境中，使得离散数据进行二次汇集；再通过与存储中数据(内存或数据库)的汇集计算，完成入库。</li>
+</ol>
+<h3 id="流计算阶段"><a href="#流计算阶段" class="headerlink" title="流计算阶段"></a>流计算阶段</h3><p><code>L1阶段职责</code></p>
+<ul>
+<li>数据接收与解析，并在当前OAP节点内进行数据聚合，使用OAL或者其他聚合模式</li>
+<li><code>MetricsAggregateWorker</code> <ul>
+<li><code>in()</code>方法：数据接收 </li>
+<li><code>onWorker</code>数据解析：调用指标 <code>combine()</code> 方法进行聚合 </li>
+</ul>
+</li>
+</ul>
+<p><code>L2阶段职责</code></p>
+<ul>
+<li>分布式聚合：根据一定的路由规则，将经过L1聚合后的数据路由到指定节点后，进行二次汇集。 </li>
+<li><code>MetricsRemoteWorker</code>: 数据发送Sender<ul>
+<li><code>in()</code>方法：接收上一步worker数据</li>
+<li><code>send()</code>方法：调用 <code>RemoteSenderService</code> 发送数据到指定OAP节点</li>
+<li>路由规则：<code>HashCode</code>（指标模型）  <code>Rolling</code>  <code>ForeverFirst</code></li>
+<li>调用发送客户端<code>RemoteClient</code>： <code>GRPCRemoteClient</code> 和 <code>SelfRemoteClient</code></li>
+</ul>
+</li>
+<li><code>MetricsPersistentWorker</code>: 数据接收Receiver<ul>
+<li><code>in()</code>方法：接收上一步worker数据</li>
+<li><code>onWokr()</code>方法：写入缓存 <code>ReadWriteSafeCache</code></li>
+<li><code>prepareBatch()</code>：二次聚合并落库</li>
+</ul>
+</li>
+</ul>
+<p><strong>二次聚合规则</strong></p>
+<ol>
+<li>数据库现有比较：查库规则 = 接收到的数据列表 - 缓存中已有的实体列表；查库，结果入缓存</li>
+<li>二次聚合：接收到的数据列表 与 缓存中的数据，进行二次聚合，具体规则</li>
+</ol>
+<ul>
+<li>缓存存在但是实体不支持更新，直接跳过不处理</li>
+<li>缓存存在且实体支持更新，进行二次聚合，<code>prepareBatchUpdate</code> 落库</li>
+<li>缓存不存在，直接<code>prepareBatchInsert</code>落库</li>
+</ul>
+<h2 id="数据存储"><a href="#数据存储" class="headerlink" title="数据存储"></a>数据存储</h2><h3 id="批量存储定时器"><a href="#批量存储定时器" class="headerlink" title="批量存储定时器"></a>批量存储定时器</h3><p><code>PersistenceTimer</code></p>
+<ul>
+<li>枚举单例</li>
+<li>定时任务：core模块启动完毕，启动该定时器</li>
+<li>每隔3s(或<code>persistentPeriod</code>指定)，调用<code>extractDataAndSave</code>批量更新或存储</li>
+<li>调用具体 <code>PersistenceWorker#prepareBatch()</code> 具体实现完成落库</li>
+</ul>
+<h3 id="批量存储"><a href="#批量存储" class="headerlink" title="批量存储"></a>批量存储</h3><p><code>MetricsPersistentWorker#prepareBatch</code> </p>
+<ul>
+<li>批量落库: 单次批量大小上限2000 (硬编码) </li>
+</ul>
+<h3 id="数据存储demo"><a href="#数据存储demo" class="headerlink" title="数据存储demo"></a>数据存储demo</h3><ul>
+<li>Instance信息(注册及心跳上送)<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;_index&quot;</span> : <span class="string">&quot;ali02_instance_traffic-20210219&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_type&quot;</span> : <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1_NjE1MTIxN2EyZjdiNGU2NWIxZDIyOTZmMjg5YTU3NTNAMTkyLjE2OC4zMS4zNg==&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_score&quot;</span> : <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">&quot;_source&quot;</span> : &#123;</span><br><span class="line">    <span class="attr">&quot;last_ping&quot;</span> : <span class="number">202102191528</span>,</span><br><span class="line">    <span class="attr">&quot;service_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;name&quot;</span> : <span class="string">&quot;6151217a2f7b4e65b1d2296f289a5753@192.168.31.36&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;time_bucket&quot;</span> : <span class="number">202102191527</span>,</span><br><span class="line">    <span class="attr">&quot;properties&quot;</span> : <span class="string">&quot;&quot;</span><span class="string">&quot;&#123;&quot;</span>OS Name<span class="string">&quot;:&quot;</span>Mac OS X<span class="string">&quot;,&quot;</span>hostname<span class="string">&quot;:&quot;</span>chenrqmac<span class="string">&quot;,&quot;</span>Process No.<span class="string">&quot;:&quot;</span><span class="number">86312</span><span class="string">&quot;,&quot;</span>language<span class="string">&quot;:&quot;</span>java<span class="string">&quot;,&quot;</span>ipv4s<span class="string">&quot;:&quot;</span><span class="number">192.168</span><span class="number">.31</span><span class="number">.36</span><span class="string">&quot;&#125;&quot;</span><span class="string">&quot;&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li>Service信息(心跳上送)<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;_index&quot;</span> : <span class="string">&quot;ali02_service_traffic-20210219&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_type&quot;</span> : <span class="string">&quot;_doc&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_id&quot;</span> : <span class="string">&quot;ZGVtbzo6cHJvamVjdEE=.1&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;_score&quot;</span> : <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">&quot;_source&quot;</span> : &#123;</span><br><span class="line">    <span class="attr">&quot;node_type&quot;</span> : <span class="number">0</span>,</span><br><span class="line">    <span class="attr">&quot;name&quot;</span> : <span class="string">&quot;demo::projectA&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;service_group&quot;</span> : <span class="string">&quot;demo&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#skywalking" >
+    <span class="tag-code">skywalking</span>
+  </a>
+
+  <a href="/tags#agent" >
+    <span class="tag-code">agent</span>
+  </a>
+
+  <a href="/tags#oap" >
+    <span class="tag-code">oap</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-BootService-%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0/">
+        <span class="nav-arrow">← </span>
+        
+          skywalking系列 | BootService核心实现
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF/">
+        
+          skywalking系列 | 元数据信息
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E5%8D%8F%E8%AE%AE"><span class="toc-nav-text">数据协议</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#proto%E6%96%87%E4%BB%B6"><span class="toc-nav-text">proto文件</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%96%B9%E6%B3%95%E5%8F%8A%E5%8F%82%E6%95%B0"><span class="toc-nav-text">方法及参数</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86"><span class="toc-nav-text">数据采集</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#gRPC%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="toc-nav-text">gRPC客户端</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%A4%84%E7%90%86%E9%80%BB%E8%BE%91"><span class="toc-nav-text">处理逻辑</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E6%8E%A5%E6%94%B6"><span class="toc-nav-text">数据接收</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#gRPC%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="toc-nav-text">gRPC服务端</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%BC%A0%E8%BE%93%E6%95%B0%E6%8D%AE"><span class="toc-nav-text">传输数据</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86"><span class="toc-nav-text">数据处理</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E6%BA%90%E5%8F%8A%E8%BD%AC%E6%8D%A2%E5%99%A8"><span class="toc-nav-text">数据源及转换器</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B5%81%E8%AE%A1%E7%AE%97%E6%A8%A1%E5%9E%8B"><span class="toc-nav-text">流计算模型</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B5%81%E8%AE%A1%E7%AE%97%E9%98%B6%E6%AE%B5"><span class="toc-nav-text">流计算阶段</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8"><span class="toc-nav-text">数据存储</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%89%B9%E9%87%8F%E5%AD%98%E5%82%A8%E5%AE%9A%E6%97%B6%E5%99%A8"><span class="toc-nav-text">批量存储定时器</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%89%B9%E9%87%8F%E5%AD%98%E5%82%A8"><span class="toc-nav-text">批量存储</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E5%AD%98%E5%82%A8demo"><span class="toc-nav-text">数据存储demo</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/02/19/skywalking系列-指标流式处理(注册心跳)/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "skywalking系列 | 指标流式处理(注册心跳)",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
