@@ -160,126 +160,125 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="DataCarrier"><a href="#DataCarrier" class="headerlink" title="DataCarrier"></a>DataCarrier</h2><ul>
+    <section class="markdown-content"><h2 id="队列内核"><a href="#队列内核" class="headerlink" title="队列内核"></a>队列内核</h2><ul>
 <li>基于无锁环状队列，生产者-消费者 内存消息队列模型；</li>
 <li>作用是在生产者和消费者之间创建一个缓冲异步内存队列，防止因skywalking收集数据方生产数据的速度大于往后端发送数据的速度而造成数据积压和生产方阻塞</li>
 </ul>
 <h3 id="Buffer"><a href="#Buffer" class="headerlink" title="Buffer"></a>Buffer</h3><ul>
-<li>两种实现方式：ArrayBlockingQueueBuffer 和 Buffer </li>
-<li>skywalking队列内核中数据的载体，队列之中的数据都存储在buffer中。</li>
+<li>两种实现方式：<code>ArrayBlockingQueueBuffer</code> 和 <code>Buffer</code> </li>
+<li>skywalking队列内核中数据的载体，队列之中的数据都存储在<code>buffer</code>中。</li>
 <li>属性<ul>
-<li>Object[] buffer：存储数据数组, 固定长度(由buffer.bufferSize决定)</li>
-<li>BufferStrategy strategy：入队策略；存在新旧数据冲突时的处理策略<ul>
-<li>默认OVERRIDE：直接覆盖旧数据</li>
-<li>BLOCKING：使用ArrayBlockingQueueBuffer，基于ArrayBlockingQueue；不适合Agent端</li>
-<li>IF_POSSIBLE 策略：直接返回false</li>
+<li><code>Object[] buffer</code>：存储数据数组, 固定长度(由buffer.bufferSize决定)</li>
+<li><code>BufferStrategy strategy</code>：入队策略；存在新旧数据冲突时的处理策略<ul>
+<li>默认<code>OVERRIDE</code>：直接覆盖旧数据</li>
+<li><code>BLOCKING</code>：使用<code>ArrayBlockingQueueBuffer</code>，基于<code>ArrayBlockingQueue</code>；不适合Agent端</li>
+<li><code>IF_POSSIBLE</code> 策略：直接返回false</li>
 </ul>
 </li>
-<li>AtomicRangeInteger index：原子循环索引，基于AtomicIntegerArray，范围同bufferSize。</li>
+<li><code>AtomicRangeInteger index</code>：原子循环索引，基于<code>AtomicIntegerArray</code>，范围同<code>bufferSize</code>。</li>
 </ul>
 </li>
 <li>方法<ul>
-<li>obtain() 方法：一次性读取（并清理）Buffer中全部数据的功能，同时也提供了部分读取的重载</li>
-<li>save() 方法负责向底层数组中填充数据<blockquote>
-<p>buffer数据存储介质 和 AtomicRangeInteger原子性和循环性 组成skywalking队列内核</p>
+<li><code>obtain()</code>方法：一次性读取（并清理）Buffer中全部数据的功能，同时也提供了部分读取的重载</li>
+<li><code>save()</code> 方法负责向底层数组中填充数据<blockquote>
+<p><code>buffer</code>数据存储介质 和 <code>AtomicRangeInteger</code>原子性和循环性 组成skywalking队列内核</p>
 </blockquote>
 </li>
 </ul>
 </li>
 </ul>
 <h3 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h3><ul>
-<li>Channel是管理Buffer的载体</li>
+<li><code>Channel</code>是管理<code>Buffer</code>的载体</li>
 <li>属性<ul>
-<li>QueueBuffer<T>[] bufferChannels：Buffer的数组集合，是队列内核中的数据载体</li>
-<li>IDataPartitioner<T> dataPartitioner：决定数据存储位置与重试次数<ul>
-<li>ProducerThreadPartitioner：根据ThreadID，保证相同线程数据在一个Buffer中。</li>
-<li>SimpleRollingPartitioner：简单循环自增选择器，使用无锁整型（volatile修饰）的自增并取模，选择要写入的 Buffer 。</li>
+<li><code>QueueBuffer&lt;T&gt;[] bufferChannels</code>：<code>Buffer</code>的数组集合，是队列内核中的数据载体</li>
+<li><code>IDataPartitioner&lt;T&gt; dataPartitioner</code>：决定数据存储位置与重试次数<ul>
+<li><code>ProducerThreadPartitioner</code>：根据<code>ThreadID</code>，保证相同线程数据在一个<code>Buffer</code>中。</li>
+<li><code>SimpleRollingPartitioner</code>：简单循环自增选择器，使用无锁整型（<code>volatile</code>修饰）的自增并取模，选择要写入的 <code>Buffer</code> 。</li>
 </ul>
 </li>
-<li>BufferStrategy strategy：队列策略，与Buffer保持一致</li>
-<li>long size：Channels能够容纳的数据大小。其值 = 1 * channelSize * bufferSize<ul>
-<li>channelSize 参数：Channel的数量</li>
-<li>bufferSize参数：每个Buffer中buffer的大小<br><img src="https://s0.lgstatic.com/i/image3/M01/05/95/CgoCgV6enVKAMtBMAABQyIHkIPs184.png" alt=" bufferSize 、channelSize 参数与 Channels之间的关系"></li>
-</ul>
-</li>
+<li><code>BufferStrategy strategy</code>：队列策略，与<code>Buffer</code>保持一致</li>
+<li><code>long size</code>：Channels能够容纳的数据大小。其值 = <code>1 * channelSize * bufferSize</code><ul>
+<li><code>channelSize</code> 参数：<code>Channel</code>的数量</li>
+<li><code>bufferSize</code>参数：每个<code>Buffer</code>中<code>buffer</code>的大小<br><img src="https://s0.lgstatic.com/i/image3/M01/05/95/CgoCgV6enVKAMtBMAABQyIHkIPs184.png" alt=" bufferSize 、channelSize 参数与 Channels之间的关系"></li>
 </ul>
 </li>
 </ul>
-<h3 id="DataCarrier-1"><a href="#DataCarrier-1" class="headerlink" title="DataCarrier"></a>DataCarrier</h3><ul>
+</li>
+</ul>
+<h3 id="DataCarrier"><a href="#DataCarrier" class="headerlink" title="DataCarrier"></a>DataCarrier</h3><ul>
 <li>队列内核的门户：与skywalking其他模块进行交互</li>
-<li>初始化必须参数：channelSize、bufferSize</li>
+<li>初始化必须参数：<code>channelSize</code>、<code>bufferSize</code></li>
 <li>属性<ul>
-<li>Channels<T> channels</li>
-<li>IDriver driver</li>
-<li>String name</li>
+<li><code>Channels&lt;T&gt; channels</code></li>
+<li><code>IDriver driver</code></li>
+<li><code>String name</code></li>
 </ul>
 </li>
 </ul>
-<h2 id="Implemention"><a href="#Implemention" class="headerlink" title="Implemention"></a>Implemention</h2><blockquote>
-<p>以 TraceSegmentServiceClient 为例 </p>
+<h2 id="实现Demo-TraceSegmentServiceClient"><a href="#实现Demo-TraceSegmentServiceClient" class="headerlink" title="实现Demo TraceSegmentServiceClient"></a>实现Demo TraceSegmentServiceClient</h2><blockquote>
 </blockquote>
-<h3 id="Producer"><a href="#Producer" class="headerlink" title="Producer"></a>Producer</h3><ul>
+<h3 id="生产者"><a href="#生产者" class="headerlink" title="生产者"></a>生产者</h3><ul>
 <li>初始化<ul>
-<li>CHANNEL_SIZE = Buffer.CHANNEL_SIZE=5</li>
-<li>BUFFER_SIZE = Buffer.BUFFER_SIZE=300</li>
-<li>BufferStrategy = IF_POSSIBLE</li>
+<li><code>CHANNEL_SIZE = Buffer.CHANNEL_SIZE=5</code></li>
+<li><code>BUFFER_SIZE = Buffer.BUFFER_SIZE=300</code></li>
+<li><code>BufferStrategy = IF_POSSIBLE</code></li>
 </ul>
 </li>
 <li>生产消息<ul>
-<li>produce()方法：调用Channels#save()</li>
+<li><code>produce()</code>方法：调用<code>Channels#save()</code></li>
 </ul>
 </li>
-<li>数据分发：dataPartitioner#partition() 默认使用 SimpleRollingPartitioner<ul>
-<li>判断当前数据应该存储在哪个Buffer：i++ % bufferChannels.length</li>
-<li>判断当前数据应该存储在buffer的索引：index.getAndIncrement()</li>
-<li>重试次数 dataPartitioner.maxRetryCount() 默认为 3</li>
+<li>数据分发：<code>dataPartitioner#partition()</code> 默认使用 <code>SimpleRollingPartitioner</code><ul>
+<li>判断当前数据应该存储在哪个<code>Buffer</code>：<code>i++ % bufferChannels.length</code></li>
+<li>判断当前数据应该存储在<code>buffer</code>的索引：<code>index.getAndIncrement()</code></li>
+<li>重试次数 <code>dataPartitioner.maxRetryCount()</code> 默认为 3</li>
 </ul>
 </li>
 </ul>
-<h3 id="IDriver"><a href="#IDriver" class="headerlink" title="IDriver"></a>IDriver</h3><ul>
-<li>IConsumer消费者和ConsumerThread线程组，按照一定的消费模式集成到一起，提供相关API。<ul>
-<li> 依赖 ConsumerThread 的实现是 ConsumerDriver </li>
-<li> 依赖 MultipleChannelsConsumer 的实现是 BulkConsumerPool </li>
+<h3 id="消费管理"><a href="#消费管理" class="headerlink" title="消费管理"></a>消费管理</h3><ul>
+<li><code>IConsumer</code>消费者和<code>ConsumerThread</code>线程组，按照一定的消费模式集成到一起，提供相关API。<ul>
+<li> 依赖 <code>ConsumerThread</code> 的实现是 <code>ConsumerDriver</code> </li>
+<li> 依赖 <code>MultipleChannelsConsumer</code> 的实现是 <code>BulkConsumerPool</code></li>
 </ul>
 </li>
 <li>方法<ul>
-<li>isRunning：检测当前IDriver是否正在运行</li>
-<li>close：关闭消费线程</li>
-<li>begin：启动消费线程</li>
+<li><code>isRunning</code>：检测当前<code>IDriver</code>是否正在运行</li>
+<li><code>close</code>：关闭消费线程</li>
+<li><code>begin</code>：启动消费线程</li>
 </ul>
 </li>
-<li>ConsumerDriver<ul>
-<li>维护了固定数量的ConsumerThread[]线程，共同消费一个Channels中的数据</li>
-<li>消费的 Channels、ConsumerThread 线程数以及两者的绑定关系一旦确定，在整个 ConsumerDriver 的生命周期中不会再进行变更。</li>
+<li><code>ConsumerDriver</code><ul>
+<li>维护了固定数量的<code>ConsumerThread</code>[]线程，共同消费一个<code>Channels</code>中的数据</li>
+<li>消费的 <code>Channels</code>、<code>ConsumerThread</code> 线程数以及两者的绑定关系一旦确定，在整个 <code>ConsumerDriver</code> 的生命周期中不会再进行变更。</li>
 </ul>
 </li>
 <li>消费线程分配逻辑 ConsumerDriver#allocateBuffer2Thread()方法<ul>
-<li>consumerThreads.length &lt; channelSize：每个ConsumerThread线程会处理多个Channel</li>
-<li>consumerThreads.length == channelSize：每个ConsumerThread线程处理一个Channel</li>
-<li>consumerThreads.length &gt; channelSize：有一些消费线程就没有作用</li>
+<li><code>consumerThreads.length &lt; channelSize</code>：每个<code>ConsumerThread</code>线程会处理多个<code>Channel</code></li>
+<li><code>consumerThreads.length == channelSize</code>：每个<code>ConsumerThread</code>线程处理一个<code>Channel</code></li>
+<li><code>consumerThreads.length &gt; channelSize</code>：有一些消费线程就没有作用</li>
 </ul>
 </li>
 </ul>
-<h3 id="ConsumerThread"><a href="#ConsumerThread" class="headerlink" title="ConsumerThread"></a>ConsumerThread</h3><ul>
+<h3 id="消费线程"><a href="#消费线程" class="headerlink" title="消费线程"></a>消费线程</h3><ul>
 <li>属性<ul>
-<li>threadName</li>
-<li>consumer消费对象：IConsumer实例，反射新建，如TraceSegmentServiceClient</li>
-<li>running：状态</li>
-<li>dataSources：绑定的Channel 即Buffer消费数据源</li>
-<li>consumeCycle：消费循环间隔时间 默认20毫秒</li>
+<li><code>threadName</code></li>
+<li><code>consumer</code>消费对象：<code>IConsumer</code>实例，反射新建，如<code>TraceSegmentServiceClient</code></li>
+<li><code>running</code>：状态</li>
+<li><code>dataSources</code>：绑定的<code>Channel</code> 即<code>Buffer</code>消费数据源</li>
+<li><code>consumeCycle</code>：消费循环间隔时间 默认20毫秒</li>
 </ul>
 </li>
-<li>消费逻辑 run()<ul>
-<li>每个 ConsumerThread 初始化一个初始容量在1500的consumeList；</li>
-<li>从每个dataSource取数存入 consumeList</li>
-<li>由消费者对象重写的 consume()方法进行消费，如TraceSegmentServiceClient</li>
-<li>每次消费完毕，清空consumeList，休眠consumeCycle毫秒 循环消费</li>
+<li>消费逻辑 <code>run()</code><ul>
+<li>每个 <code>ConsumerThread</code> 初始化一个初始容量在1500的<code>consumeList</code></li>
+<li>从每个<code>dataSource</code>取数存入 <code>consumeList</code></li>
+<li>由消费者对象重写的 <code>consume()</code>方法进行消费，如<code>TraceSegmentServiceClient</code></li>
+<li>每次消费完毕，清空<code>consumeList</code>，休眠<code>consumeCycle</code>毫秒 循环消费</li>
 </ul>
 </li>
 <li>关闭逻辑 <ul>
-<li>退出时，显示调用 consumerThread.shutdown() 修改 running 状态</li>
+<li>退出时，显示调用 <code>consumerThread.shutdown()</code> 修改 <code>running</code> 状态</li>
 <li>线程退出循环，执行最后一次保障消费逻辑</li>
-<li>调用 onExit() 执行消费对象退出前动作</li>
+<li>调用<code>onExit()</code>执行消费对象退出前动作</li>
 </ul>
 </li>
 </ul>
@@ -293,8 +292,12 @@
     <span class="tag-code">skywalking</span>
   </a>
 
-  <a href="/tags#common" >
-    <span class="tag-code">common</span>
+  <a href="/tags#agent" >
+    <span class="tag-code">agent</span>
+  </a>
+
+  <a href="/tags#oap" >
+    <span class="tag-code">oap</span>
   </a>
 
       </div>
@@ -347,7 +350,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#DataCarrier"><span class="toc-nav-text">DataCarrier</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Buffer"><span class="toc-nav-text">Buffer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Channel"><span class="toc-nav-text">Channel</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#DataCarrier-1"><span class="toc-nav-text">DataCarrier</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Implemention"><span class="toc-nav-text">Implemention</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Producer"><span class="toc-nav-text">Producer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#IDriver"><span class="toc-nav-text">IDriver</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ConsumerThread"><span class="toc-nav-text">ConsumerThread</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%98%9F%E5%88%97%E5%86%85%E6%A0%B8"><span class="toc-nav-text">队列内核</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Buffer"><span class="toc-nav-text">Buffer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Channel"><span class="toc-nav-text">Channel</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#DataCarrier"><span class="toc-nav-text">DataCarrier</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%9E%E7%8E%B0Demo-TraceSegmentServiceClient"><span class="toc-nav-text">实现Demo TraceSegmentServiceClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85"><span class="toc-nav-text">生产者</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B6%88%E8%B4%B9%E7%AE%A1%E7%90%86"><span class="toc-nav-text">消费管理</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B6%88%E8%B4%B9%E7%BA%BF%E7%A8%8B"><span class="toc-nav-text">消费线程</span></a></li></ol></li></ol>
     
   </div>
 </aside>

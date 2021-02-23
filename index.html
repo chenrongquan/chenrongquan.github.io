@@ -236,10 +236,6 @@ proto文件：management/Management.proto
     <span class="tag-code">elasticsearch</span>
   </a>
 
-  <a href="/tags#meta" >
-    <span class="tag-code">meta</span>
-  </a>
-
       
       <div class="article-summary">
         
@@ -284,10 +280,8 @@ base64(serviceName).(norm ...
       
       <div class="article-summary">
         
-          table
-sw-meta
-
-fields
+          元数据表表名sw-meta
+字段属性
 
 
 字段
@@ -298,30 +292,25 @@ fields
 
 
 id
-bigint
+bigint(20)
 是
 主键
 
 
 service_group
-varchar
+varchar(255)
 否
 服务组
 
 
 service_name
-varchar
+varchar(255)
 是
 服务名
 
 
 service_type
-tinyint
-是
-服务类型
-
-
-i ...
+tinyint ...
         
       </div>
       <a class="more" href="/2021/02/22/skywalking%E7%B3%BB%E5%88%97-%E5%85%83%E6%95%B0%E6%8D%AE%E6%94%B9%E9%80%A0/">阅读全文</a>
@@ -338,19 +327,23 @@ i ...
     <span class="tag-code">skywalking</span>
   </a>
 
-  <a href="/tags#common" >
-    <span class="tag-code">common</span>
+  <a href="/tags#agent" >
+    <span class="tag-code">agent</span>
+  </a>
+
+  <a href="/tags#oap" >
+    <span class="tag-code">oap</span>
   </a>
 
       
       <div class="article-summary">
         
-          DataCarrier
+          队列内核
 基于无锁环状队列，生产者-消费者 内存消息队列模型；
 作用是在生产者和消费者之间创建一个缓冲异步内存队列，防止因skywalking收集数据方生产数据的速度大于往后端发送数据的速度而造成数据积压和生产方阻塞
 
 Buffer
-两种实现方式：ArrayBlockingQu ...
+两种实现方式：ArrayBlockingQueueBuff ...
         
       </div>
       <a class="more" href="/2021/02/20/skywalking%E7%B3%BB%E5%88%97-%E9%98%9F%E5%88%97%E5%86%85%E6%A0%B8/">阅读全文</a>
