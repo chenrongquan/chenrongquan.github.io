@@ -10,7 +10,7 @@
   
   <title>
      
-      skywalking系列 | BootService核心实现 | ™技术博客 
+      skywalking系列 | gRPC连接管理 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,7 +151,7 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>skywalking系列 | BootService核心实现</h2>
+  <h2>skywalking系列 | gRPC连接管理</h2>
   <p class="post-date">2021年2月17日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
@@ -160,27 +160,26 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="GRPCChannelManager"><a href="#GRPCChannelManager" class="headerlink" title="GRPCChannelManager"></a>GRPCChannelManager</h2><ul>
-<li>GRPCChannelManager 负责维护Agent与后端OAP集群通信时使用的网络连接</li>
-<li>GRPCChannel: gRPC客户端的核心类之一，逻辑上表示一个Channel，底层持有一个TCP链接，负责维护此连接的活性。在RPC调用的任何时机，如果检测到底层连接处于关闭状态(terminated)，会尝试重建连接。通常情况下，不需要在RPC调用结束后就关闭Channel，该Channel可以被一直重用，直到整个客户端程序关闭。</li>
-<li>ManagedChannelBuilder：负责创建客户端Channel，ManagedChannelBuilder使用了provider机制，常用有三种<ul>
-<li>NettyChannelBuilder：创建的Channel底层是基于Netty实现的；SkyWalking Agent中用的是NettyChannelBuilder</li>
-<li>OkHttpChannelBuilder：创建的Channel底层是基于OkHttp库实现的</li>
-<li>InProcessChannelBuilder：创建进程内通信使用的Channel</li>
-</ul>
-</li>
-<li>SkyWalking 在ManagedChannel的基础上封装了自己的Channel实现——GRPCChannel；可以添加一些装饰器，如验证权限的修饰器AuthenticationDecorator</li>
-<li>GRPCChannelManager，维护了一个GRPCChannel连接以及注册在其上的Listener监听； 还维护一个后台线程定期检测该GRPCChannel的连接状态，如果发现连接断开，则会进行重连</li>
-</ul>
+    <section class="markdown-content"><h2 id="gRPC-Channel管理"><a href="#gRPC-Channel管理" class="headerlink" title="gRPC Channel管理"></a>gRPC Channel管理</h2><p><code>GRPCChannelManager</code><br>    负责维护Agent与后端OAP集群通信时使用的网络连接</p>
+<p><code>GRPCChannel</code><br>gRPC客户端的核心类之一，逻辑上表示一个<code>Channel</code>，底层持有一个TCP链接，负责维护此连接的活性。在RPC调用的任何时机，如果检测到底层连接处于关闭状态(<code>terminated</code>)，会尝试重建连接。通常情况下，不需要在RPC调用结束后就关闭<code>Channel</code>，该<code>Channel</code>可以被一直重用，直到整个客户端程序关闭。</p>
+<p><code>ManagedChannelBuilder</code>负责创建客户端<code>Channel</code>，<code>ManagedChannelBuilder</code>使用了<code>provider</code>机制，常用有三种</p>
 <ul>
-<li>boot() 方法</li>
+<li><code>NettyChannelBuilder</code>：创建的<code>Channel</code>底层是基于Netty实现的；SkyWalking Agent中用的是<code>NettyChannelBuilder</code></li>
+<li><code>OkHttpChannelBuilder</code>：创建的<code>Channel</code>底层是基于<code>OkHttp</code>库实现的</li>
+<li><code>InProcessChannelBuilder</code>：创建进程内通信使用的<code>Channel</code></li>
 </ul>
+<p><code>GRPCChannel</code></p>
+<ul>
+<li>SkyWalking 在<code>ManagedChannel</code>的基础上封装了自己的Channel实现—<code>GRPCChannel</code>；可以添加一些装饰器，如验证权限的修饰器<code>AuthenticationDecorator</code></li>
+</ul>
+<p><code>GRPCChannelManager</code><br>维护了一个<code>GRPCChannel</code>连接以及注册在其上的<code>Listener</code>监听；<br>还维护一个后台线程定期检测该<code>GRPCChannel</code>的连接状态，如果发现连接断开，则会进行重连</p>
+<h3 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h3><p><code>boot()</code>方法</p>
 <ol>
-<li>首先会解析 agent.config配置文件指定的后端OAP实例地址初始化grpcServers字段</li>
-<li>然后会初始化这个定时任务，初次会立即执行，之后每隔30s执行一次，具体执行的就是GRPCChannelManager.run()方法，其核心逻辑是检测链接状态并适时重连。</li>
-<li>notify()方法会循环调用所有注册在当前连接上的GRPCChannelListener实例(记录在listeners集合中)的statusChanged()方法，通知它们连接创建成功的事件</li>
-<li>设置 reconnect字段为false，暂时不会再重建连接了</li>
-<li>GRPCChannelManager 对外提供了 reportError() 方法，在其他依赖该网络连接的 BootService 实现发送请求失败时，可以通过该方法将 reconnect 字段设置为 true，并由后台线程重新创建 GRPCChannel。</li>
+<li>首先会解析<code>agent.config</code>配置文件指定的后端OAP实例地址初始化<code>grpcServers</code>字段</li>
+<li>然后会初始化这个定时任务，初次会立即执行，之后每隔30s执行一次，具体执行的就是<code>GRPCChannelManager.run()</code>方法，其核心逻辑是检测链接状态并适时重连。</li>
+<li><code>notify()</code>方法会循环调用所有注册在当前连接上的GRPCChannelListener实例(记录在<code>listeners</code>集合中)的<code>statusChanged()</code>方法，通知它们连接创建成功的事件</li>
+<li>设置<code>reconnect</code>字段为<code>false</code>，暂时不会再重建连接了</li>
+<li><code>GRPCChannelManager</code> 提供<code>reportError()</code>方法，在其他依赖该网络连接的 <code>BootService</code> 实现发送请求失败时，可以通过该方法将 <code>reconnect</code> 字段设置为 <code>true</code>，并由后台线程重新创建<code>GRPCChannel</code>。</li>
 </ol>
 </section>
     <!-- Tags START -->
@@ -246,7 +245,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#GRPCChannelManager"><span class="toc-nav-text">GRPCChannelManager</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#gRPC-Channel%E7%AE%A1%E7%90%86"><span class="toc-nav-text">gRPC Channel管理</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="toc-nav-text">启动流程</span></a></li></ol></li></ol>
     
   </div>
 </aside>
@@ -256,7 +255,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/02/17/skywalking系列-BootService-核心实现/';
+    var url = 'http://chenrongquan.github.com/2021/02/17/skywalking系列-gRPC连接管理/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -320,7 +319,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "skywalking系列 | BootService核心实现",
+        id: "skywalking系列 | gRPC连接管理",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
