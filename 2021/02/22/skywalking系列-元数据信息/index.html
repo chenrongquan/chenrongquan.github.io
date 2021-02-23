@@ -152,7 +152,7 @@
 </header>
     <div id="article-banner">
   <h2>skywalking系列 | 元数据信息</h2>
-  <p class="post-date">2021年2月19日</p>
+  <p class="post-date">2021年2月22日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,289 +160,202 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="InstanceMeta"><a href="#InstanceMeta" class="headerlink" title="InstanceMeta"></a>InstanceMeta</h2><h3 id="Index"><a href="#Index" class="headerlink" title="Index"></a>Index</h3><ul>
-<li>instance_traffic</li>
+    <section class="markdown-content"><h2 id="服务信息"><a href="#服务信息" class="headerlink" title="服务信息"></a>服务信息</h2><h3 id="表名"><a href="#表名" class="headerlink" title="表名"></a>表名</h3><p><code>srvice_traffic</code></p>
+<h3 id="字段属性"><a href="#字段属性" class="headerlink" title="字段属性"></a>字段属性</h3><table>
+<thead>
+<tr>
+<th align="left">字段</th>
+<th align="left">类型</th>
+<th align="left">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">service_group</td>
+<td align="left">String</td>
+<td align="left">服务组名</td>
+</tr>
+<tr>
+<td align="left">name</td>
+<td align="left">String</td>
+<td align="left">服务名</td>
+</tr>
+<tr>
+<td align="left">node_type</td>
+<td align="left">integer</td>
+<td align="left">节点类型</td>
+</tr>
+<tr>
+<td align="left">id</td>
+<td align="left">String</td>
+<td align="left">base64(serviceName).(normalType)</td>
+</tr>
+</tbody></table>
+<h3 id="聚合-amp-比较规则"><a href="#聚合-amp-比较规则" class="headerlink" title="聚合&amp;比较规则"></a>聚合&amp;比较规则</h3><ul>
+<li>不聚合</li>
+<li>按 服务名称 + 节点类型 比较</li>
 </ul>
+<h3 id="采样-amp-更新规则"><a href="#采样-amp-更新规则" class="headerlink" title="采样&amp;更新规则"></a>采样&amp;更新规则</h3><ul>
+<li>不设置采样率</li>
+<li>增量插入，非增量不处理</li>
+</ul>
+<h2 id="实例信息"><a href="#实例信息" class="headerlink" title="实例信息"></a>实例信息</h2><h3 id="表名-1"><a href="#表名-1" class="headerlink" title="表名"></a>表名</h3><p><code>instance_traffic</code></p>
+<h3 id="字段属性-1"><a href="#字段属性-1" class="headerlink" title="字段属性"></a>字段属性</h3><table>
+<thead>
+<tr>
+<th align="left">字段</th>
+<th align="left">类型</th>
+<th align="left">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">name</td>
+<td align="left">String</td>
+<td align="left">实例名称</td>
+</tr>
+<tr>
+<td align="left">service_id</td>
+<td align="left">String</td>
+<td align="left">服务ID</td>
+</tr>
+<tr>
+<td align="left">properties</td>
+<td align="left">JSON</td>
+<td align="left">properties</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">OS Name</td>
+<td align="left">系统</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">hostname</td>
+<td align="left">主机</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">Process No.</td>
+<td align="left">进程号</td>
+</tr>
+<tr>
+<td align="left"></td>
+<td align="left">language</td>
+<td align="left">语言 如 Java</td>
+</tr>
+<tr>
+<td align="left">time_bucket</td>
+<td align="left">long</td>
+<td align="left">注册时间 默认分钟 YYYYMMDDHHmm</td>
+</tr>
+<tr>
+<td align="left">last_ping</td>
+<td align="left">long</td>
+<td align="left">最新心跳时间 默认分钟 YYYYMMDDHHmm</td>
+</tr>
+<tr>
+<td align="left">id</td>
+<td align="left">long</td>
+<td align="left">serviceId+base64(instanceName)</td>
+</tr>
+</tbody></table>
+<h3 id="聚合-amp-比较规则-1"><a href="#聚合-amp-比较规则-1" class="headerlink" title="聚合&amp;比较规则"></a>聚合&amp;比较规则</h3><ul>
+<li><code>last_ping</code>: 取本次上传</li>
+<li><code>properties</code>：不为空，取本次上传</li>
+<li><code>time_bucket</code>：取库中数据，保持不变</li>
+<li>比较规则：serviceId + name</li>
+</ul>
+<h3 id="采样-amp-更新规则-1"><a href="#采样-amp-更新规则-1" class="headerlink" title="采样&amp;更新规则"></a>采样&amp;更新规则</h3><ul>
+<li>不设置采样率</li>
+<li>增量插入，非增量部分更新</li>
+</ul>
+<h2 id="端点信息"><a href="#端点信息" class="headerlink" title="端点信息"></a>端点信息</h2><h3 id="表名-2"><a href="#表名-2" class="headerlink" title="表名"></a>表名</h3><p><code>endpoint_traffic</code></p>
 <h3 id="Field"><a href="#Field" class="headerlink" title="Field"></a>Field</h3><table>
 <thead>
 <tr>
 <th align="left">字段</th>
 <th align="left">类型</th>
-<th align="left">长度</th>
-<th align="left">落库</th>
 <th align="left">含义</th>
 </tr>
 </thead>
 <tbody><tr>
-<td align="left">serviceName</td>
-<td align="left">String</td>
-<td align="left">默认70</td>
 <td align="left">name</td>
-<td align="left">长度配置 serviceNameMaxLength</td>
+<td align="left">String</td>
+<td align="left">端点名</td>
 </tr>
 <tr>
-<td align="left">instanceName</td>
-<td align="left">String</td>
-<td align="left">默认70</td>
-<td align="left">-</td>
-<td align="left">长度配置 instanceNameMaxLength</td>
-</tr>
-<tr>
-<td align="left">serviceId</td>
-<td align="left">String</td>
-<td align="left">-</td>
 <td align="left">service_id</td>
-<td align="left">生成规则 base64(serviceName).(normalType 0/1)</td>
+<td align="left">String</td>
+<td align="left">服务ID</td>
 </tr>
 <tr>
-<td align="left">properties</td>
-<td align="left">JSON</td>
-<td align="left">-</td>
-<td align="left">properties</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">-</td>
-<td align="left">OS Name</td>
-<td align="left">-</td>
-<td align="left">-</td>
-<td align="left">系统</td>
-</tr>
-<tr>
-<td align="left">-</td>
-<td align="left">hostname</td>
-<td align="left">-</td>
-<td align="left">-</td>
-<td align="left">主机</td>
-</tr>
-<tr>
-<td align="left">-</td>
-<td align="left">Process No.</td>
-<td align="left">-</td>
-<td align="left">-</td>
-<td align="left">进程号</td>
-</tr>
-<tr>
-<td align="left">-</td>
-<td align="left">language</td>
-<td align="left">-</td>
-<td align="left">-</td>
-<td align="left">语言 如 Java</td>
-</tr>
-<tr>
-<td align="left">timeBucket</td>
-<td align="left">long</td>
-<td align="left">-</td>
 <td align="left">time_bucket</td>
-<td align="left">注册时间 默认Minute YYYYMMDDHHmm</td>
-</tr>
-<tr>
-<td align="left">lastPingTimestamp</td>
 <td align="left">long</td>
-<td align="left">-</td>
-<td align="left">last_ping</td>
-<td align="left">最近一次心跳检测时间 默认Minute YYYYMMDDHHmm</td>
+<td align="left">注册时间 默认Minute YYYYMMDDHHmm 首次Span#startTime</td>
 </tr>
 <tr>
 <td align="left">id</td>
-<td align="left">long</td>
-<td align="left">-</td>
-<td align="left">es id</td>
-<td align="left">serviceId_base64(instanceName)</td>
+<td align="left">String</td>
+<td align="left">serviceId+base64(endpointName)</td>
 </tr>
 </tbody></table>
-<h3 id="Combine"><a href="#Combine" class="headerlink" title="Combine"></a>Combine</h3><ul>
-<li>更新 lastPingTimestamp</li>
-<li>更新 properties (为空不更新)</li>
-<li>更新 timeBucket 保持为首次注册时间</li>
+<h3 id="聚合-amp-比较规则-2"><a href="#聚合-amp-比较规则-2" class="headerlink" title="聚合&amp;比较规则"></a>聚合&amp;比较规则</h3><ul>
+<li>不聚合</li>
+<li>对象比较</li>
 </ul>
-<h3 id="equals-amp-amp-hashCode"><a href="#equals-amp-amp-hashCode" class="headerlink" title="equals&amp;&amp;hashCode"></a>equals&amp;&amp;hashCode</h3><ul>
-<li>serviceId + instanceName</li>
+<h3 id="采样-amp-更新规则-2"><a href="#采样-amp-更新规则-2" class="headerlink" title="采样&amp;更新规则"></a>采样&amp;更新规则</h3><ul>
+<li>不设置采样率</li>
+<li>增量插入，非增量不处理</li>
 </ul>
-<h3 id="update"><a href="#update" class="headerlink" title="update"></a>update</h3><ul>
-<li>支持更新</li>
-</ul>
-<h2 id="ServiceMeta"><a href="#ServiceMeta" class="headerlink" title="ServiceMeta"></a>ServiceMeta</h2><h3 id="Index-1"><a href="#Index-1" class="headerlink" title="Index"></a>Index</h3><ul>
-<li>service_traffic</li>
-</ul>
+<h2 id="地址映射"><a href="#地址映射" class="headerlink" title="地址映射"></a>地址映射</h2><h3 id="表名-3"><a href="#表名-3" class="headerlink" title="表名"></a>表名</h3><p><code>network_address_alias</code></p>
 <h3 id="Field-1"><a href="#Field-1" class="headerlink" title="Field"></a>Field</h3><table>
 <thead>
 <tr>
 <th align="left">字段</th>
 <th align="left">类型</th>
-<th align="left">长度</th>
-<th align="left">是否落库</th>
 <th align="left">含义</th>
 </tr>
 </thead>
 <tbody><tr>
-<td align="left">serviceName</td>
-<td align="left">String</td>
-<td align="left">默认70</td>
-<td align="left">name</td>
-<td align="left">长度配置 serviceNameMaxLength</td>
-</tr>
-<tr>
-<td align="left">nodeType</td>
-<td align="left">enum</td>
-<td align="left">1</td>
-<td align="left">node_type</td>
-<td align="left">取值 0/1</td>
-</tr>
-<tr>
-<td align="left">group</td>
-<td align="left">String</td>
-<td align="left">-</td>
-<td align="left">service_group</td>
-<td align="left">取自 serviceName 分隔符::之前</td>
-</tr>
-<tr>
-<td align="left">id</td>
-<td align="left">String</td>
-<td align="left">-</td>
-<td align="left">es id</td>
-<td align="left">base64(serviceName).(normalType 0/1)</td>
-</tr>
-</tbody></table>
-<h3 id="combine"><a href="#combine" class="headerlink" title="combine"></a>combine</h3><ul>
-<li>无</li>
-</ul>
-<h3 id="equals-amp-amp-hashCode-1"><a href="#equals-amp-amp-hashCode-1" class="headerlink" title="equals&amp;&amp;hashCode"></a>equals&amp;&amp;hashCode</h3><ul>
-<li>无</li>
-</ul>
-<h3 id="update-1"><a href="#update-1" class="headerlink" title="update"></a>update</h3><ul>
-<li>直接覆盖插入</li>
-</ul>
-<h2 id="EndpointMeta"><a href="#EndpointMeta" class="headerlink" title="EndpointMeta"></a>EndpointMeta</h2><h3 id="Index-2"><a href="#Index-2" class="headerlink" title="Index"></a>Index</h3><ul>
-<li>endpoint_traffic</li>
-</ul>
-<h3 id="Field-2"><a href="#Field-2" class="headerlink" title="Field"></a>Field</h3><table>
-<thead>
-<tr>
-<th align="left">字段</th>
-<th align="left">类型</th>
-<th align="left">长度</th>
-<th align="left">是否落库</th>
-<th align="left">含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">destEndpointName</td>
-<td align="left">String</td>
-<td align="left">默认70</td>
-<td align="left">name</td>
-<td align="left">长度配置 endpointNameMaxLength</td>
-</tr>
-<tr>
-<td align="left">serviceId</td>
-<td align="left">String</td>
-<td align="left">-</td>
-<td align="left">service_id</td>
-<td align="left">base64(serviceName).(normalType 1)</td>
-</tr>
-<tr>
-<td align="left">timeBucket</td>
-<td align="left">long</td>
-<td align="left">-</td>
-<td align="left">time_bucket</td>
-<td align="left">注册时间 默认Minute YYYYMMDDHHmm 首次Span#startTime</td>
-</tr>
-<tr>
-<td align="left">id</td>
-<td align="left">String</td>
-<td align="left">-</td>
-<td align="left">es id</td>
-<td align="left">base64(address)</td>
-</tr>
-</tbody></table>
-<h3 id="Combine-1"><a href="#Combine-1" class="headerlink" title="Combine"></a>Combine</h3><ul>
-<li>无</li>
-</ul>
-<h3 id="equals-amp-amp-hashCode-2"><a href="#equals-amp-amp-hashCode-2" class="headerlink" title="equals&amp;&amp;hashCode"></a>equals&amp;&amp;hashCode</h3><ul>
-<li>无</li>
-</ul>
-<h3 id="update-2"><a href="#update-2" class="headerlink" title="update"></a>update</h3><ul>
-<li>直接覆盖插入</li>
-</ul>
-<h2 id="NetworkAddressAliasMeta"><a href="#NetworkAddressAliasMeta" class="headerlink" title="NetworkAddressAliasMeta"></a>NetworkAddressAliasMeta</h2><h3 id="Index-3"><a href="#Index-3" class="headerlink" title="Index"></a>Index</h3><ul>
-<li>network_address_alias</li>
-</ul>
-<h3 id="Field-3"><a href="#Field-3" class="headerlink" title="Field"></a>Field</h3><table>
-<thead>
-<tr>
-<th align="left">字段</th>
-<th align="left">类型</th>
-<th align="left">长度</th>
-<th align="left">是否落库</th>
-<th align="left">含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">serviceName</td>
-<td align="left">String</td>
-<td align="left">默认70</td>
-<td align="left">-</td>
-<td align="left">长度配置 serviceNameMaxLength</td>
-</tr>
-<tr>
-<td align="left">instanceName</td>
-<td align="left">String</td>
-<td align="left">默认70</td>
-<td align="left">-</td>
-<td align="left">长度配置 instanceNameMaxLength</td>
-</tr>
-<tr>
 <td align="left">address</td>
 <td align="left">String</td>
-<td align="left">-</td>
-<td align="left">address</td>
-<td align="left">ip/hostname and port 取自Client端 即Server端EntrySpan Refs</td>
+<td align="left"></td>
 </tr>
 <tr>
-<td align="left">representServiceId</td>
-<td align="left">String</td>
-<td align="left">-</td>
 <td align="left">represent_service_id</td>
-<td align="left">base64(serviceName).(normalType 1)</td>
-</tr>
-<tr>
-<td align="left">representServiceInstanceId</td>
 <td align="left">String</td>
-<td align="left">-</td>
-<td align="left">represent_service_instance_id</td>
-<td align="left">serviceId_base64(instanceName)</td>
+<td align="left">服务ID</td>
 </tr>
 <tr>
-<td align="left">timeBucket</td>
-<td align="left">long</td>
-<td align="left">-</td>
+<td align="left">represent_service_instance_id</td>
+<td align="left">String</td>
+<td align="left">实例ID</td>
+</tr>
+<tr>
 <td align="left">time_bucket</td>
+<td align="left">long</td>
 <td align="left">注册时间 默认Minute YYYYMMDDHHmm 首次Span#startTime</td>
 </tr>
 <tr>
-<td align="left">lastUpdateTimeBucket</td>
-<td align="left">long</td>
-<td align="left">-</td>
 <td align="left">last_update_time_bucket</td>
-<td align="left">最近一次更新时间 默认Minute YYYYMMDDHHmm  每次Span#startTime</td>
+<td align="left">long</td>
+<td align="left">更新时间 默认Minute YYYYMMDDHHmm</td>
 </tr>
 <tr>
 <td align="left">id</td>
 <td align="left">String</td>
-<td align="left">-</td>
-<td align="left">es id</td>
 <td align="left">base64(address)</td>
 </tr>
 </tbody></table>
-<h3 id="Combine-2"><a href="#Combine-2" class="headerlink" title="Combine"></a>Combine</h3><ul>
-<li>更新 lastUpdateTimeBucket、representServiceInstanceId、representServiceId</li>
-<li>更新 timeBucket 保持为首次注册时间</li>
+<h3 id="聚合-amp-比较规则-3"><a href="#聚合-amp-比较规则-3" class="headerlink" title="聚合&amp;比较规则"></a>聚合&amp;比较规则</h3><ul>
+<li><code>last_update_time_bucket</code>: 取本次上传</li>
+<li><code>represent_service_id</code>: 取本次上传</li>
+<li><code>represent_service_instance_id</code>: 取本次上传</li>
+<li><code>time_bucket</code>：取库中数据，保持不变</li>
+<li>比较规则：`address</li>
 </ul>
-<h3 id="equals-amp-amp-hashCode-3"><a href="#equals-amp-amp-hashCode-3" class="headerlink" title="equals&amp;&amp;hashCode"></a>equals&amp;&amp;hashCode</h3><ul>
-<li>address</li>
-</ul>
-<h3 id="update-3"><a href="#update-3" class="headerlink" title="update"></a>update</h3><ul>
-<li>支持更新</li>
+<h3 id="采样-amp-更新规则-3"><a href="#采样-amp-更新规则-3" class="headerlink" title="采样&amp;更新规则"></a>采样&amp;更新规则</h3><ul>
+<li>不设置采样率</li>
+<li>增量插入，非增量部分更新</li>
 </ul>
 </section>
     <!-- Tags START -->
@@ -470,17 +383,17 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-BootService-%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0/">
+      <a class="nav-left" href="/2021/02/22/skywalking%E7%B3%BB%E5%88%97-%E5%85%83%E6%95%B0%E6%8D%AE%E6%94%B9%E9%80%A0/">
         <span class="nav-arrow">← </span>
         
-          skywalking系列 | BootService核心实现
+          skywalking系列 | 元数据改造
         
       </a>
     
     
-      <a class="nav-right" href="/2021/02/20/skywalking%E7%B3%BB%E5%88%97-%E9%98%9F%E5%88%97%E5%86%85%E6%A0%B8/">
+      <a class="nav-right" href="/2021/02/23/skywalking%E7%B3%BB%E5%88%97-%E6%8C%87%E6%A0%87%E6%B5%81%E5%BC%8F%E5%A4%84%E7%90%86(%E6%B3%A8%E5%86%8C%E5%BF%83%E8%B7%B3)/">
         
-          skywalking系列 | 队列内核
+          skywalking系列 | 指标流式处理(注册心跳)
         
         <span class="nav-arrow"> →</span>
       </a>
@@ -512,7 +425,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#InstanceMeta"><span class="toc-nav-text">InstanceMeta</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Index"><span class="toc-nav-text">Index</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Field"><span class="toc-nav-text">Field</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Combine"><span class="toc-nav-text">Combine</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#equals-amp-amp-hashCode"><span class="toc-nav-text">equals&amp;&amp;hashCode</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#update"><span class="toc-nav-text">update</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#ServiceMeta"><span class="toc-nav-text">ServiceMeta</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Index-1"><span class="toc-nav-text">Index</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Field-1"><span class="toc-nav-text">Field</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#combine"><span class="toc-nav-text">combine</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#equals-amp-amp-hashCode-1"><span class="toc-nav-text">equals&amp;&amp;hashCode</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#update-1"><span class="toc-nav-text">update</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#EndpointMeta"><span class="toc-nav-text">EndpointMeta</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Index-2"><span class="toc-nav-text">Index</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Field-2"><span class="toc-nav-text">Field</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Combine-1"><span class="toc-nav-text">Combine</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#equals-amp-amp-hashCode-2"><span class="toc-nav-text">equals&amp;&amp;hashCode</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#update-2"><span class="toc-nav-text">update</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#NetworkAddressAliasMeta"><span class="toc-nav-text">NetworkAddressAliasMeta</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Index-3"><span class="toc-nav-text">Index</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Field-3"><span class="toc-nav-text">Field</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Combine-2"><span class="toc-nav-text">Combine</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#equals-amp-amp-hashCode-3"><span class="toc-nav-text">equals&amp;&amp;hashCode</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#update-3"><span class="toc-nav-text">update</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%9C%8D%E5%8A%A1%E4%BF%A1%E6%81%AF"><span class="toc-nav-text">服务信息</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%A1%A8%E5%90%8D"><span class="toc-nav-text">表名</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AD%97%E6%AE%B5%E5%B1%9E%E6%80%A7"><span class="toc-nav-text">字段属性</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%81%9A%E5%90%88-amp-%E6%AF%94%E8%BE%83%E8%A7%84%E5%88%99"><span class="toc-nav-text">聚合&amp;比较规则</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%87%87%E6%A0%B7-amp-%E6%9B%B4%E6%96%B0%E8%A7%84%E5%88%99"><span class="toc-nav-text">采样&amp;更新规则</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%9E%E4%BE%8B%E4%BF%A1%E6%81%AF"><span class="toc-nav-text">实例信息</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%A1%A8%E5%90%8D-1"><span class="toc-nav-text">表名</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AD%97%E6%AE%B5%E5%B1%9E%E6%80%A7-1"><span class="toc-nav-text">字段属性</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%81%9A%E5%90%88-amp-%E6%AF%94%E8%BE%83%E8%A7%84%E5%88%99-1"><span class="toc-nav-text">聚合&amp;比较规则</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%87%87%E6%A0%B7-amp-%E6%9B%B4%E6%96%B0%E8%A7%84%E5%88%99-1"><span class="toc-nav-text">采样&amp;更新规则</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%AB%AF%E7%82%B9%E4%BF%A1%E6%81%AF"><span class="toc-nav-text">端点信息</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%A1%A8%E5%90%8D-2"><span class="toc-nav-text">表名</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Field"><span class="toc-nav-text">Field</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%81%9A%E5%90%88-amp-%E6%AF%94%E8%BE%83%E8%A7%84%E5%88%99-2"><span class="toc-nav-text">聚合&amp;比较规则</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%87%87%E6%A0%B7-amp-%E6%9B%B4%E6%96%B0%E8%A7%84%E5%88%99-2"><span class="toc-nav-text">采样&amp;更新规则</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84"><span class="toc-nav-text">地址映射</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%A1%A8%E5%90%8D-3"><span class="toc-nav-text">表名</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Field-1"><span class="toc-nav-text">Field</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%81%9A%E5%90%88-amp-%E6%AF%94%E8%BE%83%E8%A7%84%E5%88%99-3"><span class="toc-nav-text">聚合&amp;比较规则</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%87%87%E6%A0%B7-amp-%E6%9B%B4%E6%96%B0%E8%A7%84%E5%88%99-3"><span class="toc-nav-text">采样&amp;更新规则</span></a></li></ol></li></ol>
     
   </div>
 </aside>
@@ -522,7 +435,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/02/19/skywalking系列-元数据信息/';
+    var url = 'http://chenrongquan.github.com/2021/02/22/skywalking系列-元数据信息/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
