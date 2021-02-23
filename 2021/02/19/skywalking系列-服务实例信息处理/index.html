@@ -160,7 +160,7 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="Agent-ServiceManagementClient"><a href="#Agent-ServiceManagementClient" class="headerlink" title="Agent-ServiceManagementClient"></a>Agent-ServiceManagementClient</h2><h3 id="bootService-flow"><a href="#bootService-flow" class="headerlink" title="bootService flow"></a>bootService flow</h3><ul>
+    <section class="markdown-content"><h2 id="Agent-ServiceManagementClient"><a href="#Agent-ServiceManagementClient" class="headerlink" title="Agent-ServiceManagementClient"></a>Agent-ServiceManagementClient</h2><h3 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h3><ul>
 <li><p>prepare()方法</p>
 <ul>
 <li>将自身注册到GRPCChannelManager来监听网络连接状态的改变</li>
@@ -187,8 +187,8 @@
 </li>
 <li><p>V3协议 management/Management.proto</p>
 <ul>
-<li>实例注册  ManagementServiceGrpc.ManagementServiceBlockingStub#reportInstanceProperties</li>
-<li>心跳 ManagementServiceGrpc.ManagementServiceBlockingStub#keepAlive</li>
+<li>实例注册  ManagementService#reportInstanceProperties</li>
+<li>心跳 ManagementService#keepAlive</li>
 </ul>
 </li>
 </ul>
@@ -350,9 +350,9 @@
   
     <aside class="catalog-container">
   <div class="toc-main">
-    <strong class="toc-title">Catalog</strong>
+    <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Agent-ServiceManagementClient"><span class="toc-nav-text">Agent-ServiceManagementClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#bootService-flow"><span class="toc-nav-text">bootService flow</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#OAP-ManagementServiceHandler"><span class="toc-nav-text">OAP-ManagementServiceHandler</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Register-reportInstanceProperties"><span class="toc-nav-text">Register-reportInstanceProperties</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#HeartBeat-keepAlive"><span class="toc-nav-text">HeartBeat-keepAlive</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Stream"><span class="toc-nav-text">Stream</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Source-amp-amp-Dispatcher"><span class="toc-nav-text">Source&amp;&amp;Dispatcher</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#StreamModel"><span class="toc-nav-text">StreamModel</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#L1"><span class="toc-nav-text">L1</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#L2"><span class="toc-nav-text">L2</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#PersistenceModel"><span class="toc-nav-text">PersistenceModel</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#PersistenceTimer"><span class="toc-nav-text">PersistenceTimer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#data-demo"><span class="toc-nav-text">data demo</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Service"><span class="toc-nav-text">Service</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Source-amp-amp-Dispatcher-amp-amp-StreamProcessor"><span class="toc-nav-text">Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#data-demo-1"><span class="toc-nav-text">data demo</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Agent-ServiceManagementClient"><span class="toc-nav-text">Agent-ServiceManagementClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="toc-nav-text">启动流程</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#OAP-ManagementServiceHandler"><span class="toc-nav-text">OAP-ManagementServiceHandler</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Register-reportInstanceProperties"><span class="toc-nav-text">Register-reportInstanceProperties</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#HeartBeat-keepAlive"><span class="toc-nav-text">HeartBeat-keepAlive</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Stream"><span class="toc-nav-text">Stream</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Source-amp-amp-Dispatcher"><span class="toc-nav-text">Source&amp;&amp;Dispatcher</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#StreamModel"><span class="toc-nav-text">StreamModel</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#L1"><span class="toc-nav-text">L1</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#L2"><span class="toc-nav-text">L2</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#PersistenceModel"><span class="toc-nav-text">PersistenceModel</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#PersistenceTimer"><span class="toc-nav-text">PersistenceTimer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#data-demo"><span class="toc-nav-text">data demo</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Service"><span class="toc-nav-text">Service</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Source-amp-amp-Dispatcher-amp-amp-StreamProcessor"><span class="toc-nav-text">Source&amp;&amp;Dispatcher&amp;&amp;StreamProcessor</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#data-demo-1"><span class="toc-nav-text">data demo</span></a></li></ol></li></ol>
     
   </div>
 </aside>
@@ -459,9 +459,7 @@
     <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <footer class="app-footer">
     <p class="copyright">
-      &copy; 2021 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
-      <br>
-      Theme by <a target="_blank" rel="noopener" href="https://github.com/yanm1ng">yanm1ng</a>
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
     </p>
     <p id="busuanzi_container_site_pv">
       本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;

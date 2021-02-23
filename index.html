@@ -154,21 +154,53 @@
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2021/02/21/skywalking-%E5%87%A0%E7%82%B9%E7%96%91%E9%97%AE%E5%92%8C%E8%AF%B4%E6%98%8E/">skywalking-几点疑问和说明</a>
+        <a href="/2021/02/22/skywalking%E7%B3%BB%E5%88%97-%E5%85%83%E6%95%B0%E6%8D%AE%E6%94%B9%E9%80%A0/">skywalking系列 | 元数据改造</a>
       </h2>
-      <p class="article-date">February 21, 2021</p>
+      <p class="article-date">February 22, 2021</p>
       
       <div class="article-summary">
         
-          全局更新 和 部分更新 问题指定ID 全局更新 Insert
-skywalking基本都是
+          table
+sw-meta
 
-指定ID 部分更新  Update
-instance_traffice:  id规则  sericeId+base64(instanceName)
-network_address_alias：id规 ...
+fields
+
+
+字段
+类型
+必填
+含义
+
+
+
+id
+bigint
+是
+主键
+
+
+service_group
+varchar
+否
+服务组
+
+
+service_name
+varchar
+是
+服务名
+
+
+service_type
+tinyint
+是
+服务类型
+
+
+i ...
         
       </div>
-      <a class="more" href="/2021/02/21/skywalking-%E5%87%A0%E7%82%B9%E7%96%91%E9%97%AE%E5%92%8C%E8%AF%B4%E6%98%8E/">Read more</a>
+      <a class="more" href="/2021/02/22/skywalking%E7%B3%BB%E5%88%97-%E5%85%83%E6%95%B0%E6%8D%AE%E6%94%B9%E9%80%A0/">阅读全文</a>
     </article>
   
     <article class="article-card">
@@ -197,7 +229,7 @@ Buffer
 两种实现方式：ArrayBlockingQu ...
         
       </div>
-      <a class="more" href="/2021/02/20/skywalking%E7%B3%BB%E5%88%97-%E9%98%9F%E5%88%97%E5%86%85%E6%A0%B8/">Read more</a>
+      <a class="more" href="/2021/02/20/skywalking%E7%B3%BB%E5%88%97-%E9%98%9F%E5%88%97%E5%86%85%E6%A0%B8/">阅读全文</a>
     </article>
   
     <article class="article-card">
@@ -233,7 +265,7 @@ boot()方法
 初始化队列内核：CHANNEL_SIZE=3， BUFFER_SIZE= ...
         
       </div>
-      <a class="more" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E7%AB%AF%E5%8F%A3%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%86/">Read more</a>
+      <a class="more" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E7%AB%AF%E5%8F%A3%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%86/">阅读全文</a>
     </article>
   
     <article class="article-card">
@@ -286,7 +318,7 @@ String
  ...
         
       </div>
-      <a class="more" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF/">Read more</a>
+      <a class="more" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF/">阅读全文</a>
     </article>
   
     <article class="article-card">
@@ -311,14 +343,17 @@ String
       
       <div class="article-summary">
         
-          Agent-ServiceManagementClientbootService flow
+          Agent-ServiceManagementClient启动流程
 prepare()方法
 
 将自身注册到GRPCChannelManager来监听网络连接状态的改变
-生成当前InstanceName=UUID@ip 或者 Config.Agent.INSTANCE_ ...
+生成当前InstanceName=UUID@ip 或者 Config.Agent.INSTANCE_NAME指定
+
+
+boo ...
         
       </div>
-      <a class="more" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E6%9C%8D%E5%8A%A1%E5%AE%9E%E4%BE%8B%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%86/">Read more</a>
+      <a class="more" href="/2021/02/19/skywalking%E7%B3%BB%E5%88%97-%E6%9C%8D%E5%8A%A1%E5%AE%9E%E4%BE%8B%E4%BF%A1%E6%81%AF%E5%A4%84%E7%90%86/">阅读全文</a>
     </article>
   
     <article class="article-card">
@@ -344,7 +379,7 @@ GRPCChannelManager 负责维护Agent与后端OAP集群通信时使用的网络�
 GRPCChannel: gRPC客户端的核心类之一，逻辑上表示一个Channel，底层持有一个TCP链接，负责维护此连接的活性。在RPC调用的任何时机，如果检 ...
         
       </div>
-      <a class="more" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-BootService-%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0/">Read more</a>
+      <a class="more" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-BootService-%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0/">阅读全文</a>
     </article>
   
     <article class="article-card">
@@ -371,7 +406,7 @@ Java Agent是java命令的一个参数(即 -javaagent)，参数之后需要指�
 在Java虚拟机启动时，执行main()函数之前，虚拟机会先找到-javaagent命令指定jar包，然后执行 premain-class中的premain()方法 ...
         
       </div>
-      <a class="more" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-Agent%E6%8F%92%E4%BB%B6%E5%8E%9F%E7%90%86/">Read more</a>
+      <a class="more" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-Agent%E6%8F%92%E4%BB%B6%E5%8E%9F%E7%90%86/">阅读全文</a>
     </article>
   
     <article class="article-card">
@@ -398,7 +433,7 @@ Java Agent是java命令的一个参数(即 -javaagent)，参数之后需要指�
  ...
         
       </div>
-      <a class="more" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-Agent%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/">Read more</a>
+      <a class="more" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-Agent%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/">阅读全文</a>
     </article>
   
     <article class="article-card">
@@ -422,7 +457,7 @@ Java Agent是java命令的一个参数(即 -javaagent)，参数之后需要指�
           OAP存储体系(ES)非时间相关的数据(元数据与配置数据)时间相关数据
         
       </div>
-      <a class="more" href="/2021/02/16/skywalking%E7%B3%BB%E5%88%97-%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/">Read more</a>
+      <a class="more" href="/2021/02/16/skywalking%E7%B3%BB%E5%88%97-%E5%AD%98%E5%82%A8%E5%8E%9F%E7%90%86/">阅读全文</a>
     </article>
   
 
@@ -434,9 +469,7 @@ Java Agent是java命令的一个参数(即 -javaagent)，参数之后需要指�
     <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <footer class="app-footer">
     <p class="copyright">
-      &copy; 2021 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
-      <br>
-      Theme by <a target="_blank" rel="noopener" href="https://github.com/yanm1ng">yanm1ng</a>
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
     </p>
     <p id="busuanzi_container_site_pv">
       本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;

@@ -10,7 +10,7 @@
   
   <title>
      
-      skywalking-几点疑问和说明 | ™技术博客 
+      skywalking系列 | 元数据改造 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>skywalking-几点疑问和说明</h2>
-  <p class="post-date">2021-02-21</p>
+  <h2>skywalking系列 | 元数据改造</h2>
+  <p class="post-date">2021-02-22</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,34 +160,101 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="全局更新-和-部分更新-问题"><a href="#全局更新-和-部分更新-问题" class="headerlink" title="全局更新 和 部分更新 问题"></a>全局更新 和 部分更新 问题</h2><h3 id="指定ID-全局更新-Insert"><a href="#指定ID-全局更新-Insert" class="headerlink" title="指定ID 全局更新 Insert"></a>指定ID 全局更新 Insert</h3><ul>
-<li>skywalking基本都是</li>
+    <section class="markdown-content"><h2 id="table"><a href="#table" class="headerlink" title="table"></a>table</h2><ul>
+<li>sw-meta</li>
 </ul>
-<h3 id="指定ID-部分更新-Update"><a href="#指定ID-部分更新-Update" class="headerlink" title="指定ID 部分更新  Update"></a>指定ID 部分更新  Update</h3><ul>
-<li>instance_traffice:  id规则  sericeId+base64(instanceName)</li>
-<li>network_address_alias：id规则 base64(address)</li>
+<h2 id="fields"><a href="#fields" class="headerlink" title="fields"></a>fields</h2><table>
+<thead>
+<tr>
+<th align="left">字段</th>
+<th align="left">类型</th>
+<th align="left">必填</th>
+<th align="left">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">id</td>
+<td align="left">bigint</td>
+<td align="left">是</td>
+<td align="left">主键</td>
+</tr>
+<tr>
+<td align="left">service_group</td>
+<td align="left">varchar</td>
+<td align="left">否</td>
+<td align="left">服务组</td>
+</tr>
+<tr>
+<td align="left">service_name</td>
+<td align="left">varchar</td>
+<td align="left">是</td>
+<td align="left">服务名</td>
+</tr>
+<tr>
+<td align="left">service_type</td>
+<td align="left">tinyint</td>
+<td align="left">是</td>
+<td align="left">服务类型</td>
+</tr>
+<tr>
+<td align="left">instance_name</td>
+<td align="left">varchar</td>
+<td align="left">是</td>
+<td align="left">实例名</td>
+</tr>
+<tr>
+<td align="left">endpoint_name</td>
+<td align="left">varchar</td>
+<td align="left">是</td>
+<td align="left">接口名</td>
+</tr>
+<tr>
+<td align="left">address</td>
+<td align="left">varchar</td>
+<td align="left">否</td>
+<td align="left">address</td>
+</tr>
+<tr>
+<td align="left">create_time</td>
+<td align="left">timestamp</td>
+<td align="left">是</td>
+<td align="left">注册时间</td>
+</tr>
+<tr>
+<td align="left">update_time</td>
+<td align="left">timestamp</td>
+<td align="left">是</td>
+<td align="left">更新时间</td>
+</tr>
+<tr>
+<td align="left">extend</td>
+<td align="left">text</td>
+<td align="left">否</td>
+<td align="left">相关属性</td>
+</tr>
+<tr>
+<td align="left">meta_id</td>
+<td align="left">varchar</td>
+<td align="left">是</td>
+<td align="left">唯一键</td>
+</tr>
+<tr>
+<td align="left">status</td>
+<td align="left">varchar</td>
+<td align="left">是</td>
+<td align="left">状态标志位</td>
+</tr>
+<tr>
+<td align="left">is_delete</td>
+<td align="left">tinyint</td>
+<td align="left">是</td>
+<td align="left">删除标志位</td>
+</tr>
+</tbody></table>
+<h2 id="regular"><a href="#regular" class="headerlink" title="regular"></a>regular</h2><ul>
+<li>meta_id：md5(service_name + service_type + instance_name + endpoint_name)</li>
+<li>索引：(service_name,instance_name,endpoint_name)</li>
 </ul>
-<h3 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h3><blockquote>
-</blockquote>
-<ol>
-<li>好处<ul>
-<li>指定ID没有让ES自动生成ID性能好，因为ID需要查看指定的ID是否已经存在</li>
-<li></li>
-</ul>
-</li>
-<li>坏处<ul>
-<li>便于作为外部数据源输出，保持ID不变；</li>
-<li>避免数据冗余；</li>
-<li>提高性能，避免反查</li>
-</ul>
-</li>
-</ol>
-<h2 id="元数据落库时机"><a href="#元数据落库时机" class="headerlink" title="元数据落库时机"></a>元数据落库时机</h2><ol>
-<li>实例Instance信息：gRPC-oap网络连接建立之后，直接注册；更新频率300s 及 每次Segment上送更新</li>
-<li>服务Service信息：首次心跳(实例注册30s后)；更新频率30s 及 每次Segment上送更新</li>
-<li>网络信息NetworkAddressAlias：首个Segment；更新频率 每次Segment上送更新</li>
-<li>端口信息Endpoint：首个Segment；更新频率 每次Segment上送更新</li>
-</ol>
 </section>
     <!-- Tags START -->
     
@@ -230,9 +297,9 @@
   
     <aside class="catalog-container">
   <div class="toc-main">
-    <strong class="toc-title">Catalog</strong>
+    <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%85%A8%E5%B1%80%E6%9B%B4%E6%96%B0-%E5%92%8C-%E9%83%A8%E5%88%86%E6%9B%B4%E6%96%B0-%E9%97%AE%E9%A2%98"><span class="toc-nav-text">全局更新 和 部分更新 问题</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8C%87%E5%AE%9AID-%E5%85%A8%E5%B1%80%E6%9B%B4%E6%96%B0-Insert"><span class="toc-nav-text">指定ID 全局更新 Insert</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8C%87%E5%AE%9AID-%E9%83%A8%E5%88%86%E6%9B%B4%E6%96%B0-Update"><span class="toc-nav-text">指定ID 部分更新  Update</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%AF%B4%E6%98%8E"><span class="toc-nav-text">说明</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E8%90%BD%E5%BA%93%E6%97%B6%E6%9C%BA"><span class="toc-nav-text">元数据落库时机</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#table"><span class="toc-nav-text">table</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#fields"><span class="toc-nav-text">fields</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#regular"><span class="toc-nav-text">regular</span></a></li></ol>
     
   </div>
 </aside>
@@ -242,7 +309,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/02/21/skywalking-几点疑问和说明/';
+    var url = 'http://chenrongquan.github.com/2021/02/22/skywalking系列-元数据改造/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -306,7 +373,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "skywalking-几点疑问和说明",
+        id: "skywalking系列 | 元数据改造",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
@@ -339,9 +406,7 @@
     <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <footer class="app-footer">
     <p class="copyright">
-      &copy; 2021 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
-      <br>
-      Theme by <a target="_blank" rel="noopener" href="https://github.com/yanm1ng">yanm1ng</a>
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
     </p>
     <p id="busuanzi_container_site_pv">
       本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
