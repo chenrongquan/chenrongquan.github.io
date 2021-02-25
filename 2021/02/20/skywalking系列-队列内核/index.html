@@ -164,7 +164,7 @@
 <li>基于无锁环状队列，生产者-消费者 内存消息队列模型；</li>
 <li>作用是在生产者和消费者之间创建一个缓冲异步内存队列，防止因skywalking收集数据方生产数据的速度大于往后端发送数据的速度而造成数据积压和生产方阻塞</li>
 </ul>
-<h3 id="Buffer"><a href="#Buffer" class="headerlink" title="Buffer"></a>Buffer</h3><ul>
+<h3 id="Buffer"><a href="#Buffer" class="headerlink" title="Buffer"></a><code>Buffer</code></h3><ul>
 <li>两种实现方式：<code>ArrayBlockingQueueBuffer</code> 和 <code>Buffer</code> </li>
 <li>skywalking队列内核中数据的载体，队列之中的数据都存储在<code>buffer</code>中。</li>
 <li>属性<ul>
@@ -187,7 +187,7 @@
 </ul>
 </li>
 </ul>
-<h3 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a>Channel</h3><ul>
+<h3 id="Channel"><a href="#Channel" class="headerlink" title="Channel"></a><code>Channel</code></h3><ul>
 <li><code>Channel</code>是管理<code>Buffer</code>的载体</li>
 <li>属性<ul>
 <li><code>QueueBuffer&lt;T&gt;[] bufferChannels</code>：<code>Buffer</code>的数组集合，是队列内核中的数据载体</li>
@@ -205,7 +205,7 @@
 </ul>
 </li>
 </ul>
-<h3 id="DataCarrier"><a href="#DataCarrier" class="headerlink" title="DataCarrier"></a>DataCarrier</h3><ul>
+<h3 id="DataCarrier"><a href="#DataCarrier" class="headerlink" title="DataCarrier"></a><code>DataCarrier</code></h3><ul>
 <li>队列内核的门户：与skywalking其他模块进行交互</li>
 <li>初始化必须参数：<code>channelSize</code>、<code>bufferSize</code></li>
 <li>属性<ul>
@@ -215,7 +215,7 @@
 </ul>
 </li>
 </ul>
-<h2 id="实现Demo-TraceSegmentServiceClient"><a href="#实现Demo-TraceSegmentServiceClient" class="headerlink" title="实现Demo TraceSegmentServiceClient"></a>实现Demo TraceSegmentServiceClient</h2><blockquote>
+<h2 id="实现Demo-TraceSegmentServiceClient"><a href="#实现Demo-TraceSegmentServiceClient" class="headerlink" title="实现Demo TraceSegmentServiceClient"></a>实现Demo <code>TraceSegmentServiceClient</code></h2><blockquote>
 </blockquote>
 <h3 id="生产者"><a href="#生产者" class="headerlink" title="生产者"></a>生产者</h3><ul>
 <li>初始化<ul>
@@ -224,18 +224,22 @@
 <li><code>BufferStrategy = IF_POSSIBLE</code></li>
 </ul>
 </li>
+<li>队列模型<ul>
+<li>Buffer  自实现环形队列</li>
+</ul>
+</li>
 <li>生产消息<ul>
 <li><code>produce()</code>方法：调用<code>Channels#save()</code></li>
 </ul>
 </li>
 <li>数据分发：<code>dataPartitioner#partition()</code> 默认使用 <code>SimpleRollingPartitioner</code><ul>
-<li>判断当前数据应该存储在哪个<code>Buffer</code>：<code>i++ % bufferChannels.length</code></li>
+<li>判断当前数据应该存储在哪个<code>Buffer</code>：<code>i++ % channelSize</code></li>
 <li>判断当前数据应该存储在<code>buffer</code>的索引：<code>index.getAndIncrement()</code></li>
 <li>重试次数 <code>dataPartitioner.maxRetryCount()</code> 默认为 3</li>
 </ul>
 </li>
 </ul>
-<h3 id="消费管理"><a href="#消费管理" class="headerlink" title="消费管理"></a>消费管理</h3><ul>
+<h3 id="消费管理-ConsumeDriver"><a href="#消费管理-ConsumeDriver" class="headerlink" title="消费管理 ConsumeDriver"></a>消费管理 ConsumeDriver</h3><ul>
 <li><code>IConsumer</code>消费者和<code>ConsumerThread</code>线程组，按照一定的消费模式集成到一起，提供相关API。<ul>
 <li> 依赖 <code>ConsumerThread</code> 的实现是 <code>ConsumerDriver</code> </li>
 <li> 依赖 <code>MultipleChannelsConsumer</code> 的实现是 <code>BulkConsumerPool</code></li>
@@ -252,14 +256,14 @@
 <li>消费的 <code>Channels</code>、<code>ConsumerThread</code> 线程数以及两者的绑定关系一旦确定，在整个 <code>ConsumerDriver</code> 的生命周期中不会再进行变更。</li>
 </ul>
 </li>
-<li>消费线程分配逻辑 ConsumerDriver#allocateBuffer2Thread()方法<ul>
+<li>消费线程分配逻辑 <code>ConsumerDriver#allocateBuffer2Thread()</code> 方法<ul>
 <li><code>consumerThreads.length &lt; channelSize</code>：每个<code>ConsumerThread</code>线程会处理多个<code>Channel</code></li>
 <li><code>consumerThreads.length == channelSize</code>：每个<code>ConsumerThread</code>线程处理一个<code>Channel</code></li>
 <li><code>consumerThreads.length &gt; channelSize</code>：有一些消费线程就没有作用</li>
 </ul>
 </li>
 </ul>
-<h3 id="消费线程"><a href="#消费线程" class="headerlink" title="消费线程"></a>消费线程</h3><ul>
+<h3 id="消费线程-ConsumerThread"><a href="#消费线程-ConsumerThread" class="headerlink" title="消费线程 ConsumerThread"></a>消费线程 <code>ConsumerThread</code></h3><ul>
 <li>属性<ul>
 <li><code>threadName</code></li>
 <li><code>consumer</code>消费对象：<code>IConsumer</code>实例，反射新建，如<code>TraceSegmentServiceClient</code></li>
@@ -281,6 +285,42 @@
 <li>调用<code>onExit()</code>执行消费对象退出前动作</li>
 </ul>
 </li>
+</ul>
+<h2 id="实现Demo-MetricsAggregateWorker"><a href="#实现Demo-MetricsAggregateWorker" class="headerlink" title="实现Demo MetricsAggregateWorker"></a>实现Demo <code>MetricsAggregateWorker</code></h2><h3 id="生产者-1"><a href="#生产者-1" class="headerlink" title="生产者"></a>生产者</h3><ul>
+<li>初始化<ul>
+<li><code>CHANNEL_SIZE = Buffer.CHANNEL_SIZE=2</code></li>
+<li><code>BUFFER_SIZE = Buffer.BUFFER_SIZE=10000</code></li>
+<li><code>BufferStrategy = BLOCKING</code></li>
+</ul>
+</li>
+<li>队列模型<ul>
+<li><code>ArrayBlockingQueueBuffer</code>  基于 JDK <code>ArrayBlockingQueue</code></li>
+</ul>
+</li>
+<li>生产消息<ul>
+<li><code>produce()</code>方法：调用<code>Channels#save()</code></li>
+</ul>
+</li>
+<li>数据分发：<code>dataPartitioner#partition()</code> 默认使用 <code>SimpleRollingPartitioner</code><ul>
+<li><p>判断当前数据应该存储在哪个<code>Buffer</code>：<code>i++ % channelSize</code></p>
+</li>
+<li><p>判断当前数据应该存储在<code>buffer</code>的索引：<code>index.getAndIncrement()</code></p>
+<h3 id="消费管理BulkConsumePool"><a href="#消费管理BulkConsumePool" class="headerlink" title="消费管理BulkConsumePool"></a>消费管理<code>BulkConsumePool</code></h3></li>
+</ul>
+</li>
+<li>一般统一维护在 <code>ConsumerPoolFactory</code> 中</li>
+<li><code>ConsumerPoolFactory</code> 是通过枚举方式实现的单例类，其底层维护了一个 <code>Map&lt;String, ConsumerPool&gt;`` 集合，其中 Key 就是 </code>BulkConsumePool` 的名称</li>
+<li> <code>allConsumers</code> 字段（List类型）中维护了当前启动的 <code>MultipleChannelsConsumer</code> 线程</li>
+<li> <code>BulkConsumePool</code>的核心实现在其<code>add()</code>方法，通过该方法向<code>BulkConsumePool</code>添加新<code>Channels</code>以及对应 <code>IConsumer</code> 时，会通过 <code>getLowestPayload()</code>方法选择负载最低的<code>MultipleChannelsConsumer</code>线程进行处理（即当前处理<code>Group</code>最少的线程）</li>
+</ul>
+<h3 id="消费线程池MultipleChannelsConsumer"><a href="#消费线程池MultipleChannelsConsumer" class="headerlink" title="消费线程池MultipleChannelsConsumer"></a>消费线程池<code>MultipleChannelsConsumer</code></h3><ul>
+<li><code>MultipleChannelsConsumer</code> 提供了另一种消费模式，与<code>ConsumerThread</code>的区别在于：<code>MultipleChannelsConsumer</code>线程可以处理多组<code>Group</code>，每个<code>Group</code>都是<code>一个IConsumer + 一个 Channels</code>的组合<br><img src="https://s0.lgstatic.com/i/image3/M01/05/95/CgoCgV6eneaAei7OAACQCaME7Fk880.png"></li>
+<li><code>MultipleChannelsConsumer</code>可以同时消费多个<code>Group</code>，每个<code>Group</code>中的<code>IConsumer</code>对象包含了消费逻辑，<code>Channels</code>对象包含了待消费的数据</li>
+<li>一旦<code>Channels</code>被添加到<code>MultipleChannelsConsumer</code>中，将会被一个 <code>MultipleChannelsConsumer</code>完全消费，不会像<code>ConsumerThread</code>那样分区域部分消费</li>
+<li>在<code>run()</code>方法中，<code>MultipleChannelsConsumer</code>线程会定时循环遍历其消费的全部<code>Group</code>，一旦发现可消费的数据，就会循环调用<code>consume()</code>方法处理每个<code>Group</code>。</li>
+<li>底层通过一个<code>ArrayList</code>维护<code>Group</code>集合（<code>consumeTargets</code> 字段）</li>
+<li>通过 Copy-on-Write 的方式保证线程安全，即在调用<code>addNewTarget()</code>方法向 <code>consumeTargets</code>集合添加<code>Group</code>时，会创建一个新的<code>ArrayList</code>集合并拷贝原集合内容，然后向新集合中添加数据，待新集合添加完成之后，直接替换原有集合</li>
+<li>之所以这样做是因为在添加的过程中，<code>MultipleChannelsConsumer</code>线程可能正在循环处理<code>consumeTargets</code>集合，这也是<code>consumeTargets</code>用<code>volatile</code>修饰的原因<br><img src="https://s0.lgstatic.com/i/image3/M01/8B/DA/Cgq2xl6enhKADPe-AAIoMSB90P4701.png" alt="添加 Group 的核心逻辑"></li>
 </ul>
 </section>
     <!-- Tags START -->
@@ -350,7 +390,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%98%9F%E5%88%97%E5%86%85%E6%A0%B8"><span class="toc-nav-text">队列内核</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Buffer"><span class="toc-nav-text">Buffer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Channel"><span class="toc-nav-text">Channel</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#DataCarrier"><span class="toc-nav-text">DataCarrier</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%9E%E7%8E%B0Demo-TraceSegmentServiceClient"><span class="toc-nav-text">实现Demo TraceSegmentServiceClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85"><span class="toc-nav-text">生产者</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B6%88%E8%B4%B9%E7%AE%A1%E7%90%86"><span class="toc-nav-text">消费管理</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B6%88%E8%B4%B9%E7%BA%BF%E7%A8%8B"><span class="toc-nav-text">消费线程</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%98%9F%E5%88%97%E5%86%85%E6%A0%B8"><span class="toc-nav-text">队列内核</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Buffer"><span class="toc-nav-text">Buffer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Channel"><span class="toc-nav-text">Channel</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#DataCarrier"><span class="toc-nav-text">DataCarrier</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%9E%E7%8E%B0Demo-TraceSegmentServiceClient"><span class="toc-nav-text">实现Demo TraceSegmentServiceClient</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85"><span class="toc-nav-text">生产者</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B6%88%E8%B4%B9%E7%AE%A1%E7%90%86-ConsumeDriver"><span class="toc-nav-text">消费管理 ConsumeDriver</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B6%88%E8%B4%B9%E7%BA%BF%E7%A8%8B-ConsumerThread"><span class="toc-nav-text">消费线程 ConsumerThread</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%9E%E7%8E%B0Demo-MetricsAggregateWorker"><span class="toc-nav-text">实现Demo MetricsAggregateWorker</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%94%9F%E4%BA%A7%E8%80%85-1"><span class="toc-nav-text">生产者</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B6%88%E8%B4%B9%E7%AE%A1%E7%90%86BulkConsumePool"><span class="toc-nav-text">消费管理BulkConsumePool</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B6%88%E8%B4%B9%E7%BA%BF%E7%A8%8B%E6%B1%A0MultipleChannelsConsumer"><span class="toc-nav-text">消费线程池MultipleChannelsConsumer</span></a></li></ol></li></ol>
     
   </div>
 </aside>
