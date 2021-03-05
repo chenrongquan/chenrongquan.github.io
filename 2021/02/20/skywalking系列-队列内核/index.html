@@ -239,7 +239,7 @@
 </ul>
 </li>
 </ul>
-<h3 id="消费管理-ConsumeDriver"><a href="#消费管理-ConsumeDriver" class="headerlink" title="消费管理 ConsumeDriver"></a>消费管理 ConsumeDriver</h3><ul>
+<h3 id="消费管理-ConsumeDriver"><a href="#消费管理-ConsumeDriver" class="headerlink" title="消费管理 ConsumeDriver"></a>消费管理 <code>ConsumeDriver</code></h3><ul>
 <li><code>IConsumer</code>消费者和<code>ConsumerThread</code>线程组，按照一定的消费模式集成到一起，提供相关API。<ul>
 <li> 依赖 <code>ConsumerThread</code> 的实现是 <code>ConsumerDriver</code> </li>
 <li> 依赖 <code>MultipleChannelsConsumer</code> 的实现是 <code>BulkConsumerPool</code></li>
@@ -309,7 +309,7 @@
 </ul>
 </li>
 <li>一般统一维护在 <code>ConsumerPoolFactory</code> 中</li>
-<li><code>ConsumerPoolFactory</code> 是通过枚举方式实现的单例类，其底层维护了一个 <code>Map&lt;String, ConsumerPool&gt;`` 集合，其中 Key 就是 </code>BulkConsumePool` 的名称</li>
+<li><code>ConsumerPoolFactory</code> 是通过枚举方式实现的单例类，其底层维护了一个 <code>Map&lt;String, ConsumerPool&gt;</code>集合，其中Key就是 <code>BulkConsumePool</code>的名称</li>
 <li> <code>allConsumers</code> 字段（List类型）中维护了当前启动的 <code>MultipleChannelsConsumer</code> 线程</li>
 <li> <code>BulkConsumePool</code>的核心实现在其<code>add()</code>方法，通过该方法向<code>BulkConsumePool</code>添加新<code>Channels</code>以及对应 <code>IConsumer</code> 时，会通过 <code>getLowestPayload()</code>方法选择负载最低的<code>MultipleChannelsConsumer</code>线程进行处理（即当前处理<code>Group</code>最少的线程）</li>
 </ul>
