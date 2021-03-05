@@ -261,6 +261,24 @@
 <li>某个消费者消费到 Partition 的哪个位置（offset）的相关信息，是 Consumer 自己维护的。<br><img src="https://s0.lgstatic.com/i/image/M00/2F/7E/Ciqc1F8G-SeAbrU5AAAzthf0-to945.png"></li>
 <li>这样设计非常巧妙，避免了Kafka Server端维护消费者消费位置的开销，尤其是在消费数量较多的情况下。</li>
 <li>另一方面，如果是由 Kafka Server 端管理每个 Consumer 消费状态，一旦 Kafka Server 端出现延或是消费状态丢失时，将会影响大量的 Consumer。</li>
+<li>这一设计也提高了 Consumer的灵活性，Consumer可以按照自己需要的顺序和模式拉取消息进行消费。<ul>
+<li>例如：Consumer可以通过修改其消费的位置实现针对某些特殊key的消息进行反复消费，或是跳过某些消息的需求。</li>
+</ul>
+</li>
+</ul>
+<h3 id="Consumer-Group"><a href="#Consumer-Group" class="headerlink" title="Consumer Group"></a>Consumer Group</h3><ul>
+<li>在 Kafka中，多个Consumer可以组成一个ConsumerGroup，一个Consumer只能属于一个Consumer Group</li>
+<li>Consumer Group保证其订阅的Topic的每个Partition只被分配给此Consumer Group中的一个消费者处理</li>
+<li>如果不同 Consumer Group 订阅了同一 Topic，Consumer Group 彼此之间不会干扰。<ul>
+<li>要实现一个消息可以被多个 Consumer 同时消费（“广播”）的效果;则将每个 Consumer 放入单独的一个 Consumer Group；</li>
+<li>如果要实现一个消息只被一个 Consumer 消费（“独占”）的效果，则将所有的 Consumer 放入一个 Consumer Group 中。</li>
+</ul>
+</li>
+<li>在 Kafka 官网的介绍中，将 Consumer Group 称为“逻辑上的订阅者”（logical subscriber）<br><img src="https://s0.lgstatic.com/i/image/M00/2F/7E/Ciqc1F8G-TOAJ2cnAABuLTyumCs642.png"></li>
+<li>Consumer Group 除了实现“独占”和“广播”模式的消息处理外，Kafka 还通过 Consumer Group 实现了消费者的水平扩展和故障转移。</li>
+<li>当 Consumer3 的处理能力不足以处理两个 Partition 中的数据时，可以通过向 Consumer Group 中添加消费者的方式，触发Rebalance 操作重新分配 Partition 与 Consumer 的对应关系，从而实现水平扩展。<br><img src="https://s0.lgstatic.com/i/image/M00/2F/89/CgqCHl8G-T2AAoDPAAB37LzFH3w280.png"></li>
+<li>Consumer 出现故障的场景，当 Consumer4 宕机时，Consumer Group 会自动重新分配 Partition<br><img src="https://s0.lgstatic.com/i/image/M00/2F/7E/Ciqc1F8G-UuASSRJAABvDdSbF40361.png"></li>
+<li>注意，Consumer Group 中消费者的数量并不是越多越好，当消费者数量超过 Partition 的数量时，会导致有 Consumer 分配不到 Partition，从而造成 Consumer 的浪费。</li>
 </ul>
 <h2 id="设计原则"><a href="#设计原则" class="headerlink" title="设计原则"></a>设计原则</h2><h3 id="ISR-amp-Leader-Replica-amp-Follower-Replica"><a href="#ISR-amp-Leader-Replica-amp-Follower-Replica" class="headerlink" title="ISR&amp;Leader Replica&amp;Follower Replica"></a>ISR&amp;Leader Replica&amp;Follower Replica</h3><ul>
 <li>为什么Kafka要这么设计？在分布式存储中，冗余备份是常见的一种设计，常用的方案有同步复制和异步复制：<ul>
@@ -280,6 +298,13 @@
 <li>值得注意是，Follower Replica 可以批量地从 Leader Replica复制消息，这就加快了网络 I/O，Follower Replica 在更新消息时是批量写磁盘，加速了磁盘的I/O，极大减少了Follower 与 Leader 的差距。</li>
 </ul>
 </li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><img src="https://s0.lgstatic.com/i/image/M00/2F/4D/Ciqc1F8GxJWAWTtSAAKDvoKBlPU986.png"></p>
+<ul>
+<li>Producer 会根据业务逻辑产生消息，之后根据路由规则将消息发送到指定的分区的 Leader Replica 所在的 Broker 上。</li>
+<li>在 Kafka 服务端接收到消息后，会将消息追加到 Leader Replica 的 Log 中保存，之后 Follower Replica 会与 Leader Replica 进行同步，当 ISR 集合中所有 Replica 都完成了此消息的同步之后，则 Leader Replica 的 HW 会增加，并向 Producer 返回响应。</li>
+<li>当 Consumer 加入 Consumer Group 时，会触发 Rebalance 操作将 Partition 分配给不同的 Consumer 进行消费。</li>
+<li>随后，Consumer 会确定其消费的位置，并向 Kafka 集群发送拉取消息的请求，Leader Replica会验证请求的offset以及其他相关信息，然后批量返回消息。</li>
 </ul>
 </section>
     <!-- Tags START -->
@@ -334,7 +359,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-nav-text">整体架构</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="toc-nav-text">核心概念</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B6%88%E6%81%AF"><span class="toc-nav-text">消息</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Producer"><span class="toc-nav-text">Producer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Broker"><span class="toc-nav-text">Broker</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Topic"><span class="toc-nav-text">Topic</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Partition"><span class="toc-nav-text">Partition</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Log"><span class="toc-nav-text">Log</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%BF%9D%E7%95%99%E7%AD%96%E7%95%A5%EF%BC%88Retention-Policy%EF%BC%89"><span class="toc-nav-text">保留策略（Retention Policy）</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%97%A5%E5%BF%97%E5%8E%8B%E7%BC%A9%EF%BC%88Log-Compaction%EF%BC%89"><span class="toc-nav-text">日志压缩（Log Compaction）</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Replica%E5%89%AF%E6%9C%AC"><span class="toc-nav-text">Replica副本</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ISR-%E9%9B%86%E5%90%88"><span class="toc-nav-text">ISR 集合</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#HW"><span class="toc-nav-text">HW</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#LEO"><span class="toc-nav-text">LEO</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Cluster-amp-Controller"><span class="toc-nav-text">Cluster&amp;Controller</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Consumer"><span class="toc-nav-text">Consumer</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="toc-nav-text">设计原则</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ISR-amp-Leader-Replica-amp-Follower-Replica"><span class="toc-nav-text">ISR&amp;Leader Replica&amp;Follower Replica</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="toc-nav-text">整体架构</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5"><span class="toc-nav-text">核心概念</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B6%88%E6%81%AF"><span class="toc-nav-text">消息</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Producer"><span class="toc-nav-text">Producer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Broker"><span class="toc-nav-text">Broker</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Topic"><span class="toc-nav-text">Topic</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Partition"><span class="toc-nav-text">Partition</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Log"><span class="toc-nav-text">Log</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%BF%9D%E7%95%99%E7%AD%96%E7%95%A5%EF%BC%88Retention-Policy%EF%BC%89"><span class="toc-nav-text">保留策略（Retention Policy）</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%97%A5%E5%BF%97%E5%8E%8B%E7%BC%A9%EF%BC%88Log-Compaction%EF%BC%89"><span class="toc-nav-text">日志压缩（Log Compaction）</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Replica%E5%89%AF%E6%9C%AC"><span class="toc-nav-text">Replica副本</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ISR-%E9%9B%86%E5%90%88"><span class="toc-nav-text">ISR 集合</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#HW"><span class="toc-nav-text">HW</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#LEO"><span class="toc-nav-text">LEO</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Cluster-amp-Controller"><span class="toc-nav-text">Cluster&amp;Controller</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Consumer"><span class="toc-nav-text">Consumer</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Consumer-Group"><span class="toc-nav-text">Consumer Group</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="toc-nav-text">设计原则</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ISR-amp-Leader-Replica-amp-Follower-Replica"><span class="toc-nav-text">ISR&amp;Leader Replica&amp;Follower Replica</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-text">总结</span></a></li></ol>
     
   </div>
 </aside>
