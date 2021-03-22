@@ -302,12 +302,12 @@
 </ul>
 </li>
 <li>数据分发：<code>dataPartitioner#partition()</code> 默认使用 <code>SimpleRollingPartitioner</code><ul>
-<li><p>判断当前数据应该存储在哪个<code>Buffer</code>：<code>i++ % channelSize</code></p>
-</li>
-<li><p>判断当前数据应该存储在<code>buffer</code>的索引：<code>index.getAndIncrement()</code>  </p>
-<h3 id="消费管理BulkConsumePool"><a href="#消费管理BulkConsumePool" class="headerlink" title="消费管理BulkConsumePool"></a>消费管理<code>BulkConsumePool</code></h3></li>
+<li>判断当前数据应该存储在哪个<code>Buffer</code>：<code>i++ % channelSize</code></li>
+<li>判断当前数据应该存储在<code>buffer</code>的索引：<code>index.getAndIncrement()</code>  </li>
 </ul>
 </li>
+</ul>
+<h3 id="消费管理BulkConsumePool"><a href="#消费管理BulkConsumePool" class="headerlink" title="消费管理BulkConsumePool"></a>消费管理<code>BulkConsumePool</code></h3><ul>
 <li>一般统一维护在 <code>ConsumerPoolFactory</code> 中</li>
 <li><code>ConsumerPoolFactory</code> 是通过枚举方式实现的单例类，其底层维护了一个 <code>Map&lt;String, ConsumerPool&gt;</code>集合，其中Key就是 <code>BulkConsumePool</code>的名称</li>
 <li> <code>allConsumers</code> 字段（List类型）中维护了当前启动的 <code>MultipleChannelsConsumer</code> 线程</li>
