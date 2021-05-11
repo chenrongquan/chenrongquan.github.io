@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      apm系列 | 存储核心字段说明.md | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>apm系列 | 存储核心字段说明.md</h2>
+  <p class="post-date">2021年5月11日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="ES索引模板"><a href="#ES索引模板" class="headerlink" title="ES索引模板"></a>ES索引模板</h2><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;order&quot;</span> : <span class="number">0</span>,</span><br><span class="line">  <span class="attr">&quot;index_patterns&quot;</span> : [</span><br><span class="line">    <span class="string">&quot;apm_record-*&quot;</span>,</span><br><span class="line">    <span class="string">&quot;apm_metrics-*&quot;</span>,</span><br><span class="line">    <span class="string">&quot;*_apm_record-*&quot;</span>,</span><br><span class="line">    <span class="string">&quot;*_apm_metrics-*&quot;</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">&quot;settings&quot;</span> : &#123;</span><br><span class="line">    <span class="attr">&quot;number_of_shards&quot;</span> : <span class="string">&quot;1&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;number_of_replicas&quot;</span> : <span class="string">&quot;1&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;refresh_interval&quot;</span> : <span class="string">&quot;10s&quot;</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">&quot;mappings&quot;</span> : &#123;</span><br><span class="line">    <span class="attr">&quot;dynamic_templates&quot;</span> : [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">&quot;strings&quot;</span>: &#123;</span><br><span class="line">          <span class="attr">&quot;match&quot;</span> : <span class="string">&quot;*&quot;</span>,</span><br><span class="line">          <span class="attr">&quot;match_mapping_type&quot;</span> : <span class="string">&quot;string&quot;</span>,</span><br><span class="line">          <span class="attr">&quot;mapping&quot;</span> : &#123;</span><br><span class="line">            <span class="attr">&quot;type&quot;</span> : <span class="string">&quot;keyword&quot;</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ],</span><br><span class="line">    <span class="attr">&quot;properties&quot;</span> : &#123;</span><br><span class="line">      <span class="attr">&quot;@timestamp&quot;</span> : &#123;</span><br><span class="line">        <span class="attr">&quot;type&quot;</span> : <span class="string">&quot;date&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;format&quot;</span>: <span class="string">&quot;epoch_millis&quot;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">&quot;data&quot;</span> : &#123;</span><br><span class="line">        <span class="attr">&quot;type&quot;</span> : <span class="string">&quot;text&quot;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">&quot;message&quot;</span> : &#123;</span><br><span class="line">        <span class="attr">&quot;type&quot;</span> : <span class="string">&quot;text&quot;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">&quot;statement&quot;</span> : &#123;</span><br><span class="line">        <span class="attr">&quot;type&quot;</span> : <span class="string">&quot;text&quot;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">&quot;stack&quot;</span> : &#123;</span><br><span class="line">        <span class="attr">&quot;type&quot;</span> : <span class="string">&quot;text&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="ES索引表"><a href="#ES索引表" class="headerlink" title="ES索引表"></a>ES索引表</h2><ul>
+<li>明细：apm_record-yyyyMMdd</li>
+<li>指标：apm_metrics-yyyyMMdd</li>
+</ul>
+<blockquote>
+<p>注：按天存储</p>
+</blockquote>
+<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><hr>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>segment_record</td>
+<td>Segment明细</td>
+</tr>
+<tr>
+<td>trans_slow_record</td>
+<td>慢事务明细</td>
+</tr>
+<tr>
+<td>db_slow_record</td>
+<td>慢sql明细</td>
+</tr>
+<tr>
+<td>browser_error_log_record</td>
+<td>浏览器错误日志明细</td>
+</tr>
+<tr>
+<td>alarm_message_record</td>
+<td>告警明细</td>
+</tr>
+<tr>
+<td>thread_snapshot_record</td>
+<td>性能剖析明细</td>
+</tr>
+<tr>
+<td>alarm_message_record</td>
+<td>告警明细</td>
+</tr>
+<tr>
+<td>trace_metrics</td>
+<td>指标明细</td>
+</tr>
+<tr>
+<td>slow_trans_metrics</td>
+<td>慢事务性能指标</td>
+</tr>
+<tr>
+<td>db_metrics</td>
+<td>数据库性能指标</td>
+</tr>
+<tr>
+<td>slow_page_metrics</td>
+<td>慢页面性能指标</td>
+</tr>
+<tr>
+<td>browser_pref_metrics</td>
+<td>浏览器性能指标</td>
+</tr>
+</tbody></table>
+<h2 id="核心字段说明"><a href="#核心字段说明" class="headerlink" title="核心字段说明"></a>核心字段说明</h2><hr>
+<h3 id="基础字段"><a href="#基础字段" class="headerlink" title="基础字段"></a>基础字段</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>service</td>
+<td>string</td>
+<td>服务名</td>
+</tr>
+<tr>
+<td>instance</td>
+<td>string</td>
+<td>实例名  hostname@ip</td>
+</tr>
+<tr>
+<td>endpoint</td>
+<td>string</td>
+<td>端点</td>
+</tr>
+<tr>
+<td>start_time</td>
+<td>long</td>
+<td>开始时间</td>
+</tr>
+<tr>
+<td>end_time</td>
+<td>long</td>
+<td>结束时间</td>
+</tr>
+<tr>
+<td>data</td>
+<td>string</td>
+<td>Agent原始数据</td>
+</tr>
+<tr>
+<td>type</td>
+<td>string</td>
+<td>数据类型</td>
+</tr>
+<tr>
+<td>@timestamp</td>
+<td>long</td>
+<td>时间戳</td>
+</tr>
+<tr>
+<td>stack</td>
+<td>string</td>
+<td>堆栈(暂无)</td>
+</tr>
+<tr>
+<td>tags</td>
+<td>string</td>
+<td>自定义标签</td>
+</tr>
+</tbody></table>
+<h3 id="指标字段-普通Http调用"><a href="#指标字段-普通Http调用" class="headerlink" title="指标字段(普通Http调用)"></a>指标字段(普通Http调用)</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>latency</td>
+<td>int</td>
+<td>延迟耗时</td>
+</tr>
+<tr>
+<td>is_error</td>
+<td>int</td>
+<td>异常标识 0/1</td>
+</tr>
+<tr>
+<td>source_service</td>
+<td>string</td>
+<td>调用方</td>
+</tr>
+<tr>
+<td>source_instance</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td>source_endpoint</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td>dest_service</td>
+<td>string</td>
+<td>接收方</td>
+</tr>
+<tr>
+<td>dest_instance</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td>dest_endpoint</td>
+<td>string</td>
+<td></td>
+</tr>
+<tr>
+<td>detect_point</td>
+<td>string</td>
+<td>采集端 client/server</td>
+</tr>
+<tr>
+<td>component_name</td>
+<td>string</td>
+<td>组件名</td>
+</tr>
+<tr>
+<td>protocol</td>
+<td>string</td>
+<td>请求协议</td>
+</tr>
+<tr>
+<td>total_trans</td>
+<td>long</td>
+<td>总请求数</td>
+</tr>
+<tr>
+<td>total_succ_trans</td>
+<td>long</td>
+<td>成功请求数</td>
+</tr>
+<tr>
+<td>total_latency</td>
+<td>long</td>
+<td>总耗时</td>
+</tr>
+<tr>
+<td>statisfied_trans</td>
+<td>long</td>
+<td>满意请求数</td>
+</tr>
+<tr>
+<td>tolerating_trans</td>
+<td>long</td>
+<td>可容忍请求数</td>
+</tr>
+<tr>
+<td>max_latency</td>
+<td>long</td>
+<td>最大耗时</td>
+</tr>
+<tr>
+<td>total_slow_trans</td>
+<td>long</td>
+<td>慢请求数</td>
+</tr>
+</tbody></table>
+<h3 id="指标字段-数据库相关"><a href="#指标字段-数据库相关" class="headerlink" title="指标字段(数据库相关)"></a>指标字段(数据库相关)</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>db_service</td>
+<td>string</td>
+<td>DB实例 ip:port</td>
+</tr>
+<tr>
+<td>db_name</td>
+<td>string</td>
+<td>DB库名</td>
+</tr>
+<tr>
+<td>table_name</td>
+<td>string</td>
+<td>表名</td>
+</tr>
+<tr>
+<td>db_type</td>
+<td>string</td>
+<td>数据库类型</td>
+</tr>
+<tr>
+<td>operation</td>
+<td>string</td>
+<td>操作类型</td>
+</tr>
+<tr>
+<td>statement</td>
+<td>string</td>
+<td>SQL语句</td>
+</tr>
+<tr>
+<td>total_trans</td>
+<td>long</td>
+<td>总请求数</td>
+</tr>
+<tr>
+<td>total_succ_trans</td>
+<td>long</td>
+<td>成功请求数</td>
+</tr>
+<tr>
+<td>total_latency</td>
+<td>long</td>
+<td>总耗时</td>
+</tr>
+<tr>
+<td>statisfied_trans</td>
+<td>long</td>
+<td>满意请求数</td>
+</tr>
+<tr>
+<td>tolerating_trans</td>
+<td>long</td>
+<td>可容忍请求数</td>
+</tr>
+<tr>
+<td>max_latency</td>
+<td>long</td>
+<td>最大耗时</td>
+</tr>
+</tbody></table>
+<h3 id="指标字段-浏览器相关"><a href="#指标字段-浏览器相关" class="headerlink" title="指标字段(浏览器相关)"></a>指标字段(浏览器相关)</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>unique_id</td>
+<td>string</td>
+<td>请求唯一标识</td>
+</tr>
+<tr>
+<td>service</td>
+<td>string</td>
+<td>浏览器名</td>
+</tr>
+<tr>
+<td>service_name</td>
+<td>string</td>
+<td>浏览器版本</td>
+</tr>
+<tr>
+<td>page_path</td>
+<td>string</td>
+<td>页面访问路径</td>
+</tr>
+<tr>
+<td>message</td>
+<td>string</td>
+<td>错误日志</td>
+</tr>
+<tr>
+<td>error_catagory</td>
+<td>string</td>
+<td>错误类型</td>
+</tr>
+<tr>
+<td>total_dns_time</td>
+<td>long</td>
+<td>总DNS耗时(毫秒)</td>
+</tr>
+<tr>
+<td>total_tcp_time</td>
+<td>long</td>
+<td>总TCP耗时(毫秒)</td>
+</tr>
+<tr>
+<td>total_trans_time</td>
+<td>long</td>
+<td>总事务耗时(毫秒)</td>
+</tr>
+<tr>
+<td>total_dom_analysis_time</td>
+<td>long</td>
+<td>总Dom解析耗时(毫秒)</td>
+</tr>
+<tr>
+<td>total_load_page_time</td>
+<td>long</td>
+<td>总页面加载耗时(毫秒)</td>
+</tr>
+<tr>
+<td>total_page_views</td>
+<td>long</td>
+<td>总页面访问量pv</td>
+</tr>
+</tbody></table>
+</section>
+    <!-- Tags START -->
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/03/21/kafka%E7%B3%BB%E5%88%97-Spring-KafkaListener%E5%8A%A8%E6%80%81%E6%89%A9%E5%B1%95/">
+        <span class="nav-arrow">← </span>
+        
+          kafka系列 | Spring KafkaListener动态扩展
+        
+      </a>
+    
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#ES%E7%B4%A2%E5%BC%95%E6%A8%A1%E6%9D%BF"><span class="toc-nav-text">ES索引模板</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#ES%E7%B4%A2%E5%BC%95%E8%A1%A8"><span class="toc-nav-text">ES索引表</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-nav-text">数据类型</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%A0%B8%E5%BF%83%E5%AD%97%E6%AE%B5%E8%AF%B4%E6%98%8E"><span class="toc-nav-text">核心字段说明</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%9F%BA%E7%A1%80%E5%AD%97%E6%AE%B5"><span class="toc-nav-text">基础字段</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8C%87%E6%A0%87%E5%AD%97%E6%AE%B5-%E6%99%AE%E9%80%9AHttp%E8%B0%83%E7%94%A8"><span class="toc-nav-text">指标字段(普通Http调用)</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8C%87%E6%A0%87%E5%AD%97%E6%AE%B5-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9B%B8%E5%85%B3"><span class="toc-nav-text">指标字段(数据库相关)</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8C%87%E6%A0%87%E5%AD%97%E6%AE%B5-%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9B%B8%E5%85%B3"><span class="toc-nav-text">指标字段(浏览器相关)</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/05/11/apm系列-存储核心字段说明/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "apm系列 | 存储核心字段说明.md",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
