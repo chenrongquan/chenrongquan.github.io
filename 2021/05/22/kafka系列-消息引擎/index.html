@@ -165,16 +165,16 @@
 </blockquote>
 <h2 id="Apache-Kafka"><a href="#Apache-Kafka" class="headerlink" title="Apache Kafka"></a>Apache Kafka</h2><ul>
 <li>开源的消息引擎系统<code>Messaging System</code><ul>
-<li>消息引擎系统是一组规范。企业利用这组规范在不同系统之间传递语义准确的消息，实现松耦合的异步式数据传递 (<code>参考维基百科</code>)</li>
+<li>消息引擎系统是一组规范。企业利用这组规范在不同系统之间传递语义准确的消息，实现松耦合的异步式数据传递  <code>参考维基百科</code></li>
 <li>通俗版：系统 A 发送消息给消息引擎系统，系统 B 从消息引擎系统中读取 A 发送的消息</li>
 </ul>
 </li>
-<li>基本包含事实<ul>
+<li>消息引擎基本要求<ul>
 <li>消息引擎传输的对象是消息；</li>
 <li>如何传输消息属于消息引擎设计机制的一部分。</li>
 </ul>
 </li>
-<li>消息协议<ul>
+<li>消息编码格式<ul>
 <li>纯二进制的字节序列</li>
 </ul>
 </li>
@@ -198,50 +198,7 @@
 <li>发布订阅的对象；承载消息的逻辑容器</li>
 </ul>
 </li>
-<li>生产者：Producer<ul>
-<li>向主题发布消息的客户端应用程序</li>
-</ul>
-</li>
-<li>消费者：Consumer<ul>
-<li>订阅主题消息的客户端应用程序</li>
-</ul>
-</li>
-<li>客户端：Clients<ul>
-<li>生产者+消费者</li>
-</ul>
-</li>
-<li>服务端：Broker<ul>
-<li>一个Kafka集群由多个Broker组成</li>
-<li>服务代理节点，Kafka服务实例。</li>
-<li>Broker负责接收和处理客户端发送过来的请求，以及对消息进行持久化</li>
-<li>Broker一般是分布式部署，实现高可用</li>
-</ul>
-</li>
-<li>备份机制：Replication</li>
-<li>副本：Replica<ul>
-<li>Kafka 中同一条消息能够被拷贝到多个地方以提供数据冗余，这些地方就是所谓的副本。</li>
-<li>replica 包含两种类型：leader 副本、follower副本，</li>
-<li>领导者副本 Leader Replica：对外提供服务</li>
-<li>追随者副本 Follow Replica：被动的追随领导者副本，不会对外提供服务<blockquote>
-<p>一个partition拥有多个replica，提高容灾能力。</p>
-</blockquote>
-</li>
-</ul>
-</li>
-<li>副本工作机制<ul>
-<li>生产者总是向领导者副本写消息；而消费者总是从领导者副本读消息。</li>
-<li>追随者副本，它只做一件事：向领导者副本发送请求，请求领导者把最新生产的消息发给它，这样它能保持与领导者的同步。</li>
-<li>副本是在分区层级下的，即每个分区可配置多个副本实现高可用</li>
-<li>leader副本负责读写请求，follower 副本负责同步leader副本消息，通过副本选举实现故障转移。</li>
-</ul>
-</li>
-<li>Kafka追随者副本不对外提供服务的意义<ul>
-<li>如果允许follower副本对外提供读服务（主写从读），首先会存在数据一致性的问题，消息从主节点同步到从节点需要时间，可能造成主从节点的数据不一致。</li>
-<li>主写从读无非就是为了减轻leader节点的压力，将读请求的负载均衡到follower节点，如果Kafka的分区相对均匀地分散到各个broker上，同样可以达到负载均衡的效果，没必要刻意实现主写从读增加代码实现的复杂程度</li>
-</ul>
-</li>
-<li>伸缩性 Scalability</li>
-<li>分区Partitioning<ul>
+<li>分区：Partition<ul>
 <li>一个有序不变的消息序列。每个主题下可以有多个分区。</li>
 <li>等同于 Sharding Region</li>
 <li>Kafka 中的分区机制指的是将每个主题划分成多个分区（Partition），每个分区是一组有序的消息日志。</li>
@@ -253,7 +210,25 @@
 </li>
 </ul>
 </li>
-<li>分区位移：Offset<ul>
+<li>副本：Replica<ul>
+<li>Kafka 中同一条消息能够被拷贝到多个地方以提供数据冗余，这些地方就是所谓的副本。</li>
+<li>replica 包含两种类型：leader 副本、follower副本，</li>
+<li>领导者副本 Leader Replica：对外提供服务</li>
+<li>追随者副本 Follow Replica：被动的追随领导者副本，不会对外提供服务<blockquote>
+<p>一个partition拥有多个replica，提高容灾能力。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>生产者：Producer<ul>
+<li>向主题发布消息的客户端应用程序</li>
+</ul>
+</li>
+<li>消费者：Consumer<ul>
+<li>订阅主题消息的客户端应用程序</li>
+</ul>
+</li>
+<li>消息位移：Offset<ul>
 <li>分区中每条消息的位置信息，是一个单调递增且不变的值</li>
 <li>生产者向分区写入消息，每条消息在分区中的位置信息由一个叫位移（Offset）的数据来表征</li>
 <li>分区位移总是从 0 开始</li>
@@ -269,20 +244,53 @@
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&gt; ./kafka-consumer-groups.sh --bootstrap-server 192.168.87.102:9092 --group testgroup --describe</span><br><span class="line">TOPIC PARTITION CURRENT-OFFSET LOG-END-OFFSET LAG </span><br><span class="line">test1 0         0               0             0 </span><br><span class="line">test1 2         1               2             1 </span><br><span class="line">test1 1         1               1             0</span><br><span class="line"></span><br><span class="line"><span class="comment"># CURRENT-OFFSET表示当前分区消费到的Offset </span></span><br><span class="line"><span class="comment"># LOG-END-OFFSET表示当前分区的最大Offset</span></span><br><span class="line"><span class="comment"># LAG表示未消费的数量</span></span><br></pre></td></tr></table></figure>
 <ul>
-<li>消费者组：Consumer Group<ul>
+<li><p>消费者组：Consumer Group</p>
+<ul>
 <li>多个消费者实例共同组成的一个组，同时消费多个分区以实现高吞吐。<blockquote>
 <p>消费topic 的消息， 一个topic 可以让若干个consumer消费，若干个consumer组成一个 consumer group ，一条消息只能被consumer group 中一个consumer消费，若干个partition 被若干个consumer 同时消费，达到消费者高吞吐量</p>
 </blockquote>
 </li>
 </ul>
 </li>
-</ul>
+<li><p>重平衡：Rebalance</p>
 <ul>
-<li>重平衡：Rebalance<ul>
-<li>消费者组内某个消费者实例挂掉后，其他消费者实例自动重新分配订阅主题分区的过程。Rebalance 是 Kafka 消费者端实现高可用的重要手段</li>
+<li>消费者组内某个消费者实例挂掉后，其他消费者实例自动重新分配订阅主题分区的过程。</li>
+<li>Rebalance 是 Kafka 消费者端实现高可用的重要手段</li>
 </ul>
 </li>
+<li><p>客户端：Clients</p>
+<ul>
+<li>生产者+消费者</li>
 </ul>
+</li>
+<li><p>服务端：Broker</p>
+<ul>
+<li>一个Kafka集群由多个Broker组成</li>
+<li>服务代理节点，Kafka服务实例。</li>
+<li>Broker负责接收和处理客户端发送过来的请求，以及对消息进行持久化</li>
+<li>Broker一般是分布式部署，实现高可用</li>
+</ul>
+</li>
+<li><p>备份机制：Replication</p>
+</li>
+<li><p>副本工作机制</p>
+<ul>
+<li>生产者总是向领导者副本写消息；而消费者总是从领导者副本读消息。</li>
+<li>追随者副本，它只做一件事：向领导者副本发送请求，请求领导者把最新生产的消息发给它，这样它能保持与领导者的同步。</li>
+<li>副本是在分区层级下的，即每个分区可配置多个副本实现高可用</li>
+<li>leader副本负责读写请求，follower 副本负责同步leader副本消息，通过副本选举实现故障转移。</li>
+</ul>
+</li>
+<li><p>Kafka追随者副本不对外提供服务的意义</p>
+<ul>
+<li>如果允许follower副本对外提供读服务（主写从读），首先会存在数据一致性的问题，消息从主节点同步到从节点需要时间，可能造成主从节点的数据不一致。</li>
+<li>主写从读无非就是为了减轻leader节点的压力，将读请求的负载均衡到follower节点，如果Kafka的分区相对均匀地分散到各个broker上，同样可以达到负载均衡的效果，没必要刻意实现主写从读增加代码实现的复杂程度</li>
+</ul>
+</li>
+<li><p>伸缩性 Scalability</p>
+</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://static001.geekbang.org/resource/image/58/91/58c35d3ab0921bf0476e3ba14069d291.jpg"></a></p>
 <h2 id="三层消息架构"><a href="#三层消息架构" class="headerlink" title="三层消息架构"></a>三层消息架构</h2><ul>
 <li>主题层：每个主题可以配置 M 个分区（保证伸缩性），而每个分区又可以配置 N 个副本。</li>
 <li>分区层：（副本概念是在分区层定义的）每个分区的 N 个副本中只能有一个充当领导者角色，对外提供服务；其他 N-1 个副本是追随者副本，只是提供数据冗余之用。</li>
@@ -450,6 +458,13 @@
         
       </a>
     
+    
+      <a class="nav-right" href="/2021/05/23/kafka%E7%B3%BB%E5%88%97-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%A7%A3%E7%AD%941/">
+        
+          kafka系列 | 常见问题解答(1)
+        
+        <span class="nav-arrow"> →</span>
+      </a>
     
   </div>
 
