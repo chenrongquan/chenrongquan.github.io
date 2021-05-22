@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      kafka系列 | 消息引擎 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>kafka系列 | 消息引擎</h2>
+  <p class="post-date">2021年5月22日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><blockquote>
+<p>聪明人要下死功夫</p>
+</blockquote>
+<h2 id="Apache-Kafka"><a href="#Apache-Kafka" class="headerlink" title="Apache Kafka"></a>Apache Kafka</h2><ul>
+<li>开源的消息引擎系统<code>Messaging System</code><ul>
+<li>消息引擎系统是一组规范。企业利用这组规范在不同系统之间传递语义准确的消息，实现松耦合的异步式数据传递 (<code>参考维基百科</code>)</li>
+<li>通俗版：系统 A 发送消息给消息引擎系统，系统 B 从消息引擎系统中读取 A 发送的消息</li>
+</ul>
+</li>
+<li>基本包含事实<ul>
+<li>消息引擎传输的对象是消息；</li>
+<li>如何传输消息属于消息引擎设计机制的一部分。</li>
+</ul>
+</li>
+<li>消息协议<ul>
+<li>纯二进制的字节序列</li>
+</ul>
+</li>
+<li>传输协议<ul>
+<li>点对点模型</li>
+<li>发布/订阅模型</li>
+</ul>
+</li>
+<li>作用<ul>
+<li>削峰填谷：对抗上下游系统 TPS 的错配以及瞬时峰值流量</li>
+<li>发送方和接收方的松耦合</li>
+</ul>
+</li>
+</ul>
+<h2 id="Kafka术语"><a href="#Kafka术语" class="headerlink" title="Kafka术语"></a>Kafka术语</h2><ul>
+<li>消息：Record <ul>
+<li>Kafka 处理的主要对象</li>
+</ul>
+</li>
+<li>主题：Topic<ul>
+<li>发布订阅的对象；承载消息的逻辑容器</li>
+</ul>
+</li>
+<li>生产者：Producer<ul>
+<li>向主题发布消息的客户端应用程序</li>
+</ul>
+</li>
+<li>消费者：Consumer<ul>
+<li>订阅主题消息的客户端应用程序</li>
+</ul>
+</li>
+<li>客户端：Clients<ul>
+<li>生产者+消费者</li>
+</ul>
+</li>
+<li>服务端：Broker<ul>
+<li>一个Kafka集群由多个Broker组成</li>
+<li>服务代理节点，Kafka服务实例。</li>
+<li>Broker负责接收和处理客户端发送过来的请求，以及对消息进行持久化</li>
+<li>Broker一般是分布式部署，实现高可用</li>
+</ul>
+</li>
+<li>备份机制：Replication</li>
+<li>副本：Replica<ul>
+<li>Kafka 中同一条消息能够被拷贝到多个地方以提供数据冗余，这些地方就是所谓的副本。</li>
+<li>replica 包含两种类型：leader 副本、follower副本，</li>
+<li>领导者副本 Leader Replica：对外提供服务</li>
+<li>追随者副本 Follow Replica：被动的追随领导者副本，不会对外提供服务<blockquote>
+<p>一个partition拥有多个replica，提高容灾能力。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>副本工作机制<ul>
+<li>生产者总是向领导者副本写消息；而消费者总是从领导者副本读消息。</li>
+<li>追随者副本，它只做一件事：向领导者副本发送请求，请求领导者把最新生产的消息发给它，这样它能保持与领导者的同步。</li>
+<li>副本是在分区层级下的，即每个分区可配置多个副本实现高可用</li>
+<li>leader副本负责读写请求，follower 副本负责同步leader副本消息，通过副本选举实现故障转移。</li>
+</ul>
+</li>
+<li>Kafka追随者副本不对外提供服务的意义<ul>
+<li>如果允许follower副本对外提供读服务（主写从读），首先会存在数据一致性的问题，消息从主节点同步到从节点需要时间，可能造成主从节点的数据不一致。</li>
+<li>主写从读无非就是为了减轻leader节点的压力，将读请求的负载均衡到follower节点，如果Kafka的分区相对均匀地分散到各个broker上，同样可以达到负载均衡的效果，没必要刻意实现主写从读增加代码实现的复杂程度</li>
+</ul>
+</li>
+<li>伸缩性 Scalability</li>
+<li>分区Partitioning<ul>
+<li>一个有序不变的消息序列。每个主题下可以有多个分区。</li>
+<li>等同于 Sharding Region</li>
+<li>Kafka 中的分区机制指的是将每个主题划分成多个分区（Partition），每个分区是一组有序的消息日志。</li>
+<li>生产者生产的每条消息只会被发送到一个分区中，也就是说如果向一个双分区的主题发送一条消息，这条消息要么在分区 0 中，要么在分区 1 中。</li>
+<li>Kafka 的分区编号是从 0 开始的</li>
+<li>每个分区下可以配置若干个副本，其中只能有 1 个领导者副本和 N-1 个追随者副本<blockquote>
+<p>一个topic 可以拥有若干个partition（从 0 开始标识partition ），分布在不同的broker 上， 实现发布与订阅时负载均衡。producer 通过自定义的规则将消息发送到对应topic 下某个partition，以offset标识一条消息在一个partition的唯一性。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>分区位移：Offset<ul>
+<li>分区中每条消息的位置信息，是一个单调递增且不变的值</li>
+<li>生产者向分区写入消息，每条消息在分区中的位置信息由一个叫位移（Offset）的数据来表征</li>
+<li>分区位移总是从 0 开始</li>
+</ul>
+</li>
+<li>消费者位移：Consumer Offset<ul>
+<li>表征消费者消费进度，每个消费者都有自己的消费者位移。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>查看消费者位移，以及查看未消费消息数</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&gt; ./kafka-consumer-groups.sh --bootstrap-server 192.168.87.102:9092 --group testgroup --describe</span><br><span class="line">TOPIC PARTITION CURRENT-OFFSET LOG-END-OFFSET LAG </span><br><span class="line">test1 0         0               0             0 </span><br><span class="line">test1 2         1               2             1 </span><br><span class="line">test1 1         1               1             0</span><br><span class="line"></span><br><span class="line"><span class="comment"># CURRENT-OFFSET表示当前分区消费到的Offset </span></span><br><span class="line"><span class="comment"># LOG-END-OFFSET表示当前分区的最大Offset</span></span><br><span class="line"><span class="comment"># LAG表示未消费的数量</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>消费者组：Consumer Group<ul>
+<li>多个消费者实例共同组成的一个组，同时消费多个分区以实现高吞吐。<blockquote>
+<p>消费topic 的消息， 一个topic 可以让若干个consumer消费，若干个consumer组成一个 consumer group ，一条消息只能被consumer group 中一个consumer消费，若干个partition 被若干个consumer 同时消费，达到消费者高吞吐量</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>重平衡：Rebalance<ul>
+<li>消费者组内某个消费者实例挂掉后，其他消费者实例自动重新分配订阅主题分区的过程。Rebalance 是 Kafka 消费者端实现高可用的重要手段</li>
+</ul>
+</li>
+</ul>
+<h2 id="三层消息架构"><a href="#三层消息架构" class="headerlink" title="三层消息架构"></a>三层消息架构</h2><ul>
+<li>主题层：每个主题可以配置 M 个分区（保证伸缩性），而每个分区又可以配置 N 个副本。</li>
+<li>分区层：（副本概念是在分区层定义的）每个分区的 N 个副本中只能有一个充当领导者角色，对外提供服务；其他 N-1 个副本是追随者副本，只是提供数据冗余之用。</li>
+<li>消息层：分区中包含若干条消息，每条消息的位移从 0 开始，依次递增</li>
+<li>客户端程序只能与分区的领导者副本进行交互（追随者副本只是冗余保存数据，保证数据不会丢失）</li>
+</ul>
+<blockquote>
+<p>Kafka体系架构=M个producer +N个broker +K个consumer+ZK集群</p>
+</blockquote>
+<h2 id="Kafka-Broker如何持久化数据"><a href="#Kafka-Broker如何持久化数据" class="headerlink" title="Kafka Broker如何持久化数据"></a>Kafka Broker如何持久化数据</h2><ul>
+<li>Kafka 使用消息日志（Log）来保存数据</li>
+<li>一个日志就是磁盘上一个只能追加写（Append-only）消息的物理文件。<ul>
+<li>因为只能追加写入，故避免了缓慢的随机 I/O 操作，改为性能较好的顺序 I/O 写操作，这也是实现 Kafka 高吞吐量特性的一个重要手段</li>
+</ul>
+</li>
+<li>Kafka 必然要定期地删除消息以回收磁盘<ul>
+<li>通过日志段（Log Segment）机制。在 Kafka 底层，一个日志又进一步细分成多个日志段，消息被追加写到当前最新的日志段中，当写满了一个日志段后，Kafka 会自动切分出一个新的日志段，并将老的日志段封存起来</li>
+<li>Kafka 在后台还有定时任务会定期地检查老的日志段是否能够被删除，从而实现回收磁盘空间的目的<blockquote>
+<p>partition在机器磁盘上以log 体现，采用顺序追加日志的方式添加新消息、实现高吞吐量</p>
+</blockquote>
+<h2 id="消费者组"><a href="#消费者组" class="headerlink" title="消费者组"></a>消费者组</h2></li>
+</ul>
+</li>
+<li>消费者组（Consumer Group）</li>
+<li>所谓的消费者组，指的是多个消费者实例共同组成一个组来消费一组主题。这组主题中的每个分区都只会被组内的一个消费者实例消费，其他消费者实例不能消费它。</li>
+<li>为什么要引入消费者组呢？主要是为了提升消费者端的吞吐量。多个消费者实例同时消费，加速整个消费端的吞吐量（TPS）。</li>
+<li>消费者组里面的所有消费者实例不仅“瓜分”订阅主题的数据，而且更酷的是它们还能彼此协助。假设组内某个实例挂掉了，Kafka 能够自动检测到，然后把这个 Failed 实例之前负责的分区转移给其他活着的消费者。这个过程就是 Kafka 中大名鼎鼎的“重平衡”（Rebalance）。</li>
+</ul>
+<blockquote>
+<p>和elastic-job的sharding分片类似？将一个任务分给多个实例运行，一个实例只执行其中部分，通过一个field来标志每个实例负责的部分任务，如果某一个实例失败，将这个失败的任务分给其他执行完了的实例。不过这种方式是通过zookeeper的中心化的服务来实现的。</p>
+</blockquote>
+<h2 id="消费者位移"><a href="#消费者位移" class="headerlink" title="消费者位移"></a>消费者位移</h2><ul>
+<li>消费者位移（Consumer Offset）</li>
+<li>消费者位移与分区位移的区别<ul>
+<li>消费者位移：可能是随时变化的，它是消费者消费进度的指示器，每个消费者有着自己的消费者位移。</li>
+<li>分区位移：表征的是分区内的消息位置，它是不变的，即一旦消息被成功写入到一个分区上，它的位移值就是固定的了。</li>
+</ul>
+</li>
+</ul>
+<p><img src="assets/image.png"></p>
+<h2 id="Kafka不只是消息引擎吗"><a href="#Kafka不只是消息引擎吗" class="headerlink" title="Kafka不只是消息引擎吗"></a>Kafka不只是消息引擎吗</h2><ul>
+<li>Apache Kafka 是消息引擎系统，也是分布式流处理平台（Distributed Streaming Platform）</li>
+<li>名字由来：取自Franz Kafka 文学作家</li>
+<li>2011 年 Kafka 正式进入到 Apache 基金会孵化并于次年 10 月顺利毕业成为 Apache 顶级项目</li>
+<li>Kafka 社区于 0.10.0.0 版本正式推出了流处理组件 Kafka Streams，也正是从这个版本开始，Kafka 正式“变身”为分布式的流处理平台，而不仅仅是消息引擎系统了</li>
+<li>Apache Kafka 是和 Apache Storm、Apache Spark 和 Apache Flink 同等级的实时流处理平台</li>
+<li>设计之初的三个特性<ul>
+<li>提供一套 API 实现生产者和消费者；</li>
+<li>降低网络传输和磁盘存储开销；</li>
+<li>实现高伸缩性架构。</li>
+</ul>
+</li>
+<li>Kafka流处理优势<ul>
+<li>更容易实现端到端的正确性（Correctness）</li>
+<li>自己对于流式计算的定位：Kafka Streams 是一个用于搭建实时流处理的客户端库而非是一个完整的功能系统<blockquote>
+<p>流处理要最终替代它的“兄弟”批处理需要具备两点核心优势：<br>要实现正确性和提供能够推导时间的工具。<br>实现正确性是流处理能够匹敌批处理的基石<br>正确性的基石则是要求框架能提供精确一次处理语义，即处理一条消息有且只有一次机会能够影响系统状态</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>目前主流的大数据流处理框架都宣称实现了精确一次处理语义，但这是有限定条件的，即它们只能实现框架内的精确一次处理语义，无法实现端到端的。这是为什么呢？<br>姑且把 Spark 简单理解为一个生产者。生产者向 Broker 发送消息，消息被 Broker 成功接收并完成了持久化，但因为网络问题导致生产者认为消息的发送是失败的，生产者会进行重试。这显示就违背了精确一次的处理语义。</p>
+</blockquote>
+<ul>
+<li>Kafka还可以作为分布式存储系统，实际用的较少</li>
+</ul>
+<h2 id="应该选择哪种Kafka？"><a href="#应该选择哪种Kafka？" class="headerlink" title="应该选择哪种Kafka？"></a>应该选择哪种Kafka？</h2><ul>
+<li><p>Kafka Connect 通过一个个具体的连接器（Connector），串联起上下游的外部系统。<br><img src="assets/image%202.png"></p>
+</li>
+<li><p>几种 Kafka？</p>
+<ul>
+<li>Apache Kafka：社区版 Kafka</li>
+<li>Confluent Kafka：从事商业化 Kafka 工具开发，比如跨数据中心备份、Schema 注册中心以及集群监控工具等</li>
+<li>Cloudera/Hortonworks Kafka：Cloudera 提供的 CDH 和 Hortonworks 提供的 HDP 是非常著名的大数据平台；CDH Kafka 和 HDP Kafka<blockquote>
+<p>Kafka 的 3 个创始人 Jay Kreps、Naha Narkhede 和饶军创始人创办Confluent 公司</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>Apache Kafka</p>
+<ul>
+<li>优势在于迭代速度快，社区响应度高，使用它可以让你有更高的把控度；</li>
+<li>缺陷在于仅提供基础核心组件，缺失一些高级的特性；没有提供任何监控框架或工具</li>
+<li>Apach kafka原生不提供监控，但有一些开源的监控框架；比如 Kafka manager</li>
+</ul>
+</li>
+<li><p>Confluent Kafka</p>
+<ul>
+<li>分为免费版和企业版两种</li>
+<li>免费版还包含 Schema 注册中心和 REST proxy 两大功能、更多的连接器</li>
+<li>企业版提供的功能最有用的当属跨数据中心备份和集群监控两大功能了</li>
+<li>如果你需要用到 Kafka 的一些高级特性，那么推荐你使用 Confluent Kafka。</li>
+<li>优势在于集成了很多高级特性且由 Kafka 原班人马打造，质量上有保证；</li>
+<li>缺陷在于相关文档资料不全，普及率较低，没有太多可供参考的范例。<blockquote>
+<p>多个数据中心之间数据的同步以及对集群的监控历来是 Kafka 的痛点</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>CDH/HDP Kafka</p>
+<ul>
+<li><p>如果你需要快速地搭建消息引擎系统，或者你需要搭建的是多框架构成的数据平台且 Kafka 只是其中一个组件，那么我推荐你使用这些大数据云公司提供的 Kafka。</p>
+</li>
+<li><p>优势在于操作简单，节省运维成本；</p>
+</li>
+<li><p>缺陷在于把控度低，演进速度较慢。</p>
+<h2 id="Kafka版本号"><a href="#Kafka版本号" class="headerlink" title="Kafka版本号"></a>Kafka版本号</h2><p><img src="assets/image%203.png"></p>
+</li>
+</ul>
+</li>
+<li><p>前面的版本号是编译 Kafka 源代码的 Scala 编译器版本。</p>
+</li>
+<li><p>Kafka 服务器端的代码完全由 Scala 语言编写；Scala 是 JVM 系的语言</p>
+</li>
+<li><p>对于 kafka-2.11-2.1.1 的提法，真正的 Kafka 版本号实际上是 2.1.1</p>
+<ul>
+<li>2.1.1 又表示什么呢？前面的 2 表示大版本号，即 Major Version；中间的 1 表示小版本号或次版本号，即 Minor Version；最后的 1 表示修订版本号，也就是 Patch 号。</li>
+<li>Kafka 社区在发布 1.0.0 版本后特意写过一篇文章，宣布 Kafka 版本命名规则正式从 4 位演进到 3 位，比如 0.11.0.0 版本就是 4 位版本号。</li>
+<li>大版本号 - 小版本号 - Patch 号</li>
+</ul>
+</li>
+<li><p>Kafka 目前总共演进了 7 个大版本，分别是 0.7、0.8、0.9、0.10、0.11、1.0 和 2.0</p>
+<ul>
+<li>0.7 版本：只提供了最基础的消息队列功能，甚至连副本机制都没有</li>
+<li>0.8 版本：引入了副本机制，至此Kafka 成为了一个真正意义上完备的分布式高可靠消息队列解决方案。生产和消费消息使用的还是老版本的客户端 API，<strong>所谓的老版本是指当你用它们的 API 开发生产者和消费者应用时，你需要指定 ZooKeeper 的地址而非 Broker 的地址。</strong> 0.8.2.0 版本社区引入了新版本 Producer API，即需要指定 Broker 地址的 Producer</li>
+<li>0.9.0.0 版本：增加了基础的安全认证 / 权限功能，使用 Java 重写了新版本消费者 API，引入 Kafka Connect 组件用于实现高性能的数据抽取。新版本 Producer API 在这个版本中算比较稳定了；<strong>千万别用 0.9 的新版本 Consumer API，因为 Bug 超多的，。</strong></li>
+<li>0.10.0.0版本：里程碑式的大版本，引入了 Kafka Streams,正式升级成分布式流处理平台。<strong>自 0.10.2.2 版本起，新版本 Consumer API 算是比较稳定了。</strong></li>
+<li>0.11.0.0 版本：引入了两个重量级的功能变更：一个是提供幂等性 Producer API 以及事务（Transaction） API；另一个是对 Kafka 消息格式做了重构。事务 API 主要是为 Kafka Streams 应用服务的。因为格式变更引起消息格式转换而导致的性能问题在生产环境中屡见不鲜，所以你一定要谨慎对待 0.11 版本的这个变化。这个版本中各个大功能组件都变得非常稳定了。</li>
+<li>1.0 和 2.0 版本：主要还是 Kafka Streams 的各种改进，在消息引擎方面并未引入太多的重大功能特性。如果你是 Kafka Streams 的用户，至少选择 2.0.0 版本吧。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><strong>建议是尽量使用比较新的版本。如果你不能升级大版本，我也建议你至少要升级到 0.8.2.2 这个版本，因为该版本中老版本消费者 API 是比较稳定的。另外即使你升到了 0.8.2.2，也不要使用新版本 Producer API，此时它的 Bug 还非常多。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>如果你依然在使用 0.10 大版本，我强烈建议你至少升级到 0.10.2.2 然后使用新版本 Consumer API。还有个事情不得不提，0.10.2.2 修复了一个可能导致 Producer 性能降低的 Bug。基于性能的缘故你也应该升级到 0.10.2.2。</strong></p>
+</blockquote>
+<blockquote>
+<p><strong>不论你用的是哪个版本，都请尽量保持服务器端版本和客户端版本一致，否则你将损失很多 Kafka 为你提供的性能优化收益。</strong></p>
+</blockquote>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#kafka" >
+    <span class="tag-code">kafka</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/05/18/%E9%87%91%E8%9E%8D%E5%88%86%E5%B8%83%E5%BC%8F-%E8%AE%A1%E7%AE%97%E8%BE%93%E5%85%A5%E7%9A%84%E6%AD%A3%E7%A1%AE%E6%80%A7/">
+        <span class="nav-arrow">← </span>
+        
+          金融分布式-计算输入的正确性
+        
+      </a>
+    
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Apache-Kafka"><span class="toc-nav-text">Apache Kafka</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Kafka%E6%9C%AF%E8%AF%AD"><span class="toc-nav-text">Kafka术语</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%B8%89%E5%B1%82%E6%B6%88%E6%81%AF%E6%9E%B6%E6%9E%84"><span class="toc-nav-text">三层消息架构</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Kafka-Broker%E5%A6%82%E4%BD%95%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E6%8D%AE"><span class="toc-nav-text">Kafka Broker如何持久化数据</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E7%BB%84"><span class="toc-nav-text">消费者组</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%B6%88%E8%B4%B9%E8%80%85%E4%BD%8D%E7%A7%BB"><span class="toc-nav-text">消费者位移</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Kafka%E4%B8%8D%E5%8F%AA%E6%98%AF%E6%B6%88%E6%81%AF%E5%BC%95%E6%93%8E%E5%90%97"><span class="toc-nav-text">Kafka不只是消息引擎吗</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%BA%94%E8%AF%A5%E9%80%89%E6%8B%A9%E5%93%AA%E7%A7%8DKafka%EF%BC%9F"><span class="toc-nav-text">应该选择哪种Kafka？</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Kafka%E7%89%88%E6%9C%AC%E5%8F%B7"><span class="toc-nav-text">Kafka版本号</span></a></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/05/22/kafka系列-消息引擎/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "kafka系列 | 消息引擎",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
