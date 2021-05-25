@@ -10,7 +10,7 @@
   
   <title>
      
-      kafka系列 | 常见问题解答(3) | ™技术博客 
+      docker | 共享宿主机环境 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>kafka系列 | 常见问题解答(3)</h2>
-  <p class="post-date">2021年5月23日</p>
+  <h2>docker | 共享宿主机环境</h2>
+  <p class="post-date">2021年5月24日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,119 +160,23 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><ol>
-<li>kafka 的分区数量的设置需要参考每秒传输的字节数计算吗？</li>
-</ol>
-<ul>
-<li>首先你要确定你业务的SLA，比如说你希望你的producer TPS是10万条消息/秒，假设是T1</li>
-<li>在你的真实环境中创建一个单分区的topic测试一下TPS，假设是T2</li>
-<li>你需要的分区数大致可以等于T1 / T2</li>
+    <section class="markdown-content"><h2 id="宿主机安装配置jdk"><a href="#宿主机安装配置jdk" class="headerlink" title="宿主机安装配置jdk"></a>宿主机安装配置jdk</h2><ul>
+<li>列出所有已经被安装的，名字中包含jdk字符串的RPM包<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; rpm -qa|grep java</span><br></pre></td></tr></table></figure></li>
+<li>删除旧版本的jdk<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt; rpm -e --nodeps java-1.8.0-openjdk-headless-1.8.0.65-3.b17.el7.x86_64</span><br><span class="line">&gt; rpm -e --nodeps java-1.7.0-openjdk-1.7.0.91-2.6.2.3.el7.x86_64</span><br><span class="line">&gt; rpm -e --nodeps java-1.7.0-openjdk-headless-1.7.0.91-2.6.2.3.el7.x86_64</span><br><span class="line">&gt; rpm -e --nodeps java-1.8.0-openjdk- 1.8.0.65-3.b17.el7.x86_64</span><br></pre></td></tr></table></figure></li>
+<li>下载jdk1.8 解压</li>
+<li>设置环境变量<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> vim ~/.bashrc</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="built_in">set</span> oracle jdk environment</span></span><br><span class="line">export JAVA_HOME=/usr/jdk-8u172-linux-x64</span><br><span class="line">export JRE_HOME=$&#123;JAVA_HOME&#125;/jre</span><br><span class="line">export CLASSPATH=.:$&#123;JAVA_HOME&#125;/lib:$&#123;JRE_HOME&#125;/lib</span><br><span class="line">export PATH=$&#123;JAVA_HOME&#125;/bin:$PATH</span><br></pre></td></tr></table></figure></li>
+<li>环境变量生效<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;</span><span class="bash"> <span class="built_in">source</span> ~/.bashrc</span></span><br></pre></td></tr></table></figure>
+<h2 id="修改dockerfile文件，共享宿主机jdk"><a href="#修改dockerfile文件，共享宿主机jdk" class="headerlink" title="修改dockerfile文件，共享宿主机jdk"></a>修改dockerfile文件，共享宿主机jdk</h2><figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基于哪个镜像</span></span><br><span class="line"><span class="keyword">FROM</span> centos:<span class="number">7</span></span><br><span class="line"><span class="comment">#配置中文</span></span><br><span class="line"><span class="keyword">ENV</span> LANG C.UTF-<span class="number">8</span></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="bash"> bhapp</span></span><br><span class="line"><span class="comment"># 拷贝文件到容器</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> GwMicroService-1.1.0.jar app.jar</span></span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> bootstrap.yml bootstrap.yml</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \</span></span><br><span class="line"><span class="bash">  &amp;&amp; <span class="built_in">echo</span> <span class="string">&#x27;Asia/Shanghai&#x27;</span> &gt;/etc/timezone \ &amp;&amp; bash -c <span class="string">&#x27;touch app.jar&#x27;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ENV</span> JAVA_HOME=<span class="string">&quot;/usr/jdk1.8.0_172&quot;</span></span><br><span class="line"><span class="keyword">ENV</span> PATH=<span class="string">&quot;$&#123;PATH&#125;:$&#123;JAVA_HOME&#125;/bin:$&#123;JAVA_HOME&#125;/sbin&quot;</span></span><br><span class="line"><span class="comment"># 开放8081端口</span></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">8081</span></span><br><span class="line"><span class="comment"># 配置容器启动后执行的命令</span></span><br><span class="line"><span class="keyword">ENTRYPOINT</span><span class="bash"> [<span class="string">&quot;java&quot;</span>,<span class="string">&quot;-Djava.security.egd=file:/dev/./urandom&quot;</span>,<span class="string">&quot;-Xms125m&quot;</span>,<span class="string">&quot;-Xmx125m&quot;</span>,<span class="string">&quot;-jar&quot;</span>,<span class="string">&quot;app.jar&quot;</span>]</span></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li>由于以上镜像是没有jdk环境的，所以在生成容器的时候一定要把宿主机jdk目录挂载到容器中。我这里使用的时dockercompose，docker-compose.yml文件如下：<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">&#x27;3&#x27;</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line">   <span class="attr">apm-storage:</span></span><br><span class="line">     <span class="attr">ports:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">&quot;8003:8003&quot;</span></span><br><span class="line">     <span class="attr">volumes:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="string">/usr/jdk1.8.0_172:/usr/jdk1.8.0_172</span></span><br><span class="line">     <span class="attr">tty:</span> <span class="literal">true</span></span><br><span class="line">     <span class="attr">network_mode:</span> <span class="string">host</span></span><br><span class="line">     <span class="attr">restart:</span> <span class="string">always</span></span><br></pre></td></tr></table></figure></li>
 </ul>
-<ol start="2">
-<li>windows上为什么不用IOCP做呢？这才是真的async nonblocking</li>
-</ol>
-<ul>
-<li>Java NIO并没有使用IOCP，Java NIO 2使用了IOCP。Kafka源码中慢慢在切换成nio 2，比如对文件的操作</li>
-</ul>
-<ol start="3">
-<li>kafka的磁盘挂裸盘的话，如果出现磁盘坏的情况，该如何优雅的处理啊？</li>
-</ol>
-<ul>
-<li>1.1之前不好处理，只能下掉坏磁盘之后重新配置log.dirs再重启broker；1.1之后至少能保证部分磁盘坏掉后broker不宕机，你可以直接下掉坏磁盘。</li>
-</ul>
-<ol start="4">
-<li>请问有没有查看network和io请求处理时间的指标，通过这个来判断是服务处理网络请求慢了还是io请求满了，从而查看瓶颈点?</li>
-</ol>
-<ul>
-<li>通过kafka.network:type=RequestMetrics,name=RequestQueueTimeMs,request={Produce|FetchConsumer|FetchFollower} 判断是否需要调整num.network.threads</li>
-</ul>
-<ol start="5">
-<li>在生产环境，如何去规划一个broker上承载的partition数，以及一个partition应该承载的最大吞吐，有没有一个流量模型或者实践方法？</li>
-</ol>
-<ul>
-<li>通常情况下一个集群上单Broker总分区数不超过2000个。</li>
-<li>之前写过一篇文章讨论过这个问题，可以看一下：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/huxi2b/p/4757098.html">https://www.cnblogs.com/huxi2b/p/4757098.html</a></li>
-</ul>
-<ol start="6">
-<li>如果在linux上使用docker容器布署kafka，容器的内存与heap内存比例大概是多少？或者heap建议多少，整个容器的内存给多少？</li>
-</ol>
-<ul>
-<li>姑且推荐一个值：6GB</li>
-</ul>
-<ol start="7">
-<li>假如一台服务器上有 Partition A 的 leader replica，我还想让它保存 Partition B 的 follower replica，那我是需要在这台服务器上启动两个 broker 吗？</li>
-</ol>
-<ul>
-<li>不需要。一台broker既可以当某个分区的leader，也可以是其他分区的follower</li>
-</ul>
-<ol start="8">
-<li>磁盘方面可以抛弃RAID,直接使用普通磁盘上去。那么一旦这块磁盘出问题了，数据不就丢失了吗。如果raid的话，还有其他磁盘有相应的冗余数据的？</li>
-</ol>
-<ul>
-<li>Kafka 1.1开始正式支持JBOD了。再说Kafka本身在软件层面也提供了冗余的机制来对抗磁盘损坏。</li>
-</ul>
-<ol start="9">
-<li>如果单机起多个broker是否有可能造成同一个partition的多个副本在一台机器上，损失了容灾能力？</li>
-</ol>
-<ul>
-<li>是的，有这个可能。现在的分布式集群都倾向于使用普通性能的机器搭建，因此单台单Broker性价比很高的。</li>
-<li>很多公司采购了超强的服务器，然后在上面跑多个实例。这么做的原因是因为机器价格其实很便宜，贵的是IDC机架位（至少在北京是这样），因此两个方案都有自己合理的地方吧。</li>
-</ul>
-<ol start="10">
-<li>在使用Kafka中，出现消息阻塞不消费的问题，换了消费组之后过段时间又不消费了，不知什么原因？</li>
-</ol>
-<ul>
-<li>就是没有新消息可供消费了</li>
-<li>某天消息格式有问题导致解析不了了，不过这种情况很罕见，一般是因为网络传输出问题导致</li>
-</ul>
-<blockquote>
-<p>做一个单partition的topic，测试一下该topic对应的TPS，然后用磁盘的TPS去核算单块磁盘上大概能放多少个partition。</p>
-</blockquote>
-<ol start="12">
-<li>kafka produce速率获取?</li>
-</ol>
-<ul>
-<li>kafka producer速率可以监控这个JMX指标：</li>
-<li>kafka.producer:type=[consumer|producer|connect]-node-metrics,client-id=([-.\w]+),node-id=([0-9]+)</li>
-</ul>
-<ol start="13">
-<li>partitons的数量和硬盘的数量有匹配关系么？一块盘一个partiton比一块盘多个partiton要快么？是线性的关系么？</li>
-</ol>
-<ul>
-<li>没有具体的关系。</li>
-<li>“一块盘一个partiton比一块盘多个partiton要快么？” 没有实验数据支撑，单纯从分析角度来看我是认同的。当某块磁盘上有太多的分区时引入了很多随机IO拖慢了性能。</li>
-<li>事实上，阿里的RocketMQ一直宣称当单磁盘超过256分区时Kafka性能不如RocketMQ，原因也在于此。<br>数据来源：<a target="_blank" rel="noopener" href="http://jm.taobao.org/2016/04/07/kafka-vs-rocketmq-topic-amout/">http://jm.taobao.org/2016/04/07/kafka-vs-rocketmq-topic-amout/</a></li>
-</ul>
-<ol start="14">
-<li>kafka单机要达到240M的读写能力, CPU应该配几核的?</li>
-</ol>
-<ul>
-<li>通常情况下Kafka不太占用CPU，因此没有这方面的最佳实践出来。</li>
-<li>有些情况下Kafka broker是很耗CPU的：<ul>
-<li>server和client使用了不同的压缩算法；</li>
-<li>server和client版本不一致造成消息格式转换；</li>
-<li>broker端解压缩校验</li>
-</ul>
-</li>
-<li>其中前两个都能规避，第三个目前无法规避。不过相比带宽资源，CPU通常都不是瓶颈</li>
-</ul>
-<ol start="15">
-<li>kafka会出现丢数据情况，比如某个分区的leader挂了，在切换选举到另外副本为leader时，这个副本还没同步之前的leader数据，这样数据就丢了</li>
-</ol>
-<ul>
-<li>对于producer而言，如果在乎数据持久性，那么应该设置acks=all，这样当出现你说的这个情况时，producer会被显式通知消息发送失败，从而可以重试。</li>
-</ul>
-<ol start="16">
-<li>通常我们认为SSD的顺序写TPS大约是HDD的4倍。除了纵向扩展使用SSD之外，也可以尝试一下横向扩展，增加更多的broker或HDD分散负载</li>
-</ol>
 </section>
     <!-- Tags START -->
     
       <div class="tags">
         <span>Tags:</span>
         
-  <a href="/tags#kafka" >
-    <span class="tag-code">kafka</span>
+  <a href="/tags#docker" >
+    <span class="tag-code">docker</span>
   </a>
 
       </div>
@@ -283,17 +187,17 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/05/23/kafka%E7%B3%BB%E5%88%97-%E9%9B%86%E7%BE%A4%E8%A7%84%E5%88%92/">
+      <a class="nav-left" href="/2021/05/23/kafka%E7%B3%BB%E5%88%97-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%A7%A3%E7%AD%944/">
         <span class="nav-arrow">← </span>
         
-          kafka系列 | 集群规划
+          kafka系列 | 常见问题解答(4)
         
       </a>
     
     
-      <a class="nav-right" href="/2021/05/23/kafka%E7%B3%BB%E5%88%97-%E9%9B%86%E7%BE%A4%E5%8F%82%E6%95%B0%E9%85%8D%E7%BD%AE/">
+      <a class="nav-right" href="/2021/05/26/kafka%E7%B3%BB%E5%88%97-%E6%90%AD%E5%BB%BA%E6%BA%90%E7%A0%81%E7%8E%AF%E5%A2%83/">
         
-          kafka系列 | 集群参数配置
+          kafka系列 | 搭建源码环境
         
         <span class="nav-arrow"> →</span>
       </a>
@@ -325,7 +229,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="nav">none</ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%BF%E4%B8%BB%E6%9C%BA%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AEjdk"><span class="toc-nav-text">宿主机安装配置jdk</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%BF%AE%E6%94%B9dockerfile%E6%96%87%E4%BB%B6%EF%BC%8C%E5%85%B1%E4%BA%AB%E5%AE%BF%E4%B8%BB%E6%9C%BAjdk"><span class="toc-nav-text">修改dockerfile文件，共享宿主机jdk</span></a></li></ol>
     
   </div>
 </aside>
@@ -335,7 +239,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/05/23/kafka系列-常见问题解答3/';
+    var url = 'http://chenrongquan.github.com/2021/05/24/docker-共享宿主机环境/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -399,7 +303,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "kafka系列 | 常见问题解答(3)",
+        id: "docker | 共享宿主机环境",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {

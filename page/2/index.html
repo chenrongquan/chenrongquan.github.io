@@ -154,6 +154,108 @@
   
     <article class="article-card">
       <h2 class="article-head">
+        <a href="/2021/05/11/apm%E7%B3%BB%E5%88%97-%E5%AD%98%E5%82%A8%E6%A0%B8%E5%BF%83%E5%AD%97%E6%AE%B5%E8%AF%B4%E6%98%8E/">apm系列 | 存储核心字段说明.md</a>
+      </h2>
+      <p class="article-date">2021年5月11日</p>
+      
+      <div class="article-summary">
+        
+          ES索引模板123456789101112131415161718192021222324252627282930313233343536373839404142434445&#123;  &quot;order&quot; : 0,  &quot;index_patterns&quot;  ...
+        
+      </div>
+      <a class="more" href="/2021/05/11/apm%E7%B3%BB%E5%88%97-%E5%AD%98%E5%82%A8%E6%A0%B8%E5%BF%83%E5%AD%97%E6%AE%B5%E8%AF%B4%E6%98%8E/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/03/21/kafka%E7%B3%BB%E5%88%97-Spring-KafkaListener%E5%8A%A8%E6%80%81%E6%89%A9%E5%B1%95/">kafka系列 | Spring KafkaListener动态扩展</a>
+      </h2>
+      <p class="article-date">2021年3月21日</p>
+      
+        
+  <a href="/tags#kafka" >
+    <span class="tag-code">kafka</span>
+  </a>
+
+  <a href="/tags#spring" >
+    <span class="tag-code">spring</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          需求背景
+框架: spring-kafka
+需求：实现@KafkaListener的动态生成
+
+参考来源stackoverflowgithub
+样例配置123456789apm:  kafka:    listeners:      enable: true      details:    ...
+        
+      </div>
+      <a class="more" href="/2021/03/21/kafka%E7%B3%BB%E5%88%97-Spring-KafkaListener%E5%8A%A8%E6%80%81%E6%89%A9%E5%B1%95/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/03/05/kafka%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E9%83%A8%E5%88%86/">kafka系列 | 基础部分</a>
+      </h2>
+      <p class="article-date">2021年3月5日</p>
+      
+        
+  <a href="/tags#kafka" >
+    <span class="tag-code">kafka</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          整体架构
+核心概念消息
+Kafka中最基本的数据单元
+消息是一串主要由key和value构成的字符串，key和value也都是byte数组
+key的主要作用是根据一定的策略，将此消息路由到指定的Partition中，这样就可以保证包含同一key的消息全部写入同一分区中
+消息的真正有效负载是v ...
+        
+      </div>
+      <a class="more" href="/2021/03/05/kafka%E7%B3%BB%E5%88%97-%E5%9F%BA%E7%A1%80%E9%83%A8%E5%88%86/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/02/27/apm-%E5%85%B3%E9%94%AE%E6%8C%87%E6%A0%87%E8%AF%B4%E6%98%8E/">apm | 关键指标说明</a>
+      </h2>
+      <p class="article-date">2021年2月27日</p>
+      
+        
+  <a href="/tags#apm" >
+    <span class="tag-code">apm</span>
+  </a>
+
+  <a href="/tags#metrics" >
+    <span class="tag-code">metrics</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          APDEX性能指数参考：apdex
+
+APDEX性能指数（Application Performance Index）是一个国际通用的应用性能计算标准。该标准将用户对应用的使用感受定义为三个等级：
+满意（0~T）
+可容忍（T~4T）
+不满意（大于4T）
+
+
+
+
+1Apdex&#x3D;(满意 ...
+        
+      </div>
+      <a class="more" href="/2021/02/27/apm-%E5%85%B3%E9%94%AE%E6%8C%87%E6%A0%87%E8%AF%B4%E6%98%8E/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
         <a href="/2021/02/27/apm%E7%B3%BB%E5%88%97-%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E/">apm | 存储结构说明</a>
       </h2>
       <p class="article-date">2021年2月27日</p>
@@ -379,88 +481,6 @@ Buffer
       <a class="more" href="/2021/02/20/skywalking%E7%B3%BB%E5%88%97-%E9%98%9F%E5%88%97%E5%86%85%E6%A0%B8/">阅读全文</a>
     </article>
   
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-gRPC%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86/">skywalking系列 | gRPC连接管理</a>
-      </h2>
-      <p class="article-date">2021年2月17日</p>
-      
-        
-  <a href="/tags#skywalking" >
-    <span class="tag-code">skywalking</span>
-  </a>
-
-  <a href="/tags#agent" >
-    <span class="tag-code">agent</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          gRPC Channel管理GRPCChannelManager    负责维护Agent与后端OAP集群通信时使用的网络连接
-GRPCChannelgRPC客户端的核心类之一，逻辑上表示一个Channel，底层持有一个TCP链接，负责维护此连接的活性。在RPC调用的任何时机，如果检测到底层 ...
-        
-      </div>
-      <a class="more" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-gRPC%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-Agent%E6%8F%92%E4%BB%B6%E5%8E%9F%E7%90%86/">skywalking系列 | Agent插件原理</a>
-      </h2>
-      <p class="article-date">2021年2月17日</p>
-      
-        
-  <a href="/tags#skywalking" >
-    <span class="tag-code">skywalking</span>
-  </a>
-
-  <a href="/tags#agent" >
-    <span class="tag-code">agent</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          字节码增强JavaAgent
-Java Agent是java命令的一个参数(即 -javaagent)，参数之后需要指定一个jar包
-
-在Java虚拟机启动时，执行main()函数之前，虚拟机会先找到-javaagent命令指定jar包，然后执行 premain-class中的premain ...
-        
-      </div>
-      <a class="more" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-Agent%E6%8F%92%E4%BB%B6%E5%8E%9F%E7%90%86/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-Agent%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/">skywalking系列 | Agent启动原理</a>
-      </h2>
-      <p class="article-date">2021年2月17日</p>
-      
-        
-  <a href="/tags#skywalking" >
-    <span class="tag-code">skywalking</span>
-  </a>
-
-  <a href="/tags#agent" >
-    <span class="tag-code">agent</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          微内核架构 和 SPI机制微内核架构
-微内核架构(Microkernel Architecture) 也称插件化架构（Plug-in Architecture），是一种面向功能进行拆分的可扩展性架构
-
-
-
-内核系统：负责管理插件的生命周期，保证系统不因功能扩展而不断进行修改。  
-插件模块： ...
-        
-      </div>
-      <a class="more" href="/2021/02/17/skywalking%E7%B3%BB%E5%88%97-Agent%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/">阅读全文</a>
-    </article>
-  
 
   
     <div class="guide-pager">
@@ -468,7 +488,7 @@ Java Agent是java命令的一个参数(即 -javaagent)，参数之后需要指�
     <a href="/"><span class="page-arrow">← </span>Prev</a>
   
   
-    <a class="unvisible" href="/">Next <span class="page-arrow">→</span></a>
+    <a href="/page/3/">Next<span class="page-arrow"> →</span></a>
   
 </div>
   
