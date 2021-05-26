@@ -10,7 +10,7 @@
   
   <title>
      
-      kafka系列 | 消息引擎 | ™技术博客 
+      kafka | 消息引擎 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,7 +151,7 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>kafka系列 | 消息引擎</h2>
+  <h2>kafka | 消息引擎</h2>
   <p class="post-date">2021年5月22日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
@@ -190,7 +190,7 @@
 </li>
 </ul>
 <h2 id="Kafka术语"><a href="#Kafka术语" class="headerlink" title="Kafka术语"></a>Kafka术语</h2><ul>
-<li><p>消息：Record </p>
+<li><p>消息：Record</p>
 <ul>
 <li>Kafka 处理的主要对象</li>
 </ul>
@@ -247,7 +247,7 @@
 <blockquote>
 <p>查看消费者位移，以及查看未消费消息数</p>
 </blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&gt; ./kafka-consumer-groups.sh --bootstrap-server 192.168.87.102:9092 --group testgroup --describe</span><br><span class="line">TOPIC PARTITION CURRENT-OFFSET LOG-END-OFFSET LAG </span><br><span class="line">test1 0         0               0             0 </span><br><span class="line">test1 2         1               2             1 </span><br><span class="line">test1 1         1               1             0</span><br><span class="line"></span><br><span class="line"><span class="comment"># CURRENT-OFFSET表示当前分区消费到的Offset </span></span><br><span class="line"><span class="comment"># LOG-END-OFFSET表示当前分区的最大Offset</span></span><br><span class="line"><span class="comment"># LAG表示未消费的数量</span></span><br></pre></td></tr></table></figure></li>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&gt; ./kafka-consumer-groups.sh --bootstrap-server 192.168.87.102:9092 --group testgroup --describe</span><br><span class="line">TOPIC PARTITION CURRENT-OFFSET LOG-END-OFFSET LAG</span><br><span class="line">test1 0         0               0             0</span><br><span class="line">test1 2         1               2             1</span><br><span class="line">test1 1         1               1             0</span><br><span class="line"></span><br><span class="line"><span class="comment"># CURRENT-OFFSET表示当前分区消费到的Offset</span></span><br><span class="line"><span class="comment"># LOG-END-OFFSET表示当前分区的最大Offset</span></span><br><span class="line"><span class="comment"># LAG表示未消费的数量</span></span><br></pre></td></tr></table></figure></li>
 </ul>
 </li>
 <li><p>消费者组：Consumer Group</p>
@@ -413,15 +413,14 @@
 </li>
 <li><p>CDH/HDP Kafka</p>
 <ul>
-<li><p>如果你需要快速地搭建消息引擎系统，或者你需要搭建的是多框架构成的数据平台且 Kafka 只是其中一个组件，那么我推荐你使用这些大数据云公司提供的 Kafka。</p>
-</li>
-<li><p>优势在于操作简单，节省运维成本；</p>
-</li>
-<li><p>缺陷在于把控度低，演进速度较慢。</p>
-<h2 id="Kafka版本号"><a href="#Kafka版本号" class="headerlink" title="Kafka版本号"></a>Kafka版本号</h2><p><img src="https://static001.geekbang.org/resource/image/c1/23/c10df9e6f72126e9c721fba38e27ac23.png"></p>
-</li>
+<li>如果你需要快速地搭建消息引擎系统，或者你需要搭建的是多框架构成的数据平台且 Kafka 只是其中一个组件，那么我推荐你使用这些大数据云公司提供的 Kafka。</li>
+<li>优势在于操作简单，节省运维成本；</li>
+<li>缺陷在于把控度低，演进速度较慢。</li>
 </ul>
 </li>
+</ul>
+<h2 id="Kafka版本号"><a href="#Kafka版本号" class="headerlink" title="Kafka版本号"></a>Kafka版本号</h2><p><img src="https://static001.geekbang.org/resource/image/c1/23/c10df9e6f72126e9c721fba38e27ac23.png"></p>
+<ul>
 <li><p>前面的版本号是编译 Kafka 源代码的 Scala 编译器版本。</p>
 </li>
 <li><p>Kafka 服务器端的代码完全由 Scala 语言编写；Scala 是 JVM 系的语言</p>
@@ -480,14 +479,14 @@
       <a class="nav-left" href="/2021/05/11/apm-%E5%AD%98%E5%82%A8%E6%A0%B8%E5%BF%83%E5%AD%97%E6%AE%B5%E8%AF%B4%E6%98%8E/">
         <span class="nav-arrow">← </span>
         
-          apm系列 | 存储核心字段说明.md
+          apm | 存储核心字段说明.md
         
       </a>
     
     
       <a class="nav-right" href="/2021/05/23/kafka-%E9%9B%86%E7%BE%A4%E8%A7%84%E5%88%92/">
         
-          kafka系列 | 集群规划
+          kafka | 集群规划
         
         <span class="nav-arrow"> →</span>
       </a>
@@ -593,7 +592,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "kafka系列 | 消息引擎",
+        id: "kafka | 消息引擎",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
