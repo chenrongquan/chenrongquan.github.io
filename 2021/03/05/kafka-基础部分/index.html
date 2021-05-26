@@ -160,8 +160,10 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><p><img src="https://s0.lgstatic.com/i/image/M00/2F/54/CgqCHl8GwXOAJW_TAAENpE35u5w381.png" alt="Kafka的整体架构"></p>
-<h2 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h2><h3 id="消息"><a href="#消息" class="headerlink" title="消息"></a>消息</h3><ul>
+    <section class="markdown-content"><h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><hr>
+<p><img src="https://s0.lgstatic.com/i/image/M00/2F/54/CgqCHl8GwXOAJW_TAAENpE35u5w381.png" alt="Kafka的整体架构"></p>
+<h2 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h2><hr>
+<h3 id="消息"><a href="#消息" class="headerlink" title="消息"></a>消息</h3><ul>
 <li>Kafka中最基本的数据单元</li>
 <li>消息是一串主要由key和value构成的字符串，key和value也都是byte数组</li>
 <li>key的主要作用是根据一定的策略，将此消息路由到指定的Partition中，这样就可以保证包含同一key的消息全部写入同一分区中</li>
@@ -299,7 +301,8 @@
 </ul>
 </li>
 </ul>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><img src="https://s0.lgstatic.com/i/image/M00/2F/4D/Ciqc1F8GxJWAWTtSAAKDvoKBlPU986.png"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><hr>
+<p><img src="https://s0.lgstatic.com/i/image/M00/2F/4D/Ciqc1F8GxJWAWTtSAAKDvoKBlPU986.png"></p>
 <ul>
 <li>Producer 会根据业务逻辑产生消息，之后根据路由规则将消息发送到指定的分区的 Leader Replica 所在的 Broker 上。</li>
 <li>在 Kafka 服务端接收到消息后，会将消息追加到 Leader Replica 的 Log 中保存，之后 Follower Replica 会与 Leader Replica 进行同步，当 ISR 集合中所有 Replica 都完成了此消息的同步之后，则 Leader Replica 的 HW 会增加，并向 Producer 返回响应。</li>
