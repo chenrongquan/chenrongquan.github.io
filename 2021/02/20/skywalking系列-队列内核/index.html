@@ -165,7 +165,7 @@
 <li>作用是在生产者和消费者之间创建一个缓冲异步内存队列，防止因skywalking收集数据方生产数据的速度大于往后端发送数据的速度而造成数据积压和生产方阻塞</li>
 </ul>
 <h3 id="Buffer"><a href="#Buffer" class="headerlink" title="Buffer"></a><code>Buffer</code></h3><ul>
-<li>两种实现方式：<code>ArrayBlockingQueueBuffer</code> 和 <code>Buffer</code> </li>
+<li>两种实现方式：<code>ArrayBlockingQueueBuffer</code> 和 <code>Buffer</code></li>
 <li>skywalking队列内核中数据的载体，队列之中的数据都存储在<code>buffer</code>中。</li>
 <li>属性<ul>
 <li><code>Object[] buffer</code>：存储数据数组, 固定长度(由buffer.bufferSize决定)</li>
@@ -241,7 +241,7 @@
 </ul>
 <h3 id="消费管理-ConsumeDriver"><a href="#消费管理-ConsumeDriver" class="headerlink" title="消费管理 ConsumeDriver"></a>消费管理 <code>ConsumeDriver</code></h3><ul>
 <li><code>IConsumer</code>消费者和<code>ConsumerThread</code>线程组，按照一定的消费模式集成到一起，提供相关API。<ul>
-<li> 依赖 <code>ConsumerThread</code> 的实现是 <code>ConsumerDriver</code> </li>
+<li> 依赖 <code>ConsumerThread</code> 的实现是 <code>ConsumerDriver</code></li>
 <li> 依赖 <code>MultipleChannelsConsumer</code> 的实现是 <code>BulkConsumerPool</code></li>
 </ul>
 </li>
@@ -279,7 +279,7 @@
 <li>每次消费完毕，清空<code>consumeList</code>，休眠<code>consumeCycle</code>毫秒 循环消费</li>
 </ul>
 </li>
-<li>关闭逻辑 <ul>
+<li>关闭逻辑<ul>
 <li>退出时，显示调用 <code>consumerThread.shutdown()</code> 修改 <code>running</code> 状态</li>
 <li>线程退出循环，执行最后一次保障消费逻辑</li>
 <li>调用<code>onExit()</code>执行消费对象退出前动作</li>
@@ -303,7 +303,7 @@
 </li>
 <li>数据分发：<code>dataPartitioner#partition()</code> 默认使用 <code>SimpleRollingPartitioner</code><ul>
 <li>判断当前数据应该存储在哪个<code>Buffer</code>：<code>i++ % channelSize</code></li>
-<li>判断当前数据应该存储在<code>buffer</code>的索引：<code>index.getAndIncrement()</code>  </li>
+<li>判断当前数据应该存储在<code>buffer</code>的索引：<code>index.getAndIncrement()</code></li>
 </ul>
 </li>
 </ul>
@@ -332,14 +332,6 @@
     <span class="tag-code">skywalking</span>
   </a>
 
-  <a href="/tags#agent" >
-    <span class="tag-code">agent</span>
-  </a>
-
-  <a href="/tags#oap" >
-    <span class="tag-code">oap</span>
-  </a>
-
       </div>
     
     <!-- Tags END -->
@@ -356,9 +348,9 @@
       </a>
     
     
-      <a class="nav-right" href="/2021/02/22/skywalking%E7%B3%BB%E5%88%97-%E5%85%83%E6%95%B0%E6%8D%AE%E6%94%B9%E9%80%A0/">
+      <a class="nav-right" href="/2021/02/22/skywalking%E7%B3%BB%E5%88%97-%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF/">
         
-          skywalking系列 | 元数据改造
+          skywalking系列 | 元数据信息
         
         <span class="nav-arrow"> →</span>
       </a>

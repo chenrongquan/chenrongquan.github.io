@@ -10,7 +10,7 @@
   
   <title>
      
-      kafka系列 | 常见问题解答(2) | ™技术博客 
+      ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>kafka系列 | 常见问题解答(2)</h2>
-  <p class="post-date">2021年5月23日</p>
+  <h2></h2>
+  <p class="post-date">2021年5月26日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,29 +160,8 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><ol>
-<li><p>kafka性能测试工具有哪些？<br> Kafka自己提供了kafka-producer-perf-test和kafka-consumer-perf-test脚本可以做producer和consumer的性能测试。另外LinkedIn开源了一款名为kafka-monitor的端到端系统测试工具，也可以用来测试Kafka集群end-to-end的性能。</p>
-</li>
-<li><p>如果我关心的不是一个window的状态而只是想排序，kafka streams可以直接实现么？<br> 很难。如果在乎消息顺序，通常的做法是单分区。在流处理中保持事件的全局顺序几乎不可能，我指的是基于event-time而不是process-time的，毕竟总有late message。你永远不知道时刻T之前的消息是否全部到达了</p>
-</li>
-<li><p>kafka如何做压力测试，它的参考主要指标是什么，比如QPS,最大连接数，延迟等等。<br> Kafka提供了命令行脚本可以执行producer和consumer的性能测试，主要指标还是TPS，延时</p>
-</li>
-<li><p>扩容如何做到平滑扩容，不影响原业务<br> 增加broker很简单，也不会对现有业务有影响。关键是做好迁移计划——比如避开业务高峰时刻，如果迁移对业务影响最小</p>
-</li>
-<li><p>因版本差异导致消息格式转换可能会丧失Zero Copy；尽量保持服务器端版本和客户端版本一致</p>
-</li>
-</ol>
-</section>
+    <section class="markdown-content"></section>
     <!-- Tags START -->
-    
-      <div class="tags">
-        <span>Tags:</span>
-        
-  <a href="/tags#kafka" >
-    <span class="tag-code">kafka</span>
-  </a>
-
-      </div>
     
     <!-- Tags END -->
     <!-- NAV START -->
@@ -190,20 +169,13 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/05/23/kafka%E7%B3%BB%E5%88%97-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%A7%A3%E7%AD%941/">
+      <a class="nav-left" href="/2021/05/26/apm-%E7%BB%93%E6%9E%84%E6%95%B0%E6%8D%AE%E8%A1%A8%E8%AF%B4%E6%98%8E/">
         <span class="nav-arrow">← </span>
         
-          kafka系列 | 常见问题解答(1)
+          apm | 结构数据表说明
         
       </a>
     
-    
-      <a class="nav-right" href="/2021/05/23/kafka%E7%B3%BB%E5%88%97-%E9%9B%86%E7%BE%A4%E8%A7%84%E5%88%92/">
-        
-          kafka系列 | 集群规划
-        
-        <span class="nav-arrow"> →</span>
-      </a>
     
   </div>
 
@@ -242,7 +214,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/05/23/kafka系列-常见问题解答2/';
+    var url = 'http://chenrongquan.github.com/2021/05/26/skywalking系列-元数据改造/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -306,7 +278,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "kafka系列 | 常见问题解答(2)",
+        id: "",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
