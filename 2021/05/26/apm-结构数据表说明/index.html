@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      apm | 结构数据表说明 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>apm | 结构数据表说明</h2>
+  <p class="post-date">2021年5月26日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="APM库"><a href="#APM库" class="headerlink" title="APM库"></a>APM库</h2><h3 id="客户端-apm-client"><a href="#客户端-apm-client" class="headerlink" title="客户端 apm_client"></a>客户端 apm_client</h3><table>
+<thead>
+<tr>
+<th>列</th>
+<th>数据类型</th>
+<th>是否为空</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>int</td>
+<td>否</td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>client_id</td>
+<td>varchar(32)</td>
+<td>否</td>
+<td>终端编号</td>
+</tr>
+<tr>
+<td>client_secret</td>
+<td>varchar(255)</td>
+<td>否</td>
+<td>终端秘钥</td>
+</tr>
+<tr>
+<td>scope</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>终端权限范围</td>
+</tr>
+<tr>
+<td>authorized_grant_types</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>终端支持认证方式</td>
+</tr>
+<tr>
+<td>web_server_redirect_uri</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>回调地址</td>
+</tr>
+<tr>
+<td>access_token_validity</td>
+<td>int</td>
+<td>是</td>
+<td>令牌有效时间/秒</td>
+</tr>
+<tr>
+<td>refresh_token_validity</td>
+<td>int</td>
+<td>是</td>
+<td>刷新令牌有效时间/秒</td>
+</tr>
+<tr>
+<td>autoapprove</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>授权码模式是否自动放行</td>
+</tr>
+<tr>
+<td>status</td>
+<td>int</td>
+<td>否</td>
+<td>删除标识 默认1</td>
+</tr>
+</tbody></table>
+<h3 id="用户表-apm-user"><a href="#用户表-apm-user" class="headerlink" title="用户表 apm_user"></a>用户表 apm_user</h3><table>
+<thead>
+<tr>
+<th>列</th>
+<th>数据类型</th>
+<th>是否为空</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>user_id</td>
+<td>int</td>
+<td>否</td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>username</td>
+<td>varchar(64)</td>
+<td>否</td>
+<td>登录用户名</td>
+</tr>
+<tr>
+<td>password</td>
+<td>varchar(255)</td>
+<td>否</td>
+<td>登录密码</td>
+</tr>
+<tr>
+<td>phone</td>
+<td>varchar(20)</td>
+<td>是</td>
+<td>手机号</td>
+</tr>
+<tr>
+<td>email</td>
+<td>varchar(100)</td>
+<td>是</td>
+<td>邮箱</td>
+</tr>
+<tr>
+<td>enable</td>
+<td>int</td>
+<td>否</td>
+<td>0-不可用(离职) 1-可用(在职) 默认1</td>
+</tr>
+<tr>
+<td>lock_flag</td>
+<td>int</td>
+<td>否</td>
+<td>1-锁定 0-非锁定(默认)</td>
+</tr>
+<tr>
+<td>name</td>
+<td>varchar(200)</td>
+<td>是</td>
+<td>姓名</td>
+</tr>
+<tr>
+<td>status</td>
+<td>int</td>
+<td>否</td>
+<td>删除标识 默认1</td>
+</tr>
+<tr>
+<td>create_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>创建时间 默认当前时间</td>
+</tr>
+<tr>
+<td>update_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>修改时间 默认当前时间</td>
+</tr>
+</tbody></table>
+<h3 id="菜单表-apm-menu"><a href="#菜单表-apm-menu" class="headerlink" title="菜单表 apm_menu"></a>菜单表 apm_menu</h3><table>
+<thead>
+<tr>
+<th>列</th>
+<th>数据类型</th>
+<th>是否为空</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>menu_id</td>
+<td>int</td>
+<td>否</td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>name</td>
+<td>varchar(32)</td>
+<td>否</td>
+<td>菜单名</td>
+</tr>
+<tr>
+<td>path</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>前端访问路径</td>
+</tr>
+<tr>
+<td>sort</td>
+<td>int</td>
+<td>是</td>
+<td>排序值</td>
+</tr>
+<tr>
+<td>status</td>
+<td>int</td>
+<td>否</td>
+<td>删除标识 默认1</td>
+</tr>
+<tr>
+<td>create_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>创建时间 默认当前时间</td>
+</tr>
+<tr>
+<td>update_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>修改时间 默认当前时间</td>
+</tr>
+<tr>
+<td>parent_menu_id</td>
+<td>int</td>
+<td>是</td>
+<td>父菜单ID</td>
+</tr>
+<tr>
+<td>icon</td>
+<td>varchar(128)</td>
+<td>是</td>
+<td>图标</td>
+</tr>
+<tr>
+<td>type</td>
+<td>varchar(64)</td>
+<td>是</td>
+<td>类型</td>
+</tr>
+</tbody></table>
+<h3 id="角色表-apm-role"><a href="#角色表-apm-role" class="headerlink" title="角色表 apm_role"></a>角色表 apm_role</h3><table>
+<thead>
+<tr>
+<th>列</th>
+<th>数据类型</th>
+<th>是否为空</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>role_id</td>
+<td>int</td>
+<td>否</td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>role_name</td>
+<td>varchar(64)</td>
+<td>是</td>
+<td>角色名称</td>
+</tr>
+<tr>
+<td>role_code</td>
+<td>varchar(64)</td>
+<td>否</td>
+<td>角色标识</td>
+</tr>
+<tr>
+<td>role_desc</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>角色描述</td>
+</tr>
+<tr>
+<td>status</td>
+<td>int</td>
+<td>否</td>
+<td>删除标识 默认1</td>
+</tr>
+<tr>
+<td>create_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>创建时间 默认当前时间</td>
+</tr>
+<tr>
+<td>update_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>修改时间 默认当前时间</td>
+</tr>
+</tbody></table>
+<h3 id="用户角色关系表-apm-user-role"><a href="#用户角色关系表-apm-user-role" class="headerlink" title="用户角色关系表 apm_user_role"></a>用户角色关系表 apm_user_role</h3><table>
+<thead>
+<tr>
+<th>列</th>
+<th>数据类型</th>
+<th>是否为空</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>user_id</td>
+<td>int</td>
+<td>否</td>
+<td>用户ID</td>
+</tr>
+<tr>
+<td>role_id</td>
+<td>int</td>
+<td>否</td>
+<td>角色ID</td>
+</tr>
+</tbody></table>
+<h3 id="角色菜单关系表-apm-role-menu"><a href="#角色菜单关系表-apm-role-menu" class="headerlink" title="角色菜单关系表 apm_role_menu"></a>角色菜单关系表 apm_role_menu</h3><table>
+<thead>
+<tr>
+<th>列</th>
+<th>数据类型</th>
+<th>是否为空</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>role_id</td>
+<td>int</td>
+<td>否</td>
+<td>角色ID</td>
+</tr>
+<tr>
+<td>menu_id</td>
+<td>int</td>
+<td>否</td>
+<td>菜单ID</td>
+</tr>
+</tbody></table>
+<h3 id="告警规则表-apm-alarm-rule"><a href="#告警规则表-apm-alarm-rule" class="headerlink" title="告警规则表 apm_alarm_rule"></a>告警规则表 apm_alarm_rule</h3><table>
+<thead>
+<tr>
+<th>列</th>
+<th>数据类型</th>
+<th>是否为空</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>int</td>
+<td>否</td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>name</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>名称</td>
+</tr>
+<tr>
+<td>scope_catalog</td>
+<td>varchar(200)</td>
+<td>是</td>
+<td>告警类型</td>
+</tr>
+<tr>
+<td>describe</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>描述</td>
+</tr>
+<tr>
+<td>enable</td>
+<td>int</td>
+<td>否</td>
+<td>是否启动，0：关闭，1：启用 默认1</td>
+</tr>
+<tr>
+<td>alarm_expression</td>
+<td>text</td>
+<td>否</td>
+<td>告警表达式</td>
+</tr>
+<tr>
+<td>metrics_condition</td>
+<td>text</td>
+<td>否</td>
+<td>指标条件</td>
+</tr>
+<tr>
+<td>status</td>
+<td>int</td>
+<td>否</td>
+<td>删除标识 默认1</td>
+</tr>
+<tr>
+<td>create_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>创建时间 默认当前时间</td>
+</tr>
+<tr>
+<td>update_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>修改时间 默认当前时间</td>
+</tr>
+<tr>
+<td>service_filter</td>
+<td>text</td>
+<td>否</td>
+<td>服务过滤</td>
+</tr>
+</tbody></table>
+<h3 id="元数据表-apm-meta"><a href="#元数据表-apm-meta" class="headerlink" title="元数据表 apm_meta"></a>元数据表 apm_meta</h3><table>
+<thead>
+<tr>
+<th>列</th>
+<th>数据类型</th>
+<th>是否为空</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>bigint</td>
+<td>否</td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>service_group</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>服务组</td>
+</tr>
+<tr>
+<td>service</td>
+<td>varchar(255)</td>
+<td>否</td>
+<td>服务名(当service_type为1时 表示数据库实例)</td>
+</tr>
+<tr>
+<td>instance</td>
+<td>varchar(255)</td>
+<td>否</td>
+<td>实例名(当service_type为1时 表示库名)</td>
+</tr>
+<tr>
+<td>endpoint</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>端点名(当service_type为1时 表示表名)</td>
+</tr>
+<tr>
+<td>service_type</td>
+<td>int</td>
+<td>是</td>
+<td>服务类型(0-普通应用 1-数据库 6-浏览器)</td>
+</tr>
+<tr>
+<td>md5</td>
+<td>varchar(255)</td>
+<td>否</td>
+<td>由(service+instance+endpoint)组合</td>
+</tr>
+<tr>
+<td>status</td>
+<td>int</td>
+<td>否</td>
+<td>删除标识 默认1</td>
+</tr>
+<tr>
+<td>create_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>创建时间 默认当前时间</td>
+</tr>
+<tr>
+<td>update_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>修改时间 默认当前时间</td>
+</tr>
+<tr>
+<td>time_stamp</td>
+<td>bigint</td>
+<td>否</td>
+<td>时间戳</td>
+</tr>
+</tbody></table>
+<h3 id="网络元数据表-apm-network-mapping"><a href="#网络元数据表-apm-network-mapping" class="headerlink" title="网络元数据表 apm_network_mapping"></a>网络元数据表 apm_network_mapping</h3><table>
+<thead>
+<tr>
+<th>列</th>
+<th>数据类型</th>
+<th>是否为空</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>bigint</td>
+<td>否</td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>address</td>
+<td>varchar(255)</td>
+<td>否</td>
+<td>地址 ip/hostname:port</td>
+</tr>
+<tr>
+<td>service</td>
+<td>varchar(255)</td>
+<td>否</td>
+<td>服务名(当service_type为1时 表示数据库实例)</td>
+</tr>
+<tr>
+<td>instance</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>实例名(当service_type为1时 表示库名)</td>
+</tr>
+<tr>
+<td>status</td>
+<td>int</td>
+<td>否</td>
+<td>删除标识 默认1</td>
+</tr>
+<tr>
+<td>create_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>创建时间 默认当前时间</td>
+</tr>
+<tr>
+<td>update_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>修改时间 默认当前时间</td>
+</tr>
+<tr>
+<td>time_stamp</td>
+<td>bigint</td>
+<td>否</td>
+<td>时间戳</td>
+</tr>
+</tbody></table>
+<h3 id="OAL规则表-apm-oal-rule"><a href="#OAL规则表-apm-oal-rule" class="headerlink" title="OAL规则表 apm_oal_rule"></a>OAL规则表 apm_oal_rule</h3><table>
+<thead>
+<tr>
+<th>列</th>
+<th>数据类型</th>
+<th>是否为空</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>int</td>
+<td>否</td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>name</td>
+<td>varchar(255)</td>
+<td>否</td>
+<td>指标名称</td>
+</tr>
+<tr>
+<td>type</td>
+<td>int</td>
+<td>是</td>
+<td>是否可配置，0：不可配；1：可配</td>
+</tr>
+<tr>
+<td>describe</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>描述</td>
+</tr>
+<tr>
+<td>enable</td>
+<td>int</td>
+<td>否</td>
+<td>是否启动，0：关闭，1：启用 默认1</td>
+</tr>
+<tr>
+<td>define</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>定义(指标来源）</td>
+</tr>
+<tr>
+<td>script</td>
+<td>varchar(255)</td>
+<td>是</td>
+<td>表达式，不能加分号</td>
+</tr>
+<tr>
+<td>status</td>
+<td>int</td>
+<td>否</td>
+<td>删除标识 默认1</td>
+</tr>
+<tr>
+<td>create_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>创建时间 默认当前时间</td>
+</tr>
+<tr>
+<td>update_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>修改时间 默认当前时间</td>
+</tr>
+<tr>
+<td>scope_catalog</td>
+<td>varchar(200)</td>
+<td>否</td>
+<td>聚合类型，枚举参考</td>
+</tr>
+</tbody></table>
+<h3 id="阈值表-apm-threshold"><a href="#阈值表-apm-threshold" class="headerlink" title="阈值表 apm_threshold"></a>阈值表 apm_threshold</h3><table>
+<thead>
+<tr>
+<th>列</th>
+<th>数据类型</th>
+<th>是否为空</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>bigint</td>
+<td>否</td>
+<td>主键ID</td>
+</tr>
+<tr>
+<td>default_value</td>
+<td>int</td>
+<td>否</td>
+<td>默认值</td>
+</tr>
+<tr>
+<td>items</td>
+<td>text</td>
+<td>是</td>
+<td>明细</td>
+</tr>
+<tr>
+<td>threshold_type</td>
+<td>varchar(60)</td>
+<td>否</td>
+<td>类型</td>
+</tr>
+<tr>
+<td>status</td>
+<td>int</td>
+<td>否</td>
+<td>删除标识 默认1</td>
+</tr>
+<tr>
+<td>create_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>创建时间 默认当前时间</td>
+</tr>
+<tr>
+<td>update_time</td>
+<td>timestamp</td>
+<td>否</td>
+<td>修改时间 默认当前时间</td>
+</tr>
+<tr>
+<td>name</td>
+<td>varchar(128)</td>
+<td>是</td>
+<td>指标名称</td>
+</tr>
+</tbody></table>
+</section>
+    <!-- Tags START -->
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/05/26/kafka%E7%B3%BB%E5%88%97-%E6%90%AD%E5%BB%BA%E6%BA%90%E7%A0%81%E7%8E%AF%E5%A2%83/">
+        <span class="nav-arrow">← </span>
+        
+          kafka系列 | 搭建源码环境
+        
+      </a>
+    
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#APM%E5%BA%93"><span class="toc-nav-text">APM库</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF-apm-client"><span class="toc-nav-text">客户端 apm_client</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%94%A8%E6%88%B7%E8%A1%A8-apm-user"><span class="toc-nav-text">用户表 apm_user</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%8F%9C%E5%8D%95%E8%A1%A8-apm-menu"><span class="toc-nav-text">菜单表 apm_menu</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%A7%92%E8%89%B2%E8%A1%A8-apm-role"><span class="toc-nav-text">角色表 apm_role</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%94%A8%E6%88%B7%E8%A7%92%E8%89%B2%E5%85%B3%E7%B3%BB%E8%A1%A8-apm-user-role"><span class="toc-nav-text">用户角色关系表 apm_user_role</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E8%A7%92%E8%89%B2%E8%8F%9C%E5%8D%95%E5%85%B3%E7%B3%BB%E8%A1%A8-apm-role-menu"><span class="toc-nav-text">角色菜单关系表 apm_role_menu</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99%E8%A1%A8-apm-alarm-rule"><span class="toc-nav-text">告警规则表 apm_alarm_rule</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E8%A1%A8-apm-meta"><span class="toc-nav-text">元数据表 apm_meta</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%BD%91%E7%BB%9C%E5%85%83%E6%95%B0%E6%8D%AE%E8%A1%A8-apm-network-mapping"><span class="toc-nav-text">网络元数据表 apm_network_mapping</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#OAL%E8%A7%84%E5%88%99%E8%A1%A8-apm-oal-rule"><span class="toc-nav-text">OAL规则表 apm_oal_rule</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%98%88%E5%80%BC%E8%A1%A8-apm-threshold"><span class="toc-nav-text">阈值表 apm_threshold</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/05/26/apm-结构数据表说明/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "apm | 结构数据表说明",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
