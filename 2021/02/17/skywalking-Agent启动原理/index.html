@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      skywalking系列 | Agent启动原理 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>skywalking系列 | Agent启动原理</h2>
+  <p class="post-date">2021年2月17日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="微内核架构-和-SPI机制"><a href="#微内核架构-和-SPI机制" class="headerlink" title="微内核架构 和 SPI机制"></a>微内核架构 和 SPI机制</h2><h3 id="微内核架构"><a href="#微内核架构" class="headerlink" title="微内核架构"></a>微内核架构</h3><ul>
+<li>微内核架构(<code>Microkernel Architecture</code>) 也称插件化架构（<code>Plug-in Architecture</code>），是一种面向功能进行拆分的可扩展性架构</li>
+</ul>
+<p><img src="https://s0.lgstatic.com/i/image3/M01/08/53/Ciqah16FsIuAY29rAADXS1mP1qk235.png" alt="微内核架构图：核心系统和插件模块"></p>
+<ul>
+<li>内核系统：负责管理插件的生命周期，保证系统不因功能扩展而不断进行修改。</li>
+<li>插件模块：独立存在的模块，包括特定的功能，用于扩展核心系统的功能。相互模块之间应保持最小依赖原则，避免过分依赖带来扩展性问题。<blockquote>
+</blockquote>
+<h3 id="SPI机制"><a href="#SPI机制" class="headerlink" title="SPI机制"></a>SPI机制</h3></li>
+<li>服务的提供者提供了接口的实现之后，在<code>Classpath的META-INF/services/</code>目录里创建以服务接口命名的文件，此文件记录了该jar包提供的服务接口的具体实现类。</li>
+<li>当某个应用引入了该jar包且需要使用该服务时，SPI机制通过查找这个jar包的<code>META-INF/services/</code>中配置文件来获得具体的实现类名，进行实现类的加载和实例化，最终使用该实现类完成业务功能。</li>
+<li> <code>JDK SPI</code>加载步骤</li>
+</ul>
+<ol>
+<li><code>JDK SPI</code>的入口方法是<code>ServiceLoader.load()</code>方法</li>
+<li><code>LazyIterator.hasNextService()</code>方法，主要负责查找<code>META-INF/services</code>目录下的SPI配置文件，并进行遍历</li>
+<li><code>LazyIterator.nextService()</code>方法，负责实例化<code>hasNextService()</code>方法读取到的实现类</li>
+</ol>
+<ul>
+<li><code>Dubbo SPI</code> 改进<ul>
+<li><code>JDK SPI</code>在查找具体实现类的过程中，需要遍历SPI配置文件中定义的所有实现类，该过程中会将这些实现类全部实例化。如果SPI配置文件中定义了多个实现类，而我们只需要其中一个实现类时，就会生成不必要的对象。</li>
+<li>Dubbo将SPI配置文件改成了KV格式；其中key就是一个简单的标记，当我们为一个接口查找具体实现类时，可以指定key来选择具体实现。</li>
+<li><code>ExtensionLoader.getExtensionLoader()</code>方法会根据接口类型从缓存中查找相应的 <code>ExtensionLoader</code>实现。</li>
+<li>查找到接口对应的<code>ExtensionLoader</code>对象之后，会调用<code>getExtension()</code>方法，根据传入的key查找相应实现类，最终将其实例化后返回。</li>
+</ul>
+</li>
+</ul>
+<h2 id="SkywalkingAgent启动流程"><a href="#SkywalkingAgent启动流程" class="headerlink" title="SkywalkingAgent启动流程"></a>SkywalkingAgent启动流程</h2><ul>
+<li>入口是<code>apm-agent</code>模块中的<code>SkyWalkingAgent</code>类的<code>premain()</code>方法，完成了Agent启动流程</li>
+</ul>
+<ol>
+<li>初始化配置信息: 该步骤中会加载<code>agent.config</code>配置文件，其中会检测Java Agent参数以及环境变量是否覆盖了相应配置项。</li>
+<li>查找并解析<code>skywalking-plugin.def</code>插件文件。</li>
+<li><code>AgentClassLoader</code>加载插件</li>
+<li><code>PluginFinder</code>对插件进行分类管理。</li>
+<li>使用<code>Byte Buddy</code>库创建<code>AgentBuilder</code>。根据已加载的插件动态增强目标类，插入埋点逻辑。</li>
+<li>使用<code>JDK SPI</code>加载并启动<code>BootService</code>服务</li>
+<li>添加一个JVM钩子，在JVM退出时关闭所有<code>BootService</code>服务。</li>
+</ol>
+<h3 id="配置读取及处理"><a href="#配置读取及处理" class="headerlink" title="配置读取及处理"></a>配置读取及处理</h3><ul>
+<li><code>SnifferConfigInitializer.initializeCoreConfig()</code>方法中会将配置信息填充到<code>Config</code>静态字段中</li>
+</ul>
+<ol>
+<li>按照<code>$&#123;配置项名称:默认值&#125;</code>的格式读取各个配置项。</li>
+<li>解析系统环境变量值，覆盖<code>Config</code>中相应的静态字段。</li>
+<li>解析<code>Java Agent</code>的参数，覆盖<code>Config</code>中相应的静态字段。</li>
+<li>将<code>agent.config</code>文件中全部配置信息填充到<code>Config</code>中相应的静态字段中。</li>
+<li>检测<code>SERVICE_NAME</code>和<code>BACKEND_SERVICE</code>两个配置项，若为空则抛异常</li>
+<li>更新初始化标记<code>IS_INIT_COMPLETED</code></li>
+</ol>
+<blockquote>
+<p>注1： <code>loadConfig()</code>方法会优先根据环境变量(<code>skywalking_config</code>)指定的<code>agent.config</code>文件路径加载。若环境变量未指定<code>skywalking_config</code>配置，则到 <code>skywalking-agent.jar</code>同级的config目录下查找<code>agent.confg</code>配置文件。<br>注2：将<code>agent.config</code>文件中的配置信息加载到<code>Properties</code>对象之后，将使用<code>PropertyPlaceholderHelper</code>对配置信息进行解析，将当前的<code>“$&#123;配置项名称:默认值&#125;”</code>格式的配置值，替换成其中的默认值<br>注3：<code>overrideConfigBySystemProp()</code>方法会遍历环境变量(即<code>System.getProperties()</code>集合)，如果环境变量以<code>&quot;skywalking.&quot;</code>开头，则认为是<code>SkyWalking</code>的配置，覆盖<code>agent.config</code>中的默认值<br>注4：<code>overrideConfigByAgentOptions()</code>方法解析Java Agent的参数，覆盖agent.config中的默认值</p>
+</blockquote>
+<h3 id="插件启动流程"><a href="#插件启动流程" class="headerlink" title="插件启动流程"></a>插件启动流程</h3><ul>
+<li>加载插件时使用到一个自定义的<code>ClassLoader</code>—<code>AgentClassLoader</code></li>
+<li>使用自定义类加载器，目的是不在应用的<code>Classpath</code>中引入SkyWalking的插件jar包，让应用无依赖、无感知插件。</li>
+</ul>
+<ol>
+<li>在<code>AgentClassLoader</code>的构造方法中初始化classpath字段，该字段指向AgentClassLoader要扫描的目录(<code>skywalking-agent.jar</code>包同级别plugins目录和activations目录)</li>
+<li>从Classpath下加载类(或资源文件);对应<code>findClass()</code>方法和<code>findResource()</code>方法。</li>
+<li><code>findClass()</code>方法会扫描所有jar包，查找类文件</li>
+<li><code>findResource()</code>方法会遍历allJars集合缓存的全部jar包，从中查找指定的资源文件并返回</li>
+<li><code>AgentClassLoader</code>中有一个<code>DEFAULT_LOADER</code>静态字段，记录了默认的<code>AgentClassLoader</code></li>
+</ol>
+<h3 id="插件解析器"><a href="#插件解析器" class="headerlink" title="插件解析器"></a>插件解析器</h3><ul>
+<li>每个Agent插件中都会定义一个<code>skywalking-plugin.def</code>文件</li>
+<li><code>PluginResourcesResolver</code>是Agent插件的资源解析器，会通过<code>AgentClassLoader</code>中的<code>findResource()</code>方法读取所有Agent插件中的<code>skywalking-plugin.def</code>文件</li>
+</ul>
+<h3 id="Agent增强类"><a href="#Agent增强类" class="headerlink" title="Agent增强类"></a>Agent增强类</h3><ol>
+<li>拿到全部插件的<code>skywalking-plugin.def</code>文件之后，<code>PluginCfg</code>会逐行进行解析，转换成<code>PluginDefine</code>对象；<code>PluginCfg</code> 是通过枚举实现的、单例的工具类</li>
+<li>遍历全部<code>PluginDefine</code>对象，通过反射将其中<code>defineClass</code>字段中记录的插件类实例化；使用类加载器是默认的<code>AgentClassLoader</code>实例</li>
+</ol>
+<ul>
+<li><code>AbstractClassEnhancePluginDefine</code>抽象类是所有Agent插件类的顶级父类，定义了四个核心方法，决定了一个插件类应该增强哪些目标类、应该如何增强、具体插入哪些逻辑。<ul>
+<li><code>enhanceClass()</code>方法：返回的ClassMatch，用于匹配当前插件要增强的目标类。</li>
+<li><code>define()</code>方法：插件类增强逻辑的入口，底层会调用enhance()方法和witnessClass()方法。</li>
+<li><code>enhance()</code> 方法：真正执行增强逻辑的地方。</li>
+<li><code>witnessClass()</code>方法：一个开源组件可能有多个版本，插件会通过该方法识别组件的不同版本，防止对不兼容的版本进行增强。</li>
+</ul>
+</li>
+</ul>
+<h3 id="增强目标匹配类"><a href="#增强目标匹配类" class="headerlink" title="增强目标匹配类"></a>增强目标匹配类</h3><ul>
+<li><code>enhanceClass()</code>方法决定了一个插件类要增强的目标类，返回值为<code>ClassMatch</code>类型对象。<code>ClassMatch</code>类似于一个过滤器，可以通过多种方式匹配到目标类<ul>
+<li><code>NameMatch</code>：根据其className字段(String 类型)匹配目标类的名称。</li>
+<li><code>IndirectMatch</code>：子接口中定义了两个方法。</li>
+<li><code>MultiClassNameMatch</code>：其中会指定一个<code>matchClassNames</code>集合，该集合内的类即为目标类。</li>
+<li><code>ClassAnnotationMatch</code>：根据标注在类上的注解匹配目标类。</li>
+<li><code>MethodAnnotationMatch</code>：根据标注在方法上的注解匹配目标类。</li>
+<li><code>HierarchyMatch</code>：根据父类或是接口匹配目标类。</li>
+</ul>
+</li>
+</ul>
+<h3 id="插件查找器"><a href="#插件查找器" class="headerlink" title="插件查找器"></a>插件查找器</h3><ul>
+<li><code>PluginFinder</code>是<code>AbstractClassEnhancePluginDefine</code>查找器，可以根据给定的类查找用于增强的 <code>AbstractClassEnhancePluginDefine</code>集合。</li>
+<li>在<code>PluginFinder</code>的构造函数中会遍历已经实例化的<code>AbstractClassEnhancePluginDefine</code>，并根据<code>enhanceClass()</code>方法返回的<code>ClassMatcher</code>类型进行分类<ul>
+<li>如果返回值为<code>NameMatch</code>类型，则相应<code>AbstractClassEnhancePluginDefine</code>对象会记录到该集合<code>nameMatchDefine</code></li>
+<li>如果是其他类型返回值，则相应<code>AbstractClassEnhancePluginDefine</code>对象会记录到该集合<code>signatureMatchDefine</code></li>
+</ul>
+</li>
+<li><code>find()</code>方法是<code>PluginFinder</code>对外暴露的查询方法，其中会先后遍历<code>nameMatchDefine</code>集合和<code>signatureMatchDefine</code>集合，通过<code>ClassMatch.isMatch()</code>方法确定所有的匹配插件</li>
+</ul>
+<h3 id="Agent构造器"><a href="#Agent构造器" class="headerlink" title="Agent构造器"></a>Agent构造器</h3><ul>
+<li>Byte Buddy如何使用加载到的插件类增强目标方法</li>
+</ul>
+<ol>
+<li>首先会创建<code>ByteBuddy</code>对象:<code>Config.Agent.IS_OPEN_DEBUGGING_CLASS</code> 如果将其配置为 true，则会将动态生成的类输出到 debugging 目录中。</li>
+<li>接下来创建 <code>AgentBuilder</code> 对象，<code>AgentBuilder</code> 是 <code>Byte Buddy</code> 库专门用来支持 Java Agent 的一个 API，相关方法<ul>
+<li><code>ignore()</code>方法：忽略指定包中的类，对这些类不会进行拦截增强。</li>
+<li><code>type()</code>方法：在类加载时根据传入的ElementMatcher进行拦截，拦截到的目标类将会被 <code>transform()</code>方法中指定的<code>Transformer</code>进行增强。</li>
+<li><code>transform()</code>方法：这里指定的<code>Transformer</code>会对前面拦截到的类进行增强。</li>
+<li><code>with()</code>方法：添加一个<code>Listener</code>用来监听``AgentBuilder`触发的事件。</li>
+</ul>
+</li>
+<li><code>PluginFInder.buildMatch()</code>方法返回的<code>ElementMatcher</code> 对象会将全部插件的匹配规则(即插件的<code>enhanceClass()</code>方法返回的 ClassMatch)用OR的方式连接起来，这样，所有插件能匹配到的所有类都会交给Transformer处理。</li>
+<li><code>with()</code> 方法中添加的监听器——<code>SkywalkingAgent.Listener</code>，它继承了 <code>AgentBuilder.Listener</code>接口，当监听到<code>Transformation</code>事件时，会根据 <code>IS_OPEN_DEBUGGING_CLASS</code>配置决定是否将增强之后的类持久化成class文件保存到指定的log目录中; 注意，该操作是需要加锁的，会影响系统的性能，一般只在测试环境中开启，在生产环境中不会开启。</li>
+<li><code>Skywalking.Transformer</code>，它实现了<code>AgentBuilder.Transformer</code>接口，其<code>transform()</code>方法是插件增强目标类的入口。<code>Skywalking.Transformer</code>会通过<code>PluginFinder</code>查找目标类匹配的插件（即<code>AbstractClassEnhancePluginDefine</code>对象），然后交由<code>AbstractClassEnhancePluginDefine</code>完成增强<blockquote>
+<p>注意：如果一个类被多个插件匹配会被增强多次，当你打开<code>IS_OPEN_DEBUGGING_CLASS</code>配置项时，会看到对应的多个class文件。</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="服务管理"><a href="#服务管理" class="headerlink" title="服务管理"></a>服务管理</h3><ul>
+<li><code>JDK SPI</code>技术加载<code>BootService</code>接口的所有实现类，<code>BootService</code>接口中定义了<code>SkyWalking Agent</code>核心服务的行为</li>
+<li><code>ServiceManager</code>是<code>BootService</code>实例的管理器，主要负责管理BootService实例的生命周期；<code>ServiceManager</code>是个单例，底层维护了一个<code>bootedServices集合(Map&lt;Class, BootService&gt; </code>类型)，记录了每个<code>BootService</code>实现对应的实例。</li>
+<li><code>boot()</code>方法是<code>ServiceManager</code>的核心方法</li>
+</ul>
+<ol>
+<li>首先通过load方法实例化全部<code>BootService</code>接口实现</li>
+<li>在<code>apm-agent-core</code>模块的<code>resource/META-INF.services/org.apache.skywalking.apm.agent.core.boot.BootService</code>文件中，记录了 <code>ServiceManager</code>要加载的<code>BootService</code>接口实现类</li>
+<li>加载完上述<code>BootService</code>实现类型之后，<code>ServiceManager</code>会针对<code>BootService上的@DefaultImplementor</code>和<code>@OverrideImplementor</code>注解进行处理<ul>
+<li><code>@DefaultImplementor</code>注解用于标识<code>BootService</code>接口的默认实现。</li>
+<li><code>@OverrideImplementor</code>注解用于覆盖默认BootService实现，通过<code>value</code>字段指定要覆盖的默认实现。</li>
+</ul>
+</li>
+<li>确定完要使用的<code>BootService</code>实现之后，<code>ServiceManager</code>将统一初始化<code>bootServices</code>集合中的<code>BootService</code>实现,同样是在<code>ServiceManager.boot()</code>方法中，逐个调用<code>BootService</code>实现的<code>prepare()</code>、<code>startup()</code>、<code>onComplete()</code>方法<br><img src="https://s0.lgstatic.com/i/image3/M01/08/53/Ciqah16FsIyAKF5JAAFCMa4LIHU953.png" alt="BootService覆盖逻辑"></li>
+</ol>
+<h3 id="JVM关闭钩子"><a href="#JVM关闭钩子" class="headerlink" title="JVM关闭钩子"></a>JVM关闭钩子</h3><p>在 <code>Skywalking Agent</code>启动流程的最后，会添加一个JVM退出钩子，并通过<code>ServiceManager.shutdown()</code>方法，关闭前文启动的全部<code>BootService</code>服务。</p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#skywalking" >
+    <span class="tag-code">skywalking</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+    
+      <a class="nav-right" href="/2021/02/17/skywalking-Agent%E6%8F%92%E4%BB%B6%E5%8E%9F%E7%90%86/">
+        
+          skywalking系列 | Agent插件原理
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%BE%AE%E5%86%85%E6%A0%B8%E6%9E%B6%E6%9E%84-%E5%92%8C-SPI%E6%9C%BA%E5%88%B6"><span class="toc-nav-text">微内核架构 和 SPI机制</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BE%AE%E5%86%85%E6%A0%B8%E6%9E%B6%E6%9E%84"><span class="toc-nav-text">微内核架构</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#SPI%E6%9C%BA%E5%88%B6"><span class="toc-nav-text">SPI机制</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#SkywalkingAgent%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="toc-nav-text">SkywalkingAgent启动流程</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%85%8D%E7%BD%AE%E8%AF%BB%E5%8F%96%E5%8F%8A%E5%A4%84%E7%90%86"><span class="toc-nav-text">配置读取及处理</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8F%92%E4%BB%B6%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="toc-nav-text">插件启动流程</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8F%92%E4%BB%B6%E8%A7%A3%E6%9E%90%E5%99%A8"><span class="toc-nav-text">插件解析器</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Agent%E5%A2%9E%E5%BC%BA%E7%B1%BB"><span class="toc-nav-text">Agent增强类</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%A2%9E%E5%BC%BA%E7%9B%AE%E6%A0%87%E5%8C%B9%E9%85%8D%E7%B1%BB"><span class="toc-nav-text">增强目标匹配类</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8F%92%E4%BB%B6%E6%9F%A5%E6%89%BE%E5%99%A8"><span class="toc-nav-text">插件查找器</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Agent%E6%9E%84%E9%80%A0%E5%99%A8"><span class="toc-nav-text">Agent构造器</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="toc-nav-text">服务管理</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#JVM%E5%85%B3%E9%97%AD%E9%92%A9%E5%AD%90"><span class="toc-nav-text">JVM关闭钩子</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/02/17/skywalking-Agent启动原理/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "skywalking系列 | Agent启动原理",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

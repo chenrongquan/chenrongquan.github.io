@@ -10,7 +10,7 @@
   
   <title>
      
-      apm | 关键指标说明 | ™技术博客 
+      kafka系列 | 集群规划 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>apm | 关键指标说明</h2>
-  <p class="post-date">2021年2月27日</p>
+  <h2>kafka系列 | 集群规划</h2>
+  <p class="post-date">2021年5月23日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,54 +160,93 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="APDEX性能指数"><a href="#APDEX性能指数" class="headerlink" title="APDEX性能指数"></a>APDEX性能指数</h2><p>参考：<a target="_blank" rel="noopener" href="https://www.apdex.org/?spm=a2c4g.11186623.2.5.8b541d6bYpirnW">apdex</a></p>
+    <section class="markdown-content"><h2 id="Kafka线上集群部署方案怎么做？"><a href="#Kafka线上集群部署方案怎么做？" class="headerlink" title="Kafka线上集群部署方案怎么做？"></a>Kafka线上集群部署方案怎么做？</h2><hr>
+<h3 id="操作系统：Linux最佳，原因包括三个维度"><a href="#操作系统：Linux最佳，原因包括三个维度" class="headerlink" title="操作系统：Linux最佳，原因包括三个维度"></a>操作系统：Linux最佳，原因包括三个维度</h3><ul>
+<li>I/O模型的使用</li>
+<li>数据网络传输效率</li>
+<li>社区支持度</li>
+</ul>
+<ol>
+<li>I/O模型分类</li>
+</ol>
 <ul>
-<li>APDEX性能指数（Application Performance Index）是一个国际通用的应用性能计算标准。该标准将用户对应用的使用感受定义为三个等级：<ul>
-<li>满意（0~T）</li>
-<li>可容忍（T~4T）</li>
-<li>不满意（大于4T）</li>
+<li>阻塞式IO BIO</li>
+<li>非阻塞时IO NIO</li>
+<li>IO多路复用 Select函数</li>
+<li>信号驱动IO Epoll</li>
+<li>异步IO AIO</li>
+</ul>
+<p>Kafka的Java客户端底层使用了selector，在Linux上的实现机制是epoll，在windows平台上的实现机制是select；<br><strong>因此在这一点上将 Kafka 部署在 Linux 上是有优势的，因为能够获得更高效的 I/O 性能。</strong></p>
+<ol start="2">
+<li>网络传输效率</li>
+</ol>
+<ul>
+<li>kafka需要在磁盘和网络间进行大量数据传输，考虑Linux的零拷贝技术</li>
+<li>零拷贝（Zero Copy）技术，就是当数据在磁盘和网络进行传输时避免昂贵的内核态数据拷贝从而实现快速的数据传输</li>
+<li>一句话总结一下，在 Linux 部署 Kafka 能够享受到零拷贝技术所带来的快速数据传输特性。<blockquote>
+<p>零拷贝避免了将数据从磁盘复制到缓冲区，再将缓冲区的内容发送到socket的性能损耗。这中间有四次数据拷贝，磁盘-&gt;页缓存-&gt;用户空间-&gt;socket缓存-&gt;网络</p>
+</blockquote>
+</li>
+</ul>
+<ol start="3">
+<li>社区的支持度</li>
+</ol>
+<ul>
+<li>社区目前对 Windows 平台上发现的 Kafka Bug 不做任何承诺。</li>
+<li>Windows 平台上部署 Kafka 只适合于个人测试或用于功能验证，千万不要应用于生产环境。</li>
+</ul>
+<h3 id="磁盘"><a href="#磁盘" class="headerlink" title="磁盘"></a>磁盘</h3><ul>
+<li>建议使用普通机械硬盘即可，原因<ul>
+<li>Kafka使用的方式多是顺序读写操作，一定程度上规避了机械磁盘最大的劣势，即随机读写操作慢。</li>
+<li>从性价比上来说，机械磁盘物美价廉，而它因易损坏而造成的可靠性差等缺陷，又由 Kafka 在软件层面提供机制来保证，故使用普通机械磁盘是很划算的</li>
+</ul>
+</li>
+<li>是否应该使用磁盘阵列（RAID)<ul>
+<li>Kafka 自己实现了冗余机制来提供高可靠性；</li>
+<li>通过分区的概念，Kafka 也能在软件层面自行实现负载均衡。</li>
+<li>追求性价比的公司可以不搭建 RAID，使用普通磁盘组成存储空间即可</li>
+<li>使用机械磁盘完全能够胜任 Kafka 线上环境。</li>
 </ul>
 </li>
 </ul>
-<p><img src="https://static-aliyun-doc.oss-accelerate.aliyuncs.com/assets/img/zh-CN/7870348951/p43776.gif"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Apdex&#x3D;(满意数+可容忍数&#x2F;2)&#x2F;总样本量</span><br></pre></td></tr></table></figure>
-<ul>
-<li>一般：取应用的平均响应时间作为计算指标，并将T定义为500毫秒。</li>
+<h4 id="磁盘容量"><a href="#磁盘容量" class="headerlink" title="磁盘容量"></a>磁盘容量</h4><ul>
+<li>Kafka 集群到底需要多大的存储空间？应该如何结合自身业务场景和存储需求来规划 Kafka 集群的存储容量呢？</li>
+<li>计算例子：<br>假设有个业务每天需要向 Kafka 集群发送 1 亿条消息，每条消息保存两份以防止数据丢失，另外消息默认保存两周时间。现在假设消息的平均大小是 1KB，那么你能说出你的 Kafka 集群需要为这个业务预留多少磁盘空间吗？<ul>
+<li>每天 1 亿条 1KB 大小的消息，保存两份且留存两周的时间，那么总的空间大小就等于 1 亿 * 1KB * 2 / 1000 / 1000 = 200GB。</li>
+<li>一般情况下 Kafka 集群除了消息数据还有其他类型的数据，比如索引数据等，故我们再为这些数据预留出 10% 的磁盘空间，因此总的存储容量就是 220GB。</li>
+<li>既然要保存两周，那么整体容量即为 220GB * 14，大约 3TB 左右。</li>
+<li>Kafka 支持数据的压缩，假设压缩比是 0.75，那么最后你需要规划的存储空间就是 0.75 * 3 = 2.25TB。</li>
 </ul>
-<blockquote>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th align="left">Apdex值</th>
-<th align="left">颜色</th>
-<th align="left">说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">0.75 ≤ Apdex ≤ 1</td>
-<td align="left">绿色</td>
-<td align="left">表示应用、实例或事务被调用时响应很快，用户体验较满意。</td>
-</tr>
-<tr>
-<td align="left">0.3 ≤ Apdex &lt; 0.75</td>
-<td align="left">黄色</td>
-<td align="left">表示应用、实例或事务被调用时响应较慢，用户体验一般。</td>
-</tr>
-<tr>
-<td align="left">0 ≤ Apdex &lt; 0.3</td>
-<td align="left">红色</td>
-<td align="left">表示应用、实例或事务被调用时响应极慢，用户体验较差。</td>
-</tr>
-</tbody></table>
+</li>
+<li>规划磁盘容量时需要考虑的元素：每天消息量+ 单条数据大小+备份数量+保留天数+是否压缩<ul>
+<li>新增消息数</li>
+<li>消息留存时间</li>
+<li>平均消息大小</li>
+<li>备份数</li>
+<li>是否启用压缩</li>
+</ul>
+</li>
+</ul>
+<h4 id="带宽"><a href="#带宽" class="headerlink" title="带宽"></a>带宽</h4><ul>
+<li>带宽主要有两种：1Gbps 的千兆网络和 10Gbps 的万兆网络</li>
+<li>带宽资源的规划背后其实是要规划所需的 Kafka 服务器的数量</li>
+<li>计算例子：<br>假设你公司的机房环境是千兆网络，即 1Gbps，现有个业务，其业务目标或 SLA 是在 1 小时内处理 1TB 的业务数据。那么问题来了，你到底需要多少台 Kafka 服务器来完成这个业务呢？<ul>
+<li>由于带宽是 1Gbps，即每秒处理 1Gb 的数据，假设每台 Kafka 服务器都是安装在专属的机器上，也就是说每台 Kafka 机器上没有混布其他服务。通常情况下只能假设 Kafka 会用到 70% 的带宽资源，因为总要为其他应用或进程留一些资源。根据实际使用经验，超过 70% 的阈值就有网络丢包的可能性了，故 70% 的设定是一个比较合理的值，<strong>也就是说单台 Kafka 服务器最多也就能使用大约 700Mb 的带宽资源。</strong></li>
+<li>这只是它能使用的最大带宽资源，你不能让 Kafka 服务器常规性使用这么多资源，<strong>故通常要再额外预留出 2/3 的资源，即单台服务器使用带宽 700Mb / 3 ≈ 240Mbps。</strong></li>
+<li>有了 240Mbps，我们就可以计算 1 小时内处理 1TB 数据所需的服务器数量了。根据这个目标，我们每秒需要处理 2336Mb 的数据，除以 240，约等于 10 台服务器。</li>
+<li>如果消息还需要额外复制两份，那么总的服务器台数还要乘以 3，即 30 台。</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://static001.geekbang.org/resource/image/ba/04/bacf5700e4b145328f4d977575f28904.jpg"></p>
 </section>
     <!-- Tags START -->
     
       <div class="tags">
         <span>Tags:</span>
         
-  <a href="/tags#apm" >
-    <span class="tag-code">apm</span>
+  <a href="/tags#kafka" >
+    <span class="tag-code">kafka</span>
   </a>
 
       </div>
@@ -218,17 +257,17 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/02/27/apm-%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E/">
+      <a class="nav-left" href="/2021/05/22/kafka-%E6%B6%88%E6%81%AF%E5%BC%95%E6%93%8E/">
         <span class="nav-arrow">← </span>
         
-          apm | 存储结构说明
+          kafka系列 | 消息引擎
         
       </a>
     
     
-      <a class="nav-right" href="/2021/03/05/kafka-%E5%9F%BA%E7%A1%80%E9%83%A8%E5%88%86/">
+      <a class="nav-right" href="/2021/05/23/kafka-%E9%9B%86%E7%BE%A4%E5%8F%82%E6%95%B0%E9%85%8D%E7%BD%AE/">
         
-          kafka系列 | 基础部分
+          kafka系列 | 集群参数配置
         
         <span class="nav-arrow"> →</span>
       </a>
@@ -260,7 +299,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#APDEX%E6%80%A7%E8%83%BD%E6%8C%87%E6%95%B0"><span class="toc-nav-text">APDEX性能指数</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Kafka%E7%BA%BF%E4%B8%8A%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88%E6%80%8E%E4%B9%88%E5%81%9A%EF%BC%9F"><span class="toc-nav-text">Kafka线上集群部署方案怎么做？</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%EF%BC%9ALinux%E6%9C%80%E4%BD%B3%EF%BC%8C%E5%8E%9F%E5%9B%A0%E5%8C%85%E6%8B%AC%E4%B8%89%E4%B8%AA%E7%BB%B4%E5%BA%A6"><span class="toc-nav-text">操作系统：Linux最佳，原因包括三个维度</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%A3%81%E7%9B%98"><span class="toc-nav-text">磁盘</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%A3%81%E7%9B%98%E5%AE%B9%E9%87%8F"><span class="toc-nav-text">磁盘容量</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%B8%A6%E5%AE%BD"><span class="toc-nav-text">带宽</span></a></li></ol></li></ol></li></ol>
     
   </div>
 </aside>
@@ -270,7 +309,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/02/27/apm-关键指标说明/';
+    var url = 'http://chenrongquan.github.com/2021/05/23/kafka-集群规划/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -334,7 +373,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "apm | 关键指标说明",
+        id: "kafka系列 | 集群规划",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {

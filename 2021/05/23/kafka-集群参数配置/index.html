@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      kafka系列 | 集群参数配置 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>kafka系列 | 集群参数配置</h2>
+  <p class="post-date">2021年5月23日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="Broker端参数"><a href="#Broker端参数" class="headerlink" title="Broker端参数"></a>Broker端参数</h2><blockquote>
+<p>也称 静态参数（Static Configs)<br>介绍的所有参数都是那些要修改默认值的参数;因为它们默认值不适合一般的生产环境。</p>
+</blockquote>
+<hr>
+<ul>
+<li>静态参数<ul>
+<li>必须在 Kafka 的配置文件 server.properties 中进行设置的参数，不管你是新增、修改还是删除。</li>
+<li>同时，你必须重启 Broker 进程才能令它们生效。</li>
+</ul>
+</li>
+</ul>
+<h3 id="与存储信息相关的参数"><a href="#与存储信息相关的参数" class="headerlink" title="与存储信息相关的参数"></a>与存储信息相关的参数</h3><ul>
+<li>**<code>log.dirs</code>**：非常重要的参数，指定了 Broker 需要使用的若干个文件目录路径。这个参数是没有默认值的，必须亲自指定。</li>
+<li>**<code>log.dir</code>**：说明它只能表示单个路径，它是补充上一个参数用的。</li>
+<li>怎么设置呢？<ul>
+<li>只要设置log.dirs，即第一个参数就好了，不要设置log.dir</li>
+<li>更重要的是，在线上生产环境中一定要为log.dirs配置多个路径，具体格式是一个 CSV 格式，也就是用逗号分隔的多个路径</li>
+<li>有条件的话你最好保证这些目录挂载到不同的物理磁盘上</li>
+</ul>
+</li>
+<li>两个好处<ul>
+<li>提升读写性能：比起单块磁盘，多块物理磁盘同时读写数据有更高的吞吐量。</li>
+<li>能够实现故障转移：即 Failover。<blockquote>
+<p>这是 Kafka 1.1 版本新引入的强大功能。要知道在以前，只要 Kafka Broker 使用的任何一块磁盘挂掉了，整个 Broker 进程都会关闭。但是自 1.1 开始，这种情况被修正了，坏掉的磁盘上的数据会自动地转移到其他正常的磁盘上，而且 Broker 还能正常工作。还记得上一期我们关于 Kafka 是否需要使用 RAID 的讨论吗？这个改进正是我们舍弃 RAID 方案的基础：没有这种 Failover 的话，我们只能依靠 RAID 来提供保障。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="与-ZooKeeper-相关的参数"><a href="#与-ZooKeeper-相关的参数" class="headerlink" title="与 ZooKeeper 相关的参数"></a>与 ZooKeeper 相关的参数</h3><ul>
+<li><p>ZooKeeper 是做什么的呢</p>
+<ul>
+<li>它是一个分布式协调框架，负责协调管理并保存 Kafka 集群的所有元数据信息</li>
+<li>比如集群都有哪些 Broker 在运行、创建了哪些 Topic，每个 Topic 都有多少分区以及这些分区的 Leader 副本都在哪些机器上等信息。</li>
+</ul>
+</li>
+<li><p><strong><code>zookeeper.connect</code></strong>: 是一个 CSV 格式的参数；2181 是 ZooKeeper 的默认端口。</p>
+</li>
+<li><p>让多个 Kafka 集群使用同一套 ZooKeeper 集群，那么这个参数应该怎么设置呢？</p>
+<ul>
+<li> chroot 就派上用场了。这个 chroot 是 ZooKeeper 的概念，类似于别名。</li>
+</ul>
+</li>
+<li><p>同一zookeeper配置多套kafka</p>
+<ul>
+<li>有两套 Kafka 集群，假设分别叫它们 kafka1 和 kafka2</li>
+<li>两套集群的zookeeper.connect参数可以这样指定：</li>
+<li>zk1:2181,zk2:2181,zk3:2181/kafka1和zk1:2181,zk2:2181,zk3:2181/kafka2</li>
+</ul>
+</li>
+</ul>
+<h3 id="与-Broker-连接相关的参数"><a href="#与-Broker-连接相关的参数" class="headerlink" title="与 Broker 连接相关的参数"></a>与 Broker 连接相关的参数</h3><ul>
+<li><p>即客户端程序或其他 Broker 如何与该 Broker 进行通信的设置</p>
+</li>
+<li><p><strong><code>listeners</code></strong>: 监听器，其实就是告诉外部连接者要通过什么协议访问指定主机名和端口开放的 Kafka 服务。</p>
+</li>
+<li><p><code>advertised.listeners</code>: 这组监听器是 Broker 用于对外发布的。</p>
+</li>
+<li><p><code>host.name/port</code>: 过期的参数</p>
+</li>
+<li><p>监听器的概念</p>
+<ul>
+<li>从构成上来说，它是若干个逗号分隔的三元组，每个三元组的格式为&lt;协议名称，主机名，端口号&gt;。</li>
+<li>这里的协议名称可能是标准的名字，比如 PLAINTEXT 表示明文传输、SSL 表示使用 SSL 或 TLS 加密传输等；也可能是你自己定义的协议名字，比如CONTROLLER: //localhost:9092。</li>
+<li>必须还要指定listener.security.protocol.map参数告诉这个协议底层使用了哪种安全协议;比如指定listener.security.protocol.map=CONTROLLER:PLAINTEXT表示CONTROLLER这个自定义协议底层使用明文不加密传输数据。</li>
+<li>主机名这个设置中我到底使用 IP 地址还是主机名。这里我给出统一的建议：最好全部使用主机名，即 Broker 端和 Client 端应用配置中全部填写主机名。Broker 源代码中也使用的是主机名，如果你在某些地方使用了 IP 地址进行连接，可能会发生无法连接的问题。</li>
+</ul>
+</li>
+</ul>
+<h3 id="与-Topic-管理相关的参数"><a href="#与-Topic-管理相关的参数" class="headerlink" title="与 Topic 管理相关的参数"></a>与 Topic 管理相关的参数</h3><ul>
+<li><strong><code>auto.create.topics.enable</code></strong>:是否允许自动创建 Topic。<ul>
+<li>最好设置成 false，即不允许自动创建 Topic。</li>
+<li>对于那些大公司而言，每个部门被分配的 Topic 应该由运维严格把控，决不能允许自行创建任何 Topic。</li>
+</ul>
+</li>
+<li><strong><code>unclean.leader.election.enable</code></strong>:是否允许 Unclean Leader 选举。<ul>
+<li>关闭 Unclean Leader 选举的</li>
+<li>只有保存数据比较多的那些副本才有资格竞选，那些落后进度太多的副本没资格做这件事。</li>
+<li>假设那些保存数据比较多的副本都挂了怎么办？我们还要不要进行 Leader 选举了？</li>
+<li>如果设置成 false，那么就坚持之前的原则，坚决不能让那些落后太多的副本竞选 Leader。这样做的后果是这个分区就不可用了，因为没有 Leader 了。</li>
+<li>如果是 true，那么 Kafka 允许你从那些“跑得慢”的副本中选一个出来当 Leader。这样做的后果是数据有可能就丢失了，因为这些副本保存的数据本来就不全</li>
+<li>在最新版的 Kafka 中默认就是 false; 建议还是显式地把它设置成 false 吧。</li>
+</ul>
+</li>
+<li><strong><code>auto.leader.rebalance.enable</code></strong>:是否允许定期进行 Leader 选举。<ul>
+<li>设置它的值为 true 表示允许 Kafka 定期地对一些 Topic 分区进行 Leader 重选举;</li>
+<li>严格来说它与上一个参数中 Leader 选举的最大不同在于，它不是选 Leader，而是换 Leader！</li>
+<li>比如 Leader A 一直表现得很好，但若auto.leader.rebalance.enable=true，那么有可能一段时间后 Leader A 就要被强行卸任换成 Leader B。</li>
+<li>建议你在生产环境中把这个参数设置成 false。</li>
+</ul>
+</li>
+</ul>
+<h3 id="与数据留存相关的参数"><a href="#与数据留存相关的参数" class="headerlink" title="与数据留存相关的参数"></a>与数据留存相关的参数</h3><ul>
+<li>**<code>log.retention.&#123;hours|minutes|ms&#125;</code>**：这是个“三兄弟”，都是控制一条消息数据被保存多长时间。从优先级上来说 ms 设置最高、minutes 次之、hours 最低。<ul>
+<li>这里设置的是集群级别的，Kafka 还支持Topic级别的保存时间设置。</li>
+<li>比如log.retention.hours=168表示默认保存 7 天的数据，自动删除 7 天前的数据。</li>
+</ul>
+</li>
+<li>**<code>log.retention.bytes</code>**：指定 Broker 为消息保存的总磁盘容量大小。<ul>
+<li>这个值默认是 -1，表明你想在这台 Broker 上保存多少数据都可以</li>
+<li>这个参数真正发挥作用的场景其实是在云上构建多租户的 Kafka 集群</li>
+<li>设想你要做一个云上的 Kafka 服务，每个租户只能使用 100GB 的磁盘空间，为了避免有个“恶意”租户使用过多的磁盘空间，设置这个参数就显得至关重要了。</li>
+</ul>
+</li>
+<li>**<code>message.max.bytes</code>**：控制 Broker 能够接收的最大消息大小；针对单数据较大的业务需要调整该大小<ul>
+<li>不能使用默认值的参数，这个参数也是一样，默认的 1000012 太少了，还不到 1MB。</li>
+<li>在线上环境中设置一个比较大的值还是比较保险的做法。毕竟它只是一个标尺而已，仅仅衡量 Broker 能够处理的最大消息大小，即使设置大一点也不会耗费什么磁盘空间的。</li>
+</ul>
+</li>
+</ul>
+<h2 id="Topic级别参数"><a href="#Topic级别参数" class="headerlink" title="Topic级别参数"></a>Topic级别参数</h2><blockquote>
+<p>Kafka 提供了专门的 kafka-configs 命令来修改它们</p>
+</blockquote>
+<hr>
+<ul>
+<li>如果同时设置了 Topic 级别参数和全局 Broker 参数，到底听谁的呢？哪个说了算呢？<ul>
+<li>Topic 级别参数会覆盖全局 Broker 参数的值，而每个 Topic 都能设置自己的参数值，这就是所谓的 Topic 级别参数。</li>
+<li>topic参数高于broker参数<h3 id="与保存消息相关的参数"><a href="#与保存消息相关的参数" class="headerlink" title="与保存消息相关的参数"></a>与保存消息相关的参数</h3></li>
+</ul>
+</li>
+<li><strong><code>retention.ms</code></strong>: 规定了该 Topic 消息被保存的时长。<ul>
+<li>默认是 7 天，即该 Topic 只保存最近 7 天的消息。一旦设置了这个值，它会覆盖掉 Broker 端的全局参数值。</li>
+</ul>
+</li>
+<li><strong><code>retention.bytes</code></strong>: 规定了要为该 Topic 预留多大的磁盘空间。<ul>
+<li>和全局参数作用相似，这个值通常在多租户的 Kafka 集群中会有用武之地。当前默认值是 -1，表示可以无限使用磁盘空间。</li>
+</ul>
+</li>
+</ul>
+<h3 id="与能处理的消息大小相关参数"><a href="#与能处理的消息大小相关参数" class="headerlink" title="与能处理的消息大小相关参数"></a>与能处理的消息大小相关参数</h3><ul>
+<li>**<code>max.message.bytes</code>**：决定了 Kafka Broker 能够正常接收该 Topic 的最大消息大小。<ul>
+<li>该参数跟 message.max.bytes 参数的作用是一样的，只不过 max.message.bytes 是作用于某个 topic，而 message.max.bytes 是作用于全局。</li>
+</ul>
+</li>
+</ul>
+<h3 id="怎么设置-Topic-级别参数"><a href="#怎么设置-Topic-级别参数" class="headerlink" title="怎么设置 Topic 级别参数"></a>怎么设置 Topic 级别参数</h3><ul>
+<li>有两种方式可以设置：<ul>
+<li>创建 Topic 时进行设置</li>
+<li>修改 Topic 时设置</li>
+</ul>
+</li>
+<li>如何在创建 Topic 时设置这些参数</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic transaction --partitions 1 --replication-factor 1 --config retention.ms=15552000000 --config max.message.bytes=5242880</span><br></pre></td></tr></table></figure>
+<ul>
+<li>自带的命令kafka-configs来修改 Topic 级别参数<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bin/kafka-configs.sh --zookeeper localhost:2181 --entity-type topics --entity-name transaction --alter --add-config max.message.bytes=10485760</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>最好始终坚持使用第二种方式来设置，并且在未来，Kafka 社区很有可能统一使用kafka-configs脚本来调整 Topic 级别参数。</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="JVM-端参数"><a href="#JVM-端参数" class="headerlink" title="JVM 端参数"></a>JVM 端参数</h2><hr>
+<ul>
+<li>Kafka 自 2.0.0 版本开始，已经正式摒弃对 Java 7 的支持了，所以有条件的话至少使用 Java 8 吧。<h3 id="堆大小参数"><a href="#堆大小参数" class="headerlink" title="堆大小参数"></a>堆大小参数</h3></li>
+<li>无脑给出一个通用的建议：将你的 JVM 堆大小设置成 6GB 吧,这是目前业界比较公认的一个合理值。</li>
+<li>使用默认的 Heap Size 来跑 Kafka，说实话默认的 1GB 有点小，毕竟 Kafka Broker 在与客户端进行交互时会在 JVM 堆上创建大量的 ByteBuffer 实例，Heap Size 不能太小。<h3 id="垃圾回收器的设置"><a href="#垃圾回收器的设置" class="headerlink" title="垃圾回收器的设置"></a>垃圾回收器的设置</h3></li>
+<li>也就是平时常说的 GC 设置。如果你依然在使用 Java 7，那么可以根据以下法则选择合适的垃圾回收器：<ul>
+<li>非常充裕，建议使用 CMS 收集器。启用方法是指定-XX:+UseCurrentMarkSweepGC。</li>
+<li>否则，使用吞吐量收集器。开启方法是指定-XX:+UseParallelGC。</li>
+</ul>
+</li>
+<li>如果你在使用 Java 8，那么可以手动设置使用 G1 收集器。<ul>
+<li>在没有任何调优的情况下，G1 表现得要比 CMS 出色，主要体现在更少的 Full GC，需要调整的参数更少等，所以使用 G1 就好了。</li>
+</ul>
+</li>
+</ul>
+<h3 id="如何设置JVM参数"><a href="#如何设置JVM参数" class="headerlink" title="如何设置JVM参数"></a>如何设置JVM参数</h3><ul>
+<li><p>**<code>KAFKA_HEAP_OPTS</code>**：指定堆大小。</p>
+</li>
+<li><p>**<code>KAFKA_JVM_PERFORMANCE_OPTS</code>**：指定 GC 参数。</p>
+</li>
+<li><p>启动 Kafka Broker，即在启动 Kafka Broker 之前，先设置上这两个环境变量：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">$&gt; <span class="built_in">export</span> KAFKA_HEAP_OPTS=--Xms6g  --Xmx6g</span><br><span class="line">$&gt; <span class="built_in">export</span> KAFKA_JVM_PERFORMANCE_OPTS= -server -XX:+UseG1GC -XX:MaxGCPauseMillis=20 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent -Djava.awt.headless=<span class="literal">true</span></span><br><span class="line">$&gt; bin/kafka-server-start.sh config/server.properties</span><br></pre></td></tr></table></figure>
+<h2 id="操作系统级别的参数"><a href="#操作系统级别的参数" class="headerlink" title="操作系统级别的参数"></a>操作系统级别的参数</h2></li>
+</ul>
+<hr>
+<ul>
+<li>Kafka 并不需要设置太多的 OS 参数，但有些因素最好还是关注一下，比如下面这几个：<ul>
+<li>文件描述符限制</li>
+<li>文件系统类型</li>
+<li>Swappiness</li>
+<li>提交时间</li>
+</ul>
+</li>
+</ul>
+<h3 id="文件描述符限制"><a href="#文件描述符限制" class="headerlink" title="文件描述符限制"></a>文件描述符限制</h3><ul>
+<li><strong><code>ulimit -n</code></strong><ul>
+<li>任何一个 Java 项目最好都调整下这个值。实际上，文件描述符系统资源并不像我们想象的那样昂贵，你不用太担心调大此值会有什么不利的影响。</li>
+<li>通常情况下将它设置成一个超大的值是合理的做法，比如ulimit -n 1000000。</li>
+<li>设置这个参数一点都不重要，但不设置的话后果很严重，比如你会经常看到“Too many open files”的错误。<blockquote>
+<p>在 Linux 系统中，一个长连接会占用一个 Socket 句柄（文件描述符），像 Ubuntu 默认是 1024，也就是最多 1024 个 Socket 长连接，Kafka 网络通信中大量使用长连接，这对比较大的 Kafka 集群来说可能是不够的。 为了避免 Socket 句柄不够用，将这个设置为一个比较大值是合理的。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="文件系统类型"><a href="#文件系统类型" class="headerlink" title="文件系统类型"></a>文件系统类型</h3><ul>
+<li>这里所说的文件系统指的是如 ext3、ext4 或 XFS 这样的日志型文件系统。</li>
+<li>根据官网的测试报告，XFS 的性能要强于 ext4，所以生产环境最好还是使用 XFS。</li>
+</ul>
+<h3 id="swap-的调优"><a href="#swap-的调优" class="headerlink" title="swap 的调优"></a>swap 的调优</h3><ul>
+<li>网上很多文章都提到设置其为 0，将 swap 完全禁掉以防止 Kafka 进程使用 swap 空间。我个人反倒觉得还是不要设置成 0 比较好，我们可以设置成一个较小的值。</li>
+<li>因为一旦设置成 0，当物理内存耗尽时，操作系统会触发 OOM killer 这个组件，它会随机挑选一个进程然后 kill 掉，即根本不给用户任何的预警。</li>
+<li>但如果设置成一个比较小的值，当开始使用 swap 空间时，你至少能够观测到 Broker 性能开始出现急剧下降，从而给你进一步调优和诊断问题的时间。</li>
+<li>基于这个考虑，我个人建议将 swappniess 配置成一个接近 0 但不为 0 的值，比如 1。</li>
+</ul>
+<h3 id="提交时间或者说是-Flush-落盘时间"><a href="#提交时间或者说是-Flush-落盘时间" class="headerlink" title="提交时间或者说是 Flush 落盘时间"></a>提交时间或者说是 Flush 落盘时间</h3><ul>
+<li><p>向 Kafka 发送数据并不是真要等数据被写入磁盘才会认为成功，而是只要数据被写入到操作系统的页缓存（Page Cache）上就可以了</p>
+</li>
+<li><p>随后操作系统根据 LRU 算法会定期将页缓存上的“脏”数据落盘到物理磁盘上。</p>
+</li>
+<li><p>这个定期就是由提交时间来确定的，默认是 5 秒。一般情况下我们会认为这个时间太频繁了，可以适当地增加提交间隔来降低物理磁盘的写操作。</p>
+</li>
+<li><p>如果在页缓存中的数据在写入到磁盘前机器宕机了，那岂不是数据就丢失了。的确，这种情况数据确实就丢失了，但鉴于 Kafka 在软件层面已经提供了多副本的冗余机制，因此这里稍微拉大提交间隔去换取性能还是一个合理的做法。</p>
+<blockquote>
+<p>页缓存属于磁盘缓存（Disk cache）的一种，主要是为了改善系统性能。重复访问磁盘上的磁盘块是常见的操作，把它们保存在内存中可以避免昂贵的磁盘IO操作。 既然叫页缓存，它是根据页（page）来组织的内存结构。每一页包含了很多磁盘上的块数据。Linux使用Radix树实现页缓存，主要是加速特定页的查找速度。另外一般使用LRU策略来淘汰过期页数据。总之它是一个完全由内核来管理的磁盘缓存，用户应用程序通常是无感知的。</p>
+</blockquote>
+</li>
+</ul>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#kafka" >
+    <span class="tag-code">kafka</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/05/23/kafka-%E9%9B%86%E7%BE%A4%E8%A7%84%E5%88%92/">
+        <span class="nav-arrow">← </span>
+        
+          kafka系列 | 集群规划
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2021/05/24/docker-%E5%85%B1%E4%BA%AB%E5%AE%BF%E4%B8%BB%E6%9C%BA%E7%8E%AF%E5%A2%83/">
+        
+          docker | 共享宿主机环境
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Broker%E7%AB%AF%E5%8F%82%E6%95%B0"><span class="toc-nav-text">Broker端参数</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%B8%8E%E5%AD%98%E5%82%A8%E4%BF%A1%E6%81%AF%E7%9B%B8%E5%85%B3%E7%9A%84%E5%8F%82%E6%95%B0"><span class="toc-nav-text">与存储信息相关的参数</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%B8%8E-ZooKeeper-%E7%9B%B8%E5%85%B3%E7%9A%84%E5%8F%82%E6%95%B0"><span class="toc-nav-text">与 ZooKeeper 相关的参数</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%B8%8E-Broker-%E8%BF%9E%E6%8E%A5%E7%9B%B8%E5%85%B3%E7%9A%84%E5%8F%82%E6%95%B0"><span class="toc-nav-text">与 Broker 连接相关的参数</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%B8%8E-Topic-%E7%AE%A1%E7%90%86%E7%9B%B8%E5%85%B3%E7%9A%84%E5%8F%82%E6%95%B0"><span class="toc-nav-text">与 Topic 管理相关的参数</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%95%99%E5%AD%98%E7%9B%B8%E5%85%B3%E7%9A%84%E5%8F%82%E6%95%B0"><span class="toc-nav-text">与数据留存相关的参数</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Topic%E7%BA%A7%E5%88%AB%E5%8F%82%E6%95%B0"><span class="toc-nav-text">Topic级别参数</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%B8%8E%E4%BF%9D%E5%AD%98%E6%B6%88%E6%81%AF%E7%9B%B8%E5%85%B3%E7%9A%84%E5%8F%82%E6%95%B0"><span class="toc-nav-text">与保存消息相关的参数</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E4%B8%8E%E8%83%BD%E5%A4%84%E7%90%86%E7%9A%84%E6%B6%88%E6%81%AF%E5%A4%A7%E5%B0%8F%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0"><span class="toc-nav-text">与能处理的消息大小相关参数</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%80%8E%E4%B9%88%E8%AE%BE%E7%BD%AE-Topic-%E7%BA%A7%E5%88%AB%E5%8F%82%E6%95%B0"><span class="toc-nav-text">怎么设置 Topic 级别参数</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#JVM-%E7%AB%AF%E5%8F%82%E6%95%B0"><span class="toc-nav-text">JVM 端参数</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%A0%86%E5%A4%A7%E5%B0%8F%E5%8F%82%E6%95%B0"><span class="toc-nav-text">堆大小参数</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%99%A8%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="toc-nav-text">垃圾回收器的设置</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%A6%82%E4%BD%95%E8%AE%BE%E7%BD%AEJVM%E5%8F%82%E6%95%B0"><span class="toc-nav-text">如何设置JVM参数</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%BA%A7%E5%88%AB%E7%9A%84%E5%8F%82%E6%95%B0"><span class="toc-nav-text">操作系统级别的参数</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6%E9%99%90%E5%88%B6"><span class="toc-nav-text">文件描述符限制</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%B1%BB%E5%9E%8B"><span class="toc-nav-text">文件系统类型</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#swap-%E7%9A%84%E8%B0%83%E4%BC%98"><span class="toc-nav-text">swap 的调优</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8F%90%E4%BA%A4%E6%97%B6%E9%97%B4%E6%88%96%E8%80%85%E8%AF%B4%E6%98%AF-Flush-%E8%90%BD%E7%9B%98%E6%97%B6%E9%97%B4"><span class="toc-nav-text">提交时间或者说是 Flush 落盘时间</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/05/23/kafka-集群参数配置/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "kafka系列 | 集群参数配置",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

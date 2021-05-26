@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      skywalking系列 | Agent插件原理 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>skywalking系列 | Agent插件原理</h2>
+  <p class="post-date">2021年2月17日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="字节码增强"><a href="#字节码增强" class="headerlink" title="字节码增强"></a>字节码增强</h2><h3 id="JavaAgent"><a href="#JavaAgent" class="headerlink" title="JavaAgent"></a>JavaAgent</h3><ul>
+<li><p>Java Agent是java命令的一个参数(即 -javaagent)，参数之后需要指定一个jar包</p>
+</li>
+<li><p>在Java虚拟机启动时，执行main()函数之前，虚拟机会先找到-javaagent命令指定jar包，然后执行 premain-class中的premain()方法。</p>
+</li>
+<li><p>一句概括其功能的话就是：main()函数之前的一个拦截器。</p>
+</li>
+<li><p>使用Java Agent的步骤</p>
+<ul>
+<li>定义一个MANIFEST.MF文件，在其中添加premain-class配置项。</li>
+<li>创建premain-class配置项指定的类，并在其中实现premain()方法。</li>
+<li>将MANIFEST.MF文件和premain-class指定的类一起打包成一个jar包。</li>
+<li>使用-javaagent指定该jar包的路径即可执行其中的premain()方法。</li>
+</ul>
+</li>
+<li><p> premain()方法第二个参数：Instrumentation。位于java.lang.instrument包中，通过这个工具包，可以编写一个强大的Java Agent程序，用来动态替换或是修改某些类的定义。</p>
+</li>
+<li><p>Instrumentation 中的核心 API 方法</p>
+<ul>
+<li> addTransformer()/removeTransformer()方法：注册/注销一个ClassFileTransformer类的实例，该Transformer会在类加载的时候被调用，可用于修改类定义。</li>
+<li> redefineClasses()方法：该方法针对的是已经加载的类，它会对传入的类进行重新定义。</li>
+<li> getAllLoadedClasses()方法：返回当前JVM已加载的所有类。</li>
+<li> getInitiatedClasses() 方法：返回当前JVM已经初始化的类。</li>
+<li> getObjectSize()方法：获取参数指定的对象的大小。</li>
+</ul>
+</li>
+</ul>
+<h3 id="ByteBuddy"><a href="#ByteBuddy" class="headerlink" title="ByteBuddy"></a>ByteBuddy</h3><ul>
+<li>Byte Buddy 通过编写简单的Java代码即可创建自定义的运行时类。</li>
+<li>ByteBuddy类，任何一个由Byte Buddy创建/增强的类型都是通过ByteBuddy类的实例来完成的</li>
+<li>Byte Buddy 动态增强代码总共有三种方式<ul>
+<li>subclass：对应 ByteBuddy.subclass()方法。就是为目标类(即被增强的类)生成一个子类，在子类方法中插入动态代码。</li>
+<li>rebasing：对应ByteBuddy.rebasing()方法。当使用rebasing方式增强一个类时，Byte Buddy保存目标类中所有方法的实现，也就是说，当 Byte Buddy 遇到冲突的字段或方法时，会将原来的字段或方法实现复制到具有兼容签名的重新命名的私有方法中，而不会抛弃这些字段和方法实现。从而达到不丢失实现的目的。这些重命名的方法可以继续通过重命名后的名称进行调用。</li>
+<li>redefinition：对应ByteBuddy.redefine()方法。当重定义一个类时，Byte Buddy可以对一个已有的类添加属性和方法，或者删除已经存在的方法实现。如果使用其他的方法实现替换已经存在的方法实现，则原来存在的方法实现就会消失。</li>
+</ul>
+</li>
+<li>Byte Buddy 提供了几种类加载策略，这些策略定义在ClassLoadingStrategy.Default中<ul>
+<li>WRAPPER策略：创建一个新的ClassLoader来加载动态生成的类型。</li>
+<li>CHILD_FIRST策略：创建一个子类优先加载的ClassLoader，即打破了双亲委派模型。</li>
+<li>INJECTION策略：使用反射将动态生成的类型直接注入到当前ClassLoader中。</li>
+</ul>
+</li>
+<li>Byte Buddy功能<ul>
+<li>intercept() 方法: 修改方法实现</li>
+<li>defineMethod() 方法：新增方法</li>
+<li>defineField() 方法：新增字段</li>
+<li>Implement() 方法：实现一个接口</li>
+</ul>
+</li>
+</ul>
+<h2 id="Skywalking探针"><a href="#Skywalking探针" class="headerlink" title="Skywalking探针"></a>Skywalking探针</h2><h3 id="插件定义基础父类"><a href="#插件定义基础父类" class="headerlink" title="插件定义基础父类"></a>插件定义基础父类</h3><ul>
+<li>AbstractClassEnhancePluginDefine是所有插件的父类，SkywalkingAgent.Transformer会通过其enhanceClass()方法返回的ClassMatch对象，匹配到要增强的目标类。在不同的插件实现类中，enhanceClass()方法返回的 ClassMatch 对象不同。</li>
+<li>完成目标类和插件类的匹配之后，会进入 define() 方法</li>
+</ul>
+<ol>
+<li>通过witnessClass()方法确定当前插件与当前拦截到的目标类的版本是否匹配。若版本不匹配，则define()方法直接结束，当前插件类不会增强该类；若版本匹配，则继续后续逻辑。</li>
+<li>进入 enhance() 方法执行增强逻辑。</li>
+<li>设置插件增强标识。</li>
+</ol>
+<h3 id="静态方法增强逻辑"><a href="#静态方法增强逻辑" class="headerlink" title="静态方法增强逻辑"></a>静态方法增强逻辑</h3><ul>
+<li>StaticMethodsInterceptPoint接口：描述了当前插件要拦截目标类的哪些static静态方法，以及委托给哪个类去增强<ul>
+<li>getMethodsMatcher()：用于匹配目标静态方法</li>
+<li>getMethodsInterceptor()：拦截到的静态方法交给哪个Interceptor来增强</li>
+<li>isOverrideArgs()：增强过程中是否需要修改参数</li>
+</ul>
+</li>
+</ul>
+<ol>
+<li>通过 method() 方法拦截到静态方法之后，如果需要修改方法参数，则会通过StaticMethodsInterWithOverrideArgs对象进行增强</li>
+<li>如果不需要修改方法参数，则会通过StaticMethodsInter对象进行增强。</li>
+<li>加载插件指定的StaticMethodsAroundInterceptor</li>
+<li>调用 interceptor.beforeMethod()做前置处理</li>
+<li>根据before()的处理结果判定是否调用目标方法；如果需要传参，参数可以在beforeMethod()方法中改动，OverrideArgs的意义</li>
+<li>如果出现异常，会先通知interceptor中的handleMethodException()方法进行处理</li>
+<li>通过调用 interceptor.afterMethod()方法进行后置处理</li>
+</ol>
+<ul>
+<li>StaticMethodsAroundInterceptor接口 相关API<ul>
+<li>before()：在目标方法之前调用。</li>
+<li>after()：在目标方法之后调用。</li>
+<li>handleMethodException()：在目标方法抛出异常时调用。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>ClassEnhancePluginDefine 是个典型的模板方法模式的使用场景，其enhanceClass()方法只实现了增强静态方法的基本流程，真正的增强逻辑全部通过getStaticMethodsInterceptPoints()抽象方法推迟到子类实现。</p>
+</blockquote>
+<h3 id="构造及普通实例方法增强逻辑"><a href="#构造及普通实例方法增强逻辑" class="headerlink" title="构造及普通实例方法增强逻辑"></a>构造及普通实例方法增强逻辑</h3><ul>
+<li><p>实现EnhancedInstance接口: 为目标类添加了一个字段，让目标类实现EnhancedInstance接口</p>
+<ul>
+<li>定义了getSkyWalkingDynamicField()和setSkyWalkingDynamicField()两个方法，分别读写新增的_$EnhancedClassField_ws字段</li>
+</ul>
+</li>
+<li><p>增强构造方法: 使用的是 ConstructorInterceptPoint</p>
+<ul>
+<li>通过ConstructorInter对象进行增强。</li>
+<li>加载插件指定的InstanceConstructorInterceptor</li>
+<li>InstanceConstructorInterceptor相关API，onConstruct()方法</li>
+</ul>
+</li>
+<li><p>增强实例方法：</p>
+<ul>
+<li>InstanceMethodsInterceptPoint接口：描述了当前插件要拦截目标类的哪些实例方法，以及委托给哪个类去增强；API与增强静态方法类似</li>
+<li>需要修改方法参数，则会通过InstMethodsInterWithOverrideArgs对象进行增强；不需要修改方法参数，则会通过InstMethodsInter对象进行增强。</li>
+<li> intercept() 方法 拦截逻辑 同 拦截静态方法类似</li>
+<li> 加载插件指定的InstanceMethodsAroundInterceptor</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://s0.lgstatic.com/i/image3/M01/84/1A/Cgq2xl6MPj6AdwW_AABSs_M53Tk880.png" alt="增强实例方法和静态方法对比"></p>
+<h3 id="拦截器Loader"><a href="#拦截器Loader" class="headerlink" title="拦截器Loader"></a>拦截器Loader</h3><ul>
+<li>在 InterceptorInstanceLoader里面会维护一个ClassLoader Cache，以及一个Instance Cache；动态加载Interceptpr<ul>
+<li>INSTANCE_CACHE：记录了instanceKey与实例之间的映射关系，保证单例</li>
+<li>EXTEND_PLUGIN_CLASSLOADERS：记录了targetClassLoader以及其子AgentClassLoader的对应关系</li>
+</ul>
+</li>
+<li>通过 InterceptorInstanceLoader.load()这个静态方法加载Interceptor类</li>
+</ul>
+<ol>
+<li>通过该instanceKey保证该Interceptor在一个ClassLoader中只创建一次；</li>
+<li>查找targetClassLoader对应的子AgentClassLoader</li>
+<li>如果pluginLoader不存在，为targetClassLoader创建子AgentClassLoader；</li>
+<li>通过子AgentClassLoader加载Interceptor类</li>
+<li>记录Interceptor对象到INSTANCE_CACHE</li>
+</ol>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#skywalking" >
+    <span class="tag-code">skywalking</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/02/17/skywalking-Agent%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/">
+        <span class="nav-arrow">← </span>
+        
+          skywalking系列 | Agent启动原理
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2021/02/17/skywalking-gRPC%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86/">
+        
+          skywalking系列 | gRPC连接管理
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AD%97%E8%8A%82%E7%A0%81%E5%A2%9E%E5%BC%BA"><span class="toc-nav-text">字节码增强</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#JavaAgent"><span class="toc-nav-text">JavaAgent</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ByteBuddy"><span class="toc-nav-text">ByteBuddy</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Skywalking%E6%8E%A2%E9%92%88"><span class="toc-nav-text">Skywalking探针</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8F%92%E4%BB%B6%E5%AE%9A%E4%B9%89%E5%9F%BA%E7%A1%80%E7%88%B6%E7%B1%BB"><span class="toc-nav-text">插件定义基础父类</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E5%A2%9E%E5%BC%BA%E9%80%BB%E8%BE%91"><span class="toc-nav-text">静态方法增强逻辑</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%9E%84%E9%80%A0%E5%8F%8A%E6%99%AE%E9%80%9A%E5%AE%9E%E4%BE%8B%E6%96%B9%E6%B3%95%E5%A2%9E%E5%BC%BA%E9%80%BB%E8%BE%91"><span class="toc-nav-text">构造及普通实例方法增强逻辑</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8B%A6%E6%88%AA%E5%99%A8Loader"><span class="toc-nav-text">拦截器Loader</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/02/17/skywalking-Agent插件原理/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "skywalking系列 | Agent插件原理",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

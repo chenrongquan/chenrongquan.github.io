@@ -10,7 +10,7 @@
   
   <title>
      
-      apm | 关键指标说明 | ™技术博客 
+      kafka系列 | 搭建源码环境 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>apm | 关键指标说明</h2>
-  <p class="post-date">2021年2月27日</p>
+  <h2>kafka系列 | 搭建源码环境</h2>
+  <p class="post-date">2021年5月26日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,54 +160,57 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="APDEX性能指数"><a href="#APDEX性能指数" class="headerlink" title="APDEX性能指数"></a>APDEX性能指数</h2><p>参考：<a target="_blank" rel="noopener" href="https://www.apdex.org/?spm=a2c4g.11186623.2.5.8b541d6bYpirnW">apdex</a></p>
+    <section class="markdown-content"><h2 id="如何搭建-Kafka-开发环境"><a href="#如何搭建-Kafka-开发环境" class="headerlink" title="如何搭建 Kafka 开发环境"></a>如何搭建 Kafka 开发环境</h2><ol>
+<li>安装 Java 和 Gradle</li>
+</ol>
 <ul>
-<li>APDEX性能指数（Application Performance Index）是一个国际通用的应用性能计算标准。该标准将用户对应用的使用感受定义为三个等级：<ul>
-<li>满意（0~T）</li>
-<li>可容忍（T~4T）</li>
-<li>不满意（大于4T）</li>
+<li>必须要安装好 Java 和 Gradle，同时在 IDEA 中安装 Scala 插件。最好把 Java 和 Gradle 环境加入到环境变量中。</li>
+</ul>
+<ol start="2">
+<li>下载 Kafka 的源码<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; <span class="built_in">cd</span> Projects</span><br><span class="line">&gt; git <span class="built_in">clone</span> https://github.com/apache/kafka.git</span><br></pre></td></tr></table></figure></li>
+<li>下载 Gradle 的 Wrapper 程序套件</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; gradle</span><br><span class="line">&gt; Configure project :</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>将 Kafka 源码编译打包成 Jar 文件<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; ./gradlew clean releaseTarGz</span><br></pre></td></tr></table></figure></li>
+</ol>
+<ul>
+<li>在 core 的 build/distributions 下面找到生成的 tgz 包：kafka_2.12-2.4.0-SNAPSHOT。</li>
+<li>解压之后，这就是一个可以正常启动运行的 Kafka 环境了。</li>
+</ul>
+<ol start="5">
+<li>把 Kafka 源码工程导入到 IDEA 中<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; ./gradlew idea  <span class="comment">#如果你用的是Eclipse，执行./gradlew eclipse即可</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<ul>
+<li>打开 IDEA，选择“打开工程”，然后再选择 kafka 目录即可。</li>
+</ul>
+<h2 id="Kafka源码结构"><a href="#Kafka源码结构" class="headerlink" title="Kafka源码结构"></a>Kafka源码结构</h2><blockquote>
+<p>几个特殊目录</p>
+</blockquote>
+<ul>
+<li>core：Broker 端工程，保存 Broker 代码。</li>
+<li>clients：Client 端工程，保存所有 Client 代码以及所有代码都会用到的一些公共代码。</li>
+<li>streams：Streams 端工程，保存 Kafka Streams 代码。</li>
+<li>connect：Connect 端工程，保存 Kafka Connect 框架代码以及 File Connector 代码。</li>
+</ul>
+<h3 id="阅读源码技巧"><a href="#阅读源码技巧" class="headerlink" title="阅读源码技巧"></a>阅读源码技巧</h3><ul>
+<li>先从 core 包读起，也就是先从 Broker 端的代码着手。<ul>
+<li>log 包。log 包中定义了 Broker 底层消息和索引保存机制以及物理格式，非常值得一读。特别是 Log、LogSegment 和 LogManager 这几个类，几乎定义了 Kafka 底层的消息存储机制，一定要重点关注。</li>
+<li>controller 包。controller 包实现的是 Kafka Controller 的所有功能，特别是里面的 KafkaController.scala 文件，它封装了 Controller 的所有事件处理逻辑。如果你想弄明白 Controller 的工作原理，最好多读几遍这个将近 2000 行的大文件。</li>
+<li>coordinator 包下的 group 包代码。当前，coordinator 包有两个子 package：group 和 transaction。前者封装的是 Consumer Group 所用的 Coordinator；后者封装的是支持 Kafka 事务的 Transaction Coordinator。我个人觉得你最好把 group 包下的代码通读一遍，了解下 Broker 端是如何管理 Consumer Group 的。这里比较重要的是 GroupMetadataManager 和 GroupCoordinator 类，它们定义了 Consumer Group 的元数据信息以及管理这些元数据的状态机机制。</li>
+<li>network 包代码以及 server 包下的部分代码。如果你还有余力的话，可以再读一下这些代码。前者的 SocketServer 实现了 Broker 接收外部请求的完整网络流程。Kafka 用的是 Reactor 模式。想搞清楚 Reactor 模式是怎么在 Kafka“落地”的，就把这个类搞明白。</li>
+<li></li>
 </ul>
 </li>
 </ul>
-<p><img src="https://static-aliyun-doc.oss-accelerate.aliyuncs.com/assets/img/zh-CN/7870348951/p43776.gif"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Apdex&#x3D;(满意数+可容忍数&#x2F;2)&#x2F;总样本量</span><br></pre></td></tr></table></figure>
-<ul>
-<li>一般：取应用的平均响应时间作为计算指标，并将T定义为500毫秒。</li>
-</ul>
-<blockquote>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th align="left">Apdex值</th>
-<th align="left">颜色</th>
-<th align="left">说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">0.75 ≤ Apdex ≤ 1</td>
-<td align="left">绿色</td>
-<td align="left">表示应用、实例或事务被调用时响应很快，用户体验较满意。</td>
-</tr>
-<tr>
-<td align="left">0.3 ≤ Apdex &lt; 0.75</td>
-<td align="left">黄色</td>
-<td align="left">表示应用、实例或事务被调用时响应较慢，用户体验一般。</td>
-</tr>
-<tr>
-<td align="left">0 ≤ Apdex &lt; 0.3</td>
-<td align="left">红色</td>
-<td align="left">表示应用、实例或事务被调用时响应极慢，用户体验较差。</td>
-</tr>
-</tbody></table>
 </section>
     <!-- Tags START -->
     
       <div class="tags">
         <span>Tags:</span>
         
-  <a href="/tags#apm" >
-    <span class="tag-code">apm</span>
+  <a href="/tags#kafka" >
+    <span class="tag-code">kafka</span>
   </a>
 
       </div>
@@ -218,17 +221,17 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/02/27/apm-%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E/">
+      <a class="nav-left" href="/2021/05/24/docker-%E5%85%B1%E4%BA%AB%E5%AE%BF%E4%B8%BB%E6%9C%BA%E7%8E%AF%E5%A2%83/">
         <span class="nav-arrow">← </span>
         
-          apm | 存储结构说明
+          docker | 共享宿主机环境
         
       </a>
     
     
-      <a class="nav-right" href="/2021/03/05/kafka-%E5%9F%BA%E7%A1%80%E9%83%A8%E5%88%86/">
+      <a class="nav-right" href="/2021/05/26/apm-%E7%BB%93%E6%9E%84%E6%95%B0%E6%8D%AE%E8%A1%A8%E8%AF%B4%E6%98%8E/">
         
-          kafka系列 | 基础部分
+          apm | 结构数据表说明
         
         <span class="nav-arrow"> →</span>
       </a>
@@ -260,7 +263,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#APDEX%E6%80%A7%E8%83%BD%E6%8C%87%E6%95%B0"><span class="toc-nav-text">APDEX性能指数</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%A6%82%E4%BD%95%E6%90%AD%E5%BB%BA-Kafka-%E5%BC%80%E5%8F%91%E7%8E%AF%E5%A2%83"><span class="toc-nav-text">如何搭建 Kafka 开发环境</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Kafka%E6%BA%90%E7%A0%81%E7%BB%93%E6%9E%84"><span class="toc-nav-text">Kafka源码结构</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E9%98%85%E8%AF%BB%E6%BA%90%E7%A0%81%E6%8A%80%E5%B7%A7"><span class="toc-nav-text">阅读源码技巧</span></a></li></ol></li></ol>
     
   </div>
 </aside>
@@ -270,7 +273,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/02/27/apm-关键指标说明/';
+    var url = 'http://chenrongquan.github.com/2021/05/26/kafka-搭建源码环境/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -334,7 +337,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "apm | 关键指标说明",
+        id: "kafka系列 | 搭建源码环境",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {

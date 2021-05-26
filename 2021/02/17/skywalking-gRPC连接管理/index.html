@@ -10,7 +10,7 @@
   
   <title>
      
-      apm | 关键指标说明 | ™技术博客 
+      skywalking系列 | gRPC连接管理 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>apm | 关键指标说明</h2>
-  <p class="post-date">2021年2月27日</p>
+  <h2>skywalking系列 | gRPC连接管理</h2>
+  <p class="post-date">2021年2月17日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,54 +160,35 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="APDEX性能指数"><a href="#APDEX性能指数" class="headerlink" title="APDEX性能指数"></a>APDEX性能指数</h2><p>参考：<a target="_blank" rel="noopener" href="https://www.apdex.org/?spm=a2c4g.11186623.2.5.8b541d6bYpirnW">apdex</a></p>
+    <section class="markdown-content"><h2 id="gRPC-Channel管理"><a href="#gRPC-Channel管理" class="headerlink" title="gRPC Channel管理"></a>gRPC Channel管理</h2><p><code>GRPCChannelManager</code><br>    负责维护Agent与后端OAP集群通信时使用的网络连接</p>
+<p><code>GRPCChannel</code><br>gRPC客户端的核心类之一，逻辑上表示一个<code>Channel</code>，底层持有一个TCP链接，负责维护此连接的活性。在RPC调用的任何时机，如果检测到底层连接处于关闭状态(<code>terminated</code>)，会尝试重建连接。通常情况下，不需要在RPC调用结束后就关闭<code>Channel</code>，该<code>Channel</code>可以被一直重用，直到整个客户端程序关闭。</p>
+<p><code>ManagedChannelBuilder</code>负责创建客户端<code>Channel</code>，<code>ManagedChannelBuilder</code>使用了<code>provider</code>机制，常用有三种</p>
 <ul>
-<li>APDEX性能指数（Application Performance Index）是一个国际通用的应用性能计算标准。该标准将用户对应用的使用感受定义为三个等级：<ul>
-<li>满意（0~T）</li>
-<li>可容忍（T~4T）</li>
-<li>不满意（大于4T）</li>
+<li><code>NettyChannelBuilder</code>：创建的<code>Channel</code>底层是基于Netty实现的；SkyWalking Agent中用的是<code>NettyChannelBuilder</code></li>
+<li><code>OkHttpChannelBuilder</code>：创建的<code>Channel</code>底层是基于<code>OkHttp</code>库实现的</li>
+<li><code>InProcessChannelBuilder</code>：创建进程内通信使用的<code>Channel</code></li>
 </ul>
-</li>
-</ul>
-<p><img src="https://static-aliyun-doc.oss-accelerate.aliyuncs.com/assets/img/zh-CN/7870348951/p43776.gif"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Apdex&#x3D;(满意数+可容忍数&#x2F;2)&#x2F;总样本量</span><br></pre></td></tr></table></figure>
+<p><code>GRPCChannel</code></p>
 <ul>
-<li>一般：取应用的平均响应时间作为计算指标，并将T定义为500毫秒。</li>
+<li>SkyWalking 在<code>ManagedChannel</code>的基础上封装了自己的Channel实现—<code>GRPCChannel</code>；可以添加一些装饰器，如验证权限的修饰器<code>AuthenticationDecorator</code></li>
 </ul>
-<blockquote>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th align="left">Apdex值</th>
-<th align="left">颜色</th>
-<th align="left">说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">0.75 ≤ Apdex ≤ 1</td>
-<td align="left">绿色</td>
-<td align="left">表示应用、实例或事务被调用时响应很快，用户体验较满意。</td>
-</tr>
-<tr>
-<td align="left">0.3 ≤ Apdex &lt; 0.75</td>
-<td align="left">黄色</td>
-<td align="left">表示应用、实例或事务被调用时响应较慢，用户体验一般。</td>
-</tr>
-<tr>
-<td align="left">0 ≤ Apdex &lt; 0.3</td>
-<td align="left">红色</td>
-<td align="left">表示应用、实例或事务被调用时响应极慢，用户体验较差。</td>
-</tr>
-</tbody></table>
+<p><code>GRPCChannelManager</code><br>维护了一个<code>GRPCChannel</code>连接以及注册在其上的<code>Listener</code>监听；<br>还维护一个后台线程定期检测该<code>GRPCChannel</code>的连接状态，如果发现连接断开，则会进行重连</p>
+<h3 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h3><p><code>boot()</code>方法</p>
+<ol>
+<li>首先会解析<code>agent.config</code>配置文件指定的后端OAP实例地址初始化<code>grpcServers</code>字段</li>
+<li>然后会初始化这个定时任务，初次会立即执行，之后每隔30s执行一次，具体执行的就是<code>GRPCChannelManager.run()</code>方法，其核心逻辑是检测链接状态并适时重连。</li>
+<li><code>notify()</code>方法会循环调用所有注册在当前连接上的GRPCChannelListener实例(记录在<code>listeners</code>集合中)的<code>statusChanged()</code>方法，通知它们连接创建成功的事件</li>
+<li>设置<code>reconnect</code>字段为<code>false</code>，暂时不会再重建连接了</li>
+<li><code>GRPCChannelManager</code> 提供<code>reportError()</code>方法，在其他依赖该网络连接的 <code>BootService</code> 实现发送请求失败时，可以通过该方法将 <code>reconnect</code> 字段设置为 <code>true</code>，并由后台线程重新创建<code>GRPCChannel</code>。</li>
+</ol>
 </section>
     <!-- Tags START -->
     
       <div class="tags">
         <span>Tags:</span>
         
-  <a href="/tags#apm" >
-    <span class="tag-code">apm</span>
+  <a href="/tags#skywalking" >
+    <span class="tag-code">skywalking</span>
   </a>
 
       </div>
@@ -218,17 +199,17 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/02/27/apm-%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84%E8%AF%B4%E6%98%8E/">
+      <a class="nav-left" href="/2021/02/17/skywalking-Agent%E6%8F%92%E4%BB%B6%E5%8E%9F%E7%90%86/">
         <span class="nav-arrow">← </span>
         
-          apm | 存储结构说明
+          skywalking系列 | Agent插件原理
         
       </a>
     
     
-      <a class="nav-right" href="/2021/03/05/kafka-%E5%9F%BA%E7%A1%80%E9%83%A8%E5%88%86/">
+      <a class="nav-right" href="/2021/02/20/skywalking-%E9%98%9F%E5%88%97%E5%86%85%E6%A0%B8/">
         
-          kafka系列 | 基础部分
+          skywalking系列 | 队列内核
         
         <span class="nav-arrow"> →</span>
       </a>
@@ -260,7 +241,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#APDEX%E6%80%A7%E8%83%BD%E6%8C%87%E6%95%B0"><span class="toc-nav-text">APDEX性能指数</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#gRPC-Channel%E7%AE%A1%E7%90%86"><span class="toc-nav-text">gRPC Channel管理</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="toc-nav-text">启动流程</span></a></li></ol></li></ol>
     
   </div>
 </aside>
@@ -270,7 +251,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/02/27/apm-关键指标说明/';
+    var url = 'http://chenrongquan.github.com/2021/02/17/skywalking-gRPC连接管理/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -334,7 +315,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "apm | 关键指标说明",
+        id: "skywalking系列 | gRPC连接管理",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
