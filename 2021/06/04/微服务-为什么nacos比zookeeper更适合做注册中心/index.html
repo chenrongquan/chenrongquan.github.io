@@ -10,7 +10,7 @@
   
   <title>
      
-      apm | 关键指标说明 | ™技术博客 
+      微服务 | 为什么nacos比zookeeper更适合做注册中心 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>apm | 关键指标说明</h2>
-  <p class="post-date">2021年2月27日</p>
+  <h2>微服务 | 为什么nacos比zookeeper更适合做注册中心</h2>
+  <p class="post-date">2021年6月4日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,77 +160,43 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="APDEX性能指数"><a href="#APDEX性能指数" class="headerlink" title="APDEX性能指数"></a>APDEX性能指数</h2><p>参考：<a target="_blank" rel="noopener" href="https://www.apdex.org/?spm=a2c4g.11186623.2.5.8b541d6bYpirnW">apdex</a></p>
+    <section class="markdown-content"><h2 id="为什么说zookeeper不适合做服务注册中心呢？"><a href="#为什么说zookeeper不适合做服务注册中心呢？" class="headerlink" title="为什么说zookeeper不适合做服务注册中心呢？"></a>为什么说zookeeper不适合做服务注册中心呢？</h2><hr>
 <ul>
-<li>APDEX性能指数（Application Performance Index）是一个国际通用的应用性能计算标准。该标准将用户对应用的使用感受定义为三个等级：<ul>
-<li>满意（0~T）</li>
-<li>可容忍（T~4T）</li>
-<li>不满意（大于4T）</li>
+<li><p>服务注册中心是为了服务间调用服务的，那么绝对不允许因为服务注册中心出现了问题而导致服务间的调用出问题。</p>
+<ul>
+<li> 假如有node1,node2,node3,集群节点。 保存着可用服务列表ip1，ip2，ip3，试想如果此时不一致，比如node1只保存了ip1,ip2，此时服务读取node1的节点，那么会造成什么影响？</li>
+<li> 调用node1的服务，顶多就是负载均衡时不会有流量打到ip3， 然后等 node1同步回ip3后，又一致了，这对服务其实没什么太大影响。</li>
+<li> 所以，推出服务注册中心应该是个AP系统。</li>
 </ul>
 </li>
+<li><p>zookeeper是个CP系统，强一致性</p>
+</li>
 </ul>
-<p><img src="https://static-aliyun-doc.oss-accelerate.aliyuncs.com/assets/img/zh-CN/7870348951/p43776.gif"></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Apdex&#x3D;(满意数+可容忍数&#x2F;2)&#x2F;总样本量</span><br></pre></td></tr></table></figure>
+<h3 id="场景1"><a href="#场景1" class="headerlink" title="场景1"></a>场景1</h3><ul>
+<li>当master挂了，此时，zookeeper集群需要重新选举，而此时服务需要来读取可用服务，是不可用的。 影响到了服务的可用性;当然你可以说服务本地有缓存可用列表。然而下面这种方式就更无法处理了。</li>
+</ul>
+<h3 id="场景2"><a href="#场景2" class="headerlink" title="场景2"></a>场景2</h3><ul>
+<li> 分区可用。试想，有3个机房，如果其中机房3和机房1，2网络断了， 那么机房3的注册中心就不能注册新的机器了么，这显然也不合理</li>
+</ul>
 <ul>
-<li>一般：取应用的平均响应时间作为计算指标，并将T定义为500毫秒。</li>
+<li>从健康检查来看:zookeeper是通过TCP的心跳判断服务是否可用</li>
+<li>但TCP的活性并不代表服务是可用的，但TCP活性就说明服务是可用的么，答案显然是否定的，如： 连接池已经满了，DB挂了等</li>
 </ul>
-<blockquote>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th align="left">Apdex值</th>
-<th align="left">颜色</th>
-<th align="left">说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">0.75 ≤ Apdex ≤ 1</td>
-<td align="left">绿色</td>
-<td align="left">表示应用、实例或事务被调用时响应很快，用户体验较满意。</td>
-</tr>
-<tr>
-<td align="left">0.3 ≤ Apdex &lt; 0.75</td>
-<td align="left">黄色</td>
-<td align="left">表示应用、实例或事务被调用时响应较慢，用户体验一般。</td>
-</tr>
-<tr>
-<td align="left">0 ≤ Apdex &lt; 0.3</td>
-<td align="left">红色</td>
-<td align="left">表示应用、实例或事务被调用时响应极慢，用户体验较差。</td>
-</tr>
-</tbody></table>
-<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><ul>
-<li>实例是指被监控的应用所部署的机器，以JVM为粒度。</li>
+<h3 id="ZooKeeper其实瓶颈"><a href="#ZooKeeper其实瓶颈" class="headerlink" title="ZooKeeper其实瓶颈"></a>ZooKeeper其实瓶颈</h3><ul>
+<li>ZooKeeper写是不可扩展的，当注册节点一定时，写性能会是瓶颈，发布应用时出现排队现象，表现出来的现象就是，应用的启动变得十分缓慢</li>
+<li>ZooKeeper不支持跨机房的路由，不像eureka，有zone的概念，优先本地路由，当本机房路由，当本机房出现问题时，可以路由到另一个机房</li>
+<li>ZooKeeper当节点过多时，如果有服务节点变更，需要同时通知机器，会发生“惊群效应”， 瞬间打满网卡，且容易重复通知</li>
 </ul>
-<h2 id="响应时间"><a href="#响应时间" class="headerlink" title="响应时间"></a>响应时间</h2><ul>
-<li>应用、实例调用的平均响应时间，或数据库操作的平均执行响应时间。</li>
-</ul>
-<h2 id="请求数"><a href="#请求数" class="headerlink" title="请求数"></a>请求数</h2><ul>
-<li>应用、实例调用的请求调用次数，或数据库操作的执行次数。</li>
-</ul>
-<h2 id="错误数"><a href="#错误数" class="headerlink" title="错误数"></a>错误数</h2><ul>
-<li>应用、实例调用的错误调用次数，或数据库操作中异常执行次数。</li>
-</ul>
-<h2 id="错误率"><a href="#错误率" class="headerlink" title="错误率"></a>错误率</h2><ul>
-<li>（应用、实例调用的异常调用次数，或数据库操作的异常次数）/请求数。</li>
-</ul>
-<h2 id="SQL相关"><a href="#SQL相关" class="headerlink" title="SQL相关"></a>SQL相关</h2><ul>
-<li>SQL调用统计    柱状图与左Y轴为数据库请求数统计，折线图与右Y轴为数据库响应时间。</li>
-<li>平均耗时: 本次数据库调用的平均耗时</li>
-<li>调用次数: 该应用此类型数据库调用次数</li>
+<h2 id="理想的注册中心"><a href="#理想的注册中心" class="headerlink" title="理想的注册中心"></a>理想的注册中心</h2><hr>
+<ul>
+<li>起码服务的自动注册，发现。 最好有新的服务注册上去时还能推送到调用端</li>
+<li>能对注册上来的机器方便的进行管理，能手工剔除（发送信号让服务优雅下线）、恢复机器</li>
+<li>服务的健康检查，能真正的检测到服务是否可用</li>
+<li>如果再好点，可以看到是否有其他调用服务正在订阅注册上来的服务</li>
+<li>如果能够带上些除了IP外的其它信息，那就更好了</li>
 </ul>
 </section>
     <!-- Tags START -->
-    
-      <div class="tags">
-        <span>Tags:</span>
-        
-  <a href="/tags#apm" >
-    <span class="tag-code">apm</span>
-  </a>
-
-      </div>
     
     <!-- Tags END -->
     <!-- NAV START -->
@@ -238,17 +204,17 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/02/23/skywalking-%E6%8C%87%E6%A0%87%E6%B5%81%E5%BC%8F%E5%A4%84%E7%90%86(%E7%AB%AF%E7%82%B9%E4%B8%8E%E5%9C%B0%E5%9D%80)/">
+      <a class="nav-left" href="/2021/06/03/apm-%E5%85%B3%E9%94%AE%E7%BB%9F%E8%AE%A1%E6%8C%87%E6%A0%87%E8%AF%B4%E6%98%8E/">
         <span class="nav-arrow">← </span>
         
-          skywalking | 指标流式处理(端点与地址)
+          apm-关键统计指标说明
         
       </a>
     
     
-      <a class="nav-right" href="/2021/03/05/kafka-%E5%9F%BA%E7%A1%80%E9%83%A8%E5%88%86/">
+      <a class="nav-right" href="/2021/06/13/Java-System-getProperty-vs-System-getenv/">
         
-          kafka | 基础部分
+          Java | System.getProperty vs System.getenv
         
         <span class="nav-arrow"> →</span>
       </a>
@@ -280,7 +246,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#APDEX%E6%80%A7%E8%83%BD%E6%8C%87%E6%95%B0"><span class="toc-nav-text">APDEX性能指数</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%9E%E4%BE%8B"><span class="toc-nav-text">实例</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%93%8D%E5%BA%94%E6%97%B6%E9%97%B4"><span class="toc-nav-text">响应时间</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%AF%B7%E6%B1%82%E6%95%B0"><span class="toc-nav-text">请求数</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%94%99%E8%AF%AF%E6%95%B0"><span class="toc-nav-text">错误数</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%94%99%E8%AF%AF%E7%8E%87"><span class="toc-nav-text">错误率</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#SQL%E7%9B%B8%E5%85%B3"><span class="toc-nav-text">SQL相关</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4zookeeper%E4%B8%8D%E9%80%82%E5%90%88%E5%81%9A%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%91%A2%EF%BC%9F"><span class="toc-nav-text">为什么说zookeeper不适合做服务注册中心呢？</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%9C%BA%E6%99%AF1"><span class="toc-nav-text">场景1</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%9C%BA%E6%99%AF2"><span class="toc-nav-text">场景2</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ZooKeeper%E5%85%B6%E5%AE%9E%E7%93%B6%E9%A2%88"><span class="toc-nav-text">ZooKeeper其实瓶颈</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%90%86%E6%83%B3%E7%9A%84%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83"><span class="toc-nav-text">理想的注册中心</span></a></li></ol>
     
   </div>
 </aside>
@@ -290,7 +256,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/02/27/apm-关键指标说明/';
+    var url = 'http://chenrongquan.github.com/2021/06/04/微服务-为什么nacos比zookeeper更适合做注册中心/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -354,7 +320,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "apm | 关键指标说明",
+        id: "微服务 | 为什么nacos比zookeeper更适合做注册中心",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
