@@ -10,7 +10,7 @@
   
   <title>
      
-      Java | System.getProperty vs System.getenv | ™技术博客 
+      Java | System.getProperty与System.getenv | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,7 +151,7 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>Java | System.getProperty vs System.getenv</h2>
+  <h2>Java | System.getProperty与System.getenv</h2>
   <p class="post-date">2021年6月13日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
@@ -160,8 +160,8 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h1 id="Java-System-getProperty-vs-System-getenv"><a href="#Java-System-getProperty-vs-System-getenv" class="headerlink" title="Java System.getProperty vs System.getenv"></a>Java System.getProperty vs System.getenv</h1><h2 id="1-引用"><a href="#1-引用" class="headerlink" title="1. 引用"></a>1. 引用</h2><p>在一个Java应用中<code>java.lang</code>包是自动引入的。这个包包括许多常见的类，如 <code>NullPointerException</code>、<code>Math</code>、<code>String</code>。<br><code>Java.lang.System</code>是一个<code>final</code>修饰的类，意味着该类不可被继承，因此所有的方法都是静态的。<br>接下来我们将以下两个系统方法的差异 <code>reading system propertie</code> 和 <code>reading environment variables</code>；即 <code>getProperty</code> 和 <code>getenv</code>。</p>
-<h2 id="使用-System-getProperty"><a href="#使用-System-getProperty" class="headerlink" title="使用 System.getProperty()"></a>使用 <code>System.getProperty()</code></h2><p>Java平台使用 <code>Properties</code>对象代表当前系统信息和配置，我们称之为系统参数。<br>系统参数包括当前用户信息、java运行时的版本信息、文件分隔符(file pathname separator)。<br>如以下示例代码，我们使用<code>System.getProperty(&quot;log_dir&quot;)</code>读取属性<code>log_dir</code>的值。我们也可以使用一个默认参数当该属性不存在时，返回<code>/tmp/log</code>。</p>
+    <section class="markdown-content"><h1 id="Java-System-getProperty-与-System-getenv-区别"><a href="#Java-System-getProperty-与-System-getenv-区别" class="headerlink" title="Java System.getProperty 与 System.getenv 区别"></a>Java System.getProperty 与 System.getenv 区别</h1><h2 id="1-引用"><a href="#1-引用" class="headerlink" title="1. 引用"></a>1. 引用</h2><p>在一个Java应用中<code>java.lang</code>包是自动引入的。这个包包括许多常见的类，如 <code>NullPointerException</code>、<code>Math</code>、<code>String</code>。<br><code>Java.lang.System</code>是一个<code>final</code>修饰的类，意味着该类不可被继承，因此所有的方法都是静态的。<br>接下来我们将以下两个系统方法的差异 <code>reading system propertie</code> 和 <code>reading environment variables</code>；即 <code>getProperty</code> 和 <code>getenv</code>。</p>
+<h2 id="2-使用-System-getProperty"><a href="#2-使用-System-getProperty" class="headerlink" title="2. 使用 System.getProperty()"></a>2. 使用 <code>System.getProperty()</code></h2><p>Java平台使用 <code>Properties</code>对象代表当前系统信息和配置，我们称之为系统参数。<br>系统参数包括当前用户信息、java运行时的版本信息、文件分隔符(file pathname separator)。<br>如以下示例代码，我们使用<code>System.getProperty(&quot;log_dir&quot;)</code>读取属性<code>log_dir</code>的值。我们也可以使用一个默认参数当该属性不存在时，返回<code>/tmp/log</code>。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String log_dir = System.getProperty(<span class="string">&quot;log_dir&quot;</span>, <span class="string">&quot;/tmp/log&quot;</span>);</span><br></pre></td></tr></table></figure>
 <p>运行时更新系统属性，使用<code>System.getProperty()</code>方法</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">System.getProperty(<span class="string">&quot;log_dir&quot;</span>, <span class="string">&quot;/tmp/log&quot;</span>);</span><br></pre></td></tr></table></figure>
@@ -169,19 +169,19 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar jarName -DpropertyName=value</span><br></pre></td></tr></table></figure>
 <p>如 设置foo=bar属性在app.jar中</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar app -Dfoo=<span class="string">&quot;bar&quot;</span></span><br></pre></td></tr></table></figure>
-<h2 id="使用-System-getenv"><a href="#使用-System-getenv" class="headerlink" title="使用 System.getenv()"></a>使用 <code>System.getenv()</code></h2><p><strong>环境变量为key/value对，类似于属性值</strong>。许多操作系统允许使用环境变量来传递配置信息给应用。<br>设置环境变量的方式与操作系统有关，例如，Windows系统通过控制面板的系统配置、Unix使用shell脚本。<br>当创建一个进程时，默认会从父进程中克隆一份环境变量。<br>如示例代码，通过一个lambda表达式来打印所有的环境变量。</p>
+<h2 id="3-使用-System-getenv"><a href="#3-使用-System-getenv" class="headerlink" title="3. 使用 System.getenv()"></a>3. 使用 <code>System.getenv()</code></h2><p><strong>环境变量为key/value对，类似于属性值</strong>。许多操作系统允许使用环境变量来传递配置信息给应用。<br>设置环境变量的方式与操作系统有关，例如，Windows系统通过控制面板的系统配置、Unix使用shell脚本。<br>当创建一个进程时，默认会从父进程中克隆一份环境变量。<br>如示例代码，通过一个lambda表达式来打印所有的环境变量。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">System.getenv().foreach((k, v) -&gt; &#123;</span><br><span class="line">  System.out.println(k + <span class="string">&quot;:&quot;</span> + v);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 <p><code>getenv</code>返回一个只读Map，当试图给这个Map新增元素时，会抛出<code>UnsupportedOperationException</code>。<br>获取指定环境变量的值</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String log_dir = System.getenv(<span class="string">&quot;log_dir&quot;</span>);</span><br></pre></td></tr></table></figure>
 <p>从另一方面看，我们可以根据当前应用创建另外一个进程，且在它的环境中增加新的变量。<br>创建子进程，在Java中可以使用<code>ProcessBuilder</code>类，这个类有个方法用于调用环境变量。该方法返回一个map，但是这个map是并非只读的，可以往里新增元素。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ProcessBuilder pb = <span class="keyword">new</span> ProcessBuilder(args);</span><br><span class="line">Map&lt;String, String&gt; env = pb.environment();</span><br><span class="line">env.put(<span class="string">&quot;log_dir&quot;</span>, <span class="string">&quot;/tmp/log&quot;</span>);</span><br><span class="line">Process process = pb.start();</span><br></pre></td></tr></table></figure>
-<h2 id="二者的区别"><a href="#二者的区别" class="headerlink" title="二者的区别"></a>二者的区别</h2><p>尽管二者都需要map结果来提供key-value，但是二者还是有一些区别</p>
+<h2 id="4-二者的区别"><a href="#4-二者的区别" class="headerlink" title="4. 二者的区别"></a>4. 二者的区别</h2><p>尽管二者都需要map结果来提供key-value，但是二者还是有一些区别</p>
 <ul>
 <li>我们可以在运行时更新Properties，但是环境变量系统变量一个不可变的副本</li>
 <li>Properties只能包含于Java平台，而环境变量在操作系统层面是全局的，在相同机器上，所有应用都可以使用。</li>
 <li>Properties当打包应用时必须存储，而环境变量可在任何是有由操作系统来创建。</li>
 </ul>
-<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>使用环境变量，相同的应用可以被发布到不同的机器上跑不同的实例。可以在操作系统级别配置，更新配置时无需重新构建应用。</p>
+<h2 id="5-结论"><a href="#5-结论" class="headerlink" title="5. 结论"></a>5. 结论</h2><p>使用环境变量，相同的应用可以被发布到不同的机器上跑不同的实例。可以在操作系统级别配置，更新配置时无需重新构建应用。</p>
 </section>
     <!-- Tags START -->
     
@@ -242,7 +242,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Java-System-getProperty-vs-System-getenv"><span class="toc-nav-text">Java System.getProperty vs System.getenv</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#1-%E5%BC%95%E7%94%A8"><span class="toc-nav-text">1. 引用</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%BD%BF%E7%94%A8-System-getProperty"><span class="toc-nav-text">使用 System.getProperty()</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%BD%BF%E7%94%A8-System-getenv"><span class="toc-nav-text">使用 System.getenv()</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%BA%8C%E8%80%85%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-nav-text">二者的区别</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-nav-text">结论</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#Java-System-getProperty-%E4%B8%8E-System-getenv-%E5%8C%BA%E5%88%AB"><span class="toc-nav-text">Java System.getProperty 与 System.getenv 区别</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#1-%E5%BC%95%E7%94%A8"><span class="toc-nav-text">1. 引用</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#2-%E4%BD%BF%E7%94%A8-System-getProperty"><span class="toc-nav-text">2. 使用 System.getProperty()</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#3-%E4%BD%BF%E7%94%A8-System-getenv"><span class="toc-nav-text">3. 使用 System.getenv()</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#4-%E4%BA%8C%E8%80%85%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-nav-text">4. 二者的区别</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#5-%E7%BB%93%E8%AE%BA"><span class="toc-nav-text">5. 结论</span></a></li></ol></li></ol>
     
   </div>
 </aside>
@@ -316,7 +316,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "Java | System.getProperty vs System.getenv",
+        id: "Java | System.getProperty与System.getenv",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
