@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      apm | 探针插件开发 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>apm | 探针插件开发</h2>
+  <p class="post-date">2021年6月14日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>追踪的基本方法是拦截Java方法，使用字节码操作技术和AOP概念。SkyWalking包装了字节码操作技术，和追踪上下文的传播，所以你只需要定义拦截点(类似于 spring的切面)</p>
+<h2 id="拦截"><a href="#拦截" class="headerlink" title="拦截"></a>拦截</h2><p>SkyWalking 提供了两类通用的定义来拦截构造方法，实例方法和类方法。</p>
+<ul>
+<li><code>ClassInstanceMethodsEnhancePluginDefine</code> 定义了构造方法 <code>constructor</code> 拦截点 和实例方法 <code>instance method</code> 拦截点</li>
+<li><code>ClassStaticMethodsEnhancePluginDefine</code> 定义了类方法 <code>class method</code> 拦截点</li>
+</ul>
+<p>当然，你也可以继承 <code>ClassEnhancePluginDefine</code> 去设置所有拦截点，但这不常用。</p>
+<h2 id="插件实现"><a href="#插件实现" class="headerlink" title="插件实现"></a>插件实现</h2><p>通过扩展 <code>ClassInstanceMethodsEnhancePluginDefine</code> 来演示如何实现一个插件。</p>
+<ol>
+<li>定义目标类的名称<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> ClassMatch <span class="title">enhanceClass</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
+ClassMatch 表示如何去匹配目标类，有4种方式：</li>
+</ol>
+<ul>
+<li>byName: 基于类的全限定名（包名 + . + 类名）。</li>
+<li>byClassAnnotationMatch: 根据目标类中是否存在某些注解。</li>
+<li>byMethodAnnotationMatch: 根据目标类的方法中是存在某些注解。</li>
+<li>byHierarchMatch: 基于目标类的父类或接口。</li>
+</ul>
+<p>注意：</p>
+<ul>
+<li>在插件定义中禁止使用<code>ThirdPartyClass.class</code>，例如<code>takesArguments</code>(<code>ThirdPartyClass.class</code>) 或<code>byName</code>(<code>ThirdPartyClass.class.getName()</code>)，因为 <code>ThirdPartyClass</code> 不一定存在于目标应用程序中，这样做导致探针异常; 我们有“导入”检查来帮助在 CI 流程检查此限制，但它没有涵盖此限制的所有场景，所以永远不要视图通过使用完全限定类名 (FQCN) 之类的方法绕过这个此限制， <code>takeArguments( full.qualified.ThirdPartyClass.class)</code> 和 <code>byName(full.qualified.ThirdPartyClass.class.getName())</code> 即使能通过CI检查，但是代理代码中仍然无效，使用完全限定的类名字符串文献替代。</li>
+<li>禁止使用 <code>*.class.getName()</code> 去获取类名，建议使用文本字符串，这事为了避免classloader的问题</li>
+<li><code>by*AnnotationMatch</code> 不支持从父类继承来的注解</li>
+<li>除非确实有必要，否则不建议使用 <code>byHierarchyMatch</code>，因为使用它可能会触发拦截许多预期之外的方法，会导致性能问题和不稳定。</li>
+</ul>
+<p>实例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> ClassMatch <span class="title">enhanceClassName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> byName(<span class="string">&quot;org.apache.catalina.core.StandardEngineValve&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>定义实例方法拦截点</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> InstanceMethodsInterceptPoint[] getInstanceMethodsInterceptPoints();</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">InstanceMethodsInterceptPoint</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * class instance methods matcher.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> methods matcher</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">ElementMatcher&lt;MethodDescription&gt; <span class="title">getMethodsMatcher</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> represents a class name, the class instance must instanceof InstanceMethodsAroundInterceptor.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">String <span class="title">getMethodsInterceptor</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">isOverrideArgs</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>也可以使用<code>Matcher</code>来设置目标方法。 如果要在拦截器中更改引用参数，请在<code>isOverrideArgs</code>中返回<code>true</code>。</p>
+<ol start="3">
+<li>在文件 skywalking-plugin.def 中添加插件定义<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tomcat-7.x/8.x=TomcatInstrumentation</span><br></pre></td></tr></table></figure>
+<h2 id="实现一个拦截器"><a href="#实现一个拦截器" class="headerlink" title="实现一个拦截器"></a>实现一个拦截器</h2>作为一个实例方法的拦截器，它必须实现<br><code>org.apache.skywalking.apm.agent.core.plugin.interceptor.enhance.InstanceMethodsAroundInterceptor</code><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * A interceptor, which intercept method&#x27;s invocation. The target methods will be defined in &#123;<span class="doctag">@link</span></span></span><br><span class="line"><span class="comment"> * ClassEnhancePluginDefine&#125;&#x27;s subclass, most likely in &#123;<span class="doctag">@link</span> ClassInstanceMethodsEnhancePluginDefine&#125;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">InstanceMethodsAroundInterceptor</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * called before target method invocation.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> result change this result, if you want to truncate the method.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Throwable</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">beforeMethod</span><span class="params">(EnhancedInstance objInst, Method method, Object[] allArguments, Class&lt;?&gt;[] argumentsTypes,</span></span></span><br><span class="line"><span class="function"><span class="params">        MethodInterceptResult result)</span> <span class="keyword">throws</span> Throwable</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * called after target method invocation. Even method&#x27;s invocation triggers an exception.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> ret the method&#x27;s original return value.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> the method&#x27;s actual return value.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Throwable</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">Object <span class="title">afterMethod</span><span class="params">(EnhancedInstance objInst, Method method, Object[] allArguments, Class&lt;?&gt;[] argumentsTypes,</span></span></span><br><span class="line"><span class="function"><span class="params">        Object ret)</span> <span class="keyword">throws</span> Throwable</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * called when occur exception.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> t the exception occur.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">handleMethodException</span><span class="params">(EnhancedInstance objInst, Method method, Object[] allArguments, Class&lt;?&gt;[] argumentsTypes,</span></span></span><br><span class="line"><span class="function"><span class="params">        Throwable t)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+在方法调用前、调用后以及异常处理阶段使用核心API。</li>
+</ol>
+<h2 id="引导类插件"><a href="#引导类插件" class="headerlink" title="引导类插件"></a>引导类插件</h2><p>SkyWalking 已经将引导工具打包在代理核心中。 通过在插件定义中声明它，可以很容易继承实现它。<br>重写 <code>public boolean isBootstrapInstrumentation() </code> 并返回true</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">URLInstrumentation</span> <span class="keyword">extends</span> <span class="title">ClassEnhancePluginDefine</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String CLASS_NAME = <span class="string">&quot;java.net.URL&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">protected</span> ClassMatch <span class="title">enhanceClass</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> byName(CLASS_NAME);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">public</span> ConstructorInterceptPoint[] getConstructorsInterceptPoints() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ConstructorInterceptPoint[] &#123;</span><br><span class="line">            <span class="keyword">new</span> ConstructorInterceptPoint() &#123;</span><br><span class="line">                <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> ElementMatcher&lt;MethodDescription&gt; <span class="title">getConstructorMatcher</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="keyword">return</span> any();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> String <span class="title">getConstructorInterceptor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="string">&quot;org.apache.skywalking.apm.plugin.jre.httpurlconnection.Interceptor2&quot;</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">public</span> InstanceMethodsInterceptPoint[] getInstanceMethodsInterceptPoints() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> InstanceMethodsInterceptPoint[<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">public</span> StaticMethodsInterceptPoint[] getStaticMethodsInterceptPoints() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> StaticMethodsInterceptPoint[<span class="number">0</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isBootstrapInstrumentation</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注：<br>引导类插件只拦截最主要的类定义，在实际运行中会要影响JRE核心（rt.jar），随便定义它可能会产生意想不到的结果或副作用。</p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#apm" >
+    <span class="tag-code">apm</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/06/14/apm-Tracing%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90/">
+        <span class="nav-arrow">← </span>
+        
+          apm | Tracing原理剖析
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2021/06/14/Tracing%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E5%99%A8ContextManager/">
+        
+          (untitled)
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-nav-text">引言</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%8B%A6%E6%88%AA"><span class="toc-nav-text">拦截</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%8F%92%E4%BB%B6%E5%AE%9E%E7%8E%B0"><span class="toc-nav-text">插件实现</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="toc-nav-text">实现一个拦截器</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%BC%95%E5%AF%BC%E7%B1%BB%E6%8F%92%E4%BB%B6"><span class="toc-nav-text">引导类插件</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/06/14/apm-探针插件开发/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "apm | 探针插件开发",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

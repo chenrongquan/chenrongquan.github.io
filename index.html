@@ -154,6 +154,43 @@
   
     <article class="article-card">
       <h2 class="article-head">
+        <a href="/2021/06/14/Tracing%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E5%99%A8ContextManager/"></a>
+      </h2>
+      <p class="article-date">2021年6月14日</p>
+      
+      <div class="article-summary">
+        
+          
+        
+      </div>
+      <a class="more" href="/2021/06/14/Tracing%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E5%99%A8ContextManager/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/06/14/apm-%E6%8E%A2%E9%92%88%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91/">apm | 探针插件开发</a>
+      </h2>
+      <p class="article-date">2021年6月14日</p>
+      
+        
+  <a href="/tags#apm" >
+    <span class="tag-code">apm</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          引言追踪的基本方法是拦截Java方法，使用字节码操作技术和AOP概念。SkyWalking包装了字节码操作技术，和追踪上下文的传播，所以你只需要定义拦截点(类似于 spring的切面)
+拦截SkyWalking 提供了两类通用的定义来拦截构造方法，实例方法和类方法。
+
+ClassInstan ...
+        
+      </div>
+      <a class="more" href="/2021/06/14/apm-%E6%8E%A2%E9%92%88%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
         <a href="/2021/06/14/apm-Tracing%E5%8E%9F%E7%90%86%E5%89%96%E6%9E%90/">apm | Tracing原理剖析</a>
       </h2>
       <p class="article-date">2021年6月14日</p>
@@ -188,8 +225,8 @@ User -&gt; Tomcat7 -&gt; SpringMvc(projectA/{name})-&gt; 线程内调用 -& ...
       
       <div class="article-summary">
         
-          SpanSpan在分布式追踪系统中是一个重要而且得到公认的概念。关于Span可参考Google Dapper Paper和 OpenTracing
-Skywalking从2017年开始支持OpenTracing和OpenTracing API; 在Skywalking中Span概念与谷歌的D ...
+          SpanSpan在分布式追踪系统中一个重要且常用的概念。可从Google Dapper Paper和 OpenTracing学习更多与Span相关的知识。
+Skywalking从2017年开始支持OpenTracing和OpenTracing API; Skywalking中Span概念与谷 ...
         
       </div>
       <a class="more" href="/2021/06/14/apm-Tracing%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86%E5%99%A8ContextManager/">阅读全文</a>
@@ -279,7 +316,7 @@ Skywalking从2017年开始支持OpenTracing和OpenTracing API; 在Skywalking中S
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2021/06/03/apm-%E5%85%B3%E9%94%AE%E7%BB%9F%E8%AE%A1%E6%8C%87%E6%A0%87%E8%AF%B4%E6%98%8E/">apm-关键统计指标说明</a>
+        <a href="/2021/06/03/apm-%E5%85%B3%E9%94%AE%E7%BB%9F%E8%AE%A1%E6%8C%87%E6%A0%87%E8%AF%B4%E6%98%8E/">apm | 关键统计指标说明</a>
       </h2>
       <p class="article-date">2021年6月3日</p>
       
@@ -328,84 +365,6 @@ I ...
         
       </div>
       <a class="more" href="/2021/06/03/%E8%BF%90%E7%BB%B4-%E4%B8%AD%E8%8B%B1%E6%96%87%E6%9C%AF%E8%AF%AD%E5%AF%B9%E7%85%A7/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/05/26/apm-%E5%85%83%E6%95%B0%E6%8D%AE%E8%A1%A8%E8%AF%B4%E6%98%8E/">apm | 元数据表说明</a>
-      </h2>
-      <p class="article-date">2021年5月26日</p>
-      
-        
-  <a href="/tags#apm" >
-    <span class="tag-code">apm</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          APM库客户端:apm_client
-
-
-列
-数据类型
-是否为空
-说明
-
-
-
-id
-int
-否
-主键ID
-
-
-client_id
-varchar(32)
-否
-终端编号
-
-
-client_secret
-varchar(255)
-否
-终端秘钥
-
-
-scope
-varchar(255)
-是
-终端权 ...
-        
-      </div>
-      <a class="more" href="/2021/05/26/apm-%E5%85%83%E6%95%B0%E6%8D%AE%E8%A1%A8%E8%AF%B4%E6%98%8E/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/05/26/kafka-%E6%90%AD%E5%BB%BA%E6%BA%90%E7%A0%81%E7%8E%AF%E5%A2%83/">kafka | 搭建源码环境</a>
-      </h2>
-      <p class="article-date">2021年5月26日</p>
-      
-        
-  <a href="/tags#kafka" >
-    <span class="tag-code">kafka</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          如何搭建 Kafka 开发环境
-安装 Java 和 Gradle
-
-
-必须要安装好 Java 和 Gradle，同时在 IDEA 中安装 Scala 插件。最好把 Java 和 Gradle 环境加入到环境变量中。
-
-
-下载 Kafka 的源码12&gt; cd Projects&gt; g ...
-        
-      </div>
-      <a class="more" href="/2021/05/26/kafka-%E6%90%AD%E5%BB%BA%E6%BA%90%E7%A0%81%E7%8E%AF%E5%A2%83/">阅读全文</a>
     </article>
   
 
