@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      apm | 跟踪上下文管理器ContextManager | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>apm | 跟踪上下文管理器ContextManager</h2>
+  <p class="post-date">2021年6月14日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h1 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h1><h2 id="Span"><a href="#Span" class="headerlink" title="Span"></a>Span</h2><p>Span在分布式追踪系统中是一个重要而且得到公认的概念。关于Span可参考<a target="_blank" rel="noopener" href="https://research.google.com/pubs/pub36356.html">Google Dapper Paper</a>和 <a target="_blank" rel="noopener" href="http://opentracing.io/">OpenTracing</a></p>
+<p>Skywalking从2017年开始支持OpenTracing和OpenTracing API; 在Skywalking中Span概念与谷歌的Dapper论文 和 OpenTracing相似，也去做了扩展。<br>有三种类型的Span</p>
+<ol>
+<li>Entry Span：代表服务提供者(Service Provider)，它也是服务端的一个端点。作为一个APM系统，我们的目标是应用服务。因此，几乎所有的服务和MQ消费者都是EntrySpan。</li>
+<li>Local Span：代表一个正常的Java方法内部调用，与远程服务无关。它就是一个MQ生产者/消费者，也不是服务(如 HTTP服务)的调用方/接收方</li>
+<li>Exit Span：代表服务的客户端或者MQ的生产者，早期的Skywaking称之为LeafSpan。举个例子，通过JDBC访问DB 和 读取 Redis/Memcached 是 典型的ExitSpan。</li>
+</ol>
+<h2 id="ContextCarrier"><a href="#ContextCarrier" class="headerlink" title="ContextCarrier"></a>ContextCarrier</h2><p>为了实现分布式跟踪，必须绑定跨进程跟踪，并且上下文必须跨进程传播。这是ContextCarrier产生的原因。<br>以下是有关如何在 A-&gt;B 分布式调用中使用 ContextCarrier 的步骤。</p>
+<ol>
+<li>在客户端创建一个新的而且为空的ContextCarrier</li>
+<li>调用 <code>ContextManager#createExitSpan</code> 创建一个ExitSpan 或者 使用 <code>ContextManager#inject</code> 初始化这个 ContextCarrier</li>
+<li>将ContextCarrier所有元素绑定到Headers上(如 HTTP HEAD)、附加信息(如 Dubbo PPC框架)或者消息(例如 Kafka)</li>
+<li>ContextCarrier通过服务调用传递到服务端</li>
+<li>服务端从heads中获取所有的元素、附加信息、消息</li>
+<li>通过调用<code>ContextManager#createEntrySpan</code> 创建EntrySpan 或者 使用<code>ContextManager#extract</code> 来绑定客户端与服务端</li>
+</ol>
+<h3 id="示例1：Apache-HTTPComponent-客户端插件-和-Tomcat7-服务端插件"><a href="#示例1：Apache-HTTPComponent-客户端插件-和-Tomcat7-服务端插件" class="headerlink" title="示例1：Apache HTTPComponent 客户端插件 和 Tomcat7 服务端插件"></a>示例1：Apache HTTPComponent 客户端插件 和 Tomcat7 服务端插件</h3><p>在客户端使用Apache HTTPComponent插件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">span = ContextManager.createExitSpan(<span class="string">&quot;/span/operation/name&quot;</span>, contextCarrier, <span class="string">&quot;ip:port&quot;</span>);</span><br><span class="line">  CarrierItem next = contextCarrier.items();</span><br><span class="line">  <span class="keyword">while</span> (next.hasNext()) &#123;</span><br><span class="line">      next = next.next();</span><br><span class="line">      httpRequest.setHeader(next.getHeadKey(), next.getHeadValue());</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>在服务端使用Tomcat7 服务端插件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ContextCarrier contextCarrier = <span class="keyword">new</span> ContextCarrier();</span><br><span class="line">CarrierItem next = contextCarrier.items();</span><br><span class="line"><span class="keyword">while</span> (next.hasNext()) &#123;</span><br><span class="line">    next = next.next();</span><br><span class="line">    next.setHeadValue(request.getHeader(next.getHeadKey()));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">span = ContextManager.createEntrySpan(“/span/operation/name”, contextCarrier);</span><br></pre></td></tr></table></figure>
+<h2 id="ContextSnapshot"><a href="#ContextSnapshot" class="headerlink" title="ContextSnapshot"></a>ContextSnapshot</h2><p>除了跨进程跟踪，还必须支持跨线程跟踪。例如，异步进程（内存 MQ）和批处理在 Java 中都很常见。跨进程和跨线程跟踪非常相似，因为它们都需要传播上下文, 但是跨线程跟踪不需要序列化。<br>以下是跨线程传播的三个步骤：</p>
+<ul>
+<li>使用<code>ContextManager#capture</code>获取 ContextSnapshot 对象</li>
+<li>让子线程通过方法参数或由现有参数携带来访问ContextSnapshot</li>
+<li>在子线程中使用 <code>ContextManager#continued</code> 方法</li>
+</ul>
+<h2 id="核心APIS"><a href="#核心APIS" class="headerlink" title="核心APIS"></a>核心APIS</h2><h3 id="ContextManager"><a href="#ContextManager" class="headerlink" title="ContextManager"></a>ContextManager</h3><p>ContextManager的主要APIS</p>
+<ol>
+<li><p>Create EntrySpan<br><code>public static AbstractSpan createEntrySpan(String endpointName, ContextCarrier carrier)</code><br>根据operationName(比如 服务名、uri) 和 <code>ContextCarrier</code> 来创建EntrySpan</p>
+</li>
+<li><p>Create LocalSpan<br><code>public static AbstractSpan createLocalSpan(String endpointName)</code><br>根据operationName(如 方法的全限定名)来创建LocalSpan</p>
+</li>
+<li><p>Create ExitSpan<br><code>public static AbstractSpan createExitSpan(String endpointName, ContextCarrier carrier, String remotePeer)</code><br>根据operationName(比如 服务名、uri) 和 新的<code>ContextCarrier</code> 和 调用方地址(如 ip+port 或 hostname+port)来创建ExitSpan</p>
+</li>
+</ol>
+<h3 id="AbstractSpan"><a href="#AbstractSpan" class="headerlink" title="AbstractSpan"></a>AbstractSpan</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Set the component id, which defines in &#123;<span class="doctag">@link</span> ComponentsDefine&#125;</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> component</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> the span for chaining.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">AbstractSpan <span class="title">setComponent</span><span class="params">(Component component)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function">AbstractSpan <span class="title">setLayer</span><span class="params">(SpanLayer layer)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Set a key:value tag on the Span.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> this Span instance, for chaining</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">AbstractSpan <span class="title">tag</span><span class="params">(String key, String value)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Record an exception event of the current walltime timestamp.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> t any subclass of &#123;<span class="doctag">@link</span> Throwable&#125;, which occurs in this span.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> the Span, for chaining</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">AbstractSpan <span class="title">log</span><span class="params">(Throwable t)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function">AbstractSpan <span class="title">errorOccurred</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Record an event at a specific timestamp.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> timestamp The explicit timestamp for the log record.</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> event the events</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> the Span, for chaining</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">AbstractSpan <span class="title">log</span><span class="params">(<span class="keyword">long</span> timestamp, Map&lt;String, ?&gt; event)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Sets the string name for the logical operation this span represents.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> this Span instance, for chaining</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">AbstractSpan <span class="title">setOperationName</span><span class="params">(String endpointName)</span></span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>除了设置操作名称、标签和日志之外，还必须设置两个属性，即组件和层。 这对于 EntrySpan 和 ExitSpan 尤其重要。<br>SpanLayer是Span的类型，有5个值</p>
+<ol>
+<li>UNKNOWN(default)</li>
+<li>DB</li>
+<li>RPC_FRAMEWORK(为 RPC 框架设计，而不是普通的 HTTP 调用)</li>
+<li>HTTP</li>
+<li>MQ</li>
+</ol>
+<p>组件 ID 由 SkyWalking 项目定义和保留。对于组件名称/ID 的扩展，请遵循组件库定义和扩展文档(component library definitions and extensions)[<a target="_blank" rel="noopener" href="https://github.com/apache/skywalking/blob/master/docs/en/guides/Component-library-settings.md]">https://github.com/apache/skywalking/blob/master/docs/en/guides/Component-library-settings.md]</a></p>
+<h3 id="Special-Span-Tags"><a href="#Special-Span-Tags" class="headerlink" title="Special Span Tags"></a>Special Span Tags</h3><p>所有标签在跟踪视图都是可用的。 同时，在 OAP 后端分析中，一些特殊的标签或标签组合提供了其他高级功能。</p>
+<p><strong>Tag key status_code</strong><br>该值应该是一个整数。 OAL 实体的响应码对应这个值。</p>
+<p><strong>Tag keys <code>db.statement</code> 和 <code>db.type</code></strong><br><code>db.statement</code> 的值代表数据库语句，如SQL，如果值为空则为[No statement]/+span#operationName。当ExitSpan包含此标签时，OAP 会根据 agent-analyzer/default/maxSlowSQLLength 对慢SQL进行采样。慢SQL的阈值由<code>agent-analyzer/default/slowDBAccessThreshold</code>定义</p>
+<p><strong>扩展逻辑端点：Tag key x-le</strong><br>逻辑端点是一个概念，不代表真正的 RPC 调用，但需要统计信息。 x-le 的值应该是 JSON 格式。 有两种选择：</p>
+<ol>
+<li>定义一个分离的逻辑端点。 提供其自己的端点名称、延迟和状态。 适用于EntrySpan 和 LocalSpan。<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;name&quot;</span>: <span class="string">&quot;GraphQL-service&quot;</span>,</span><br><span class="line">  <span class="attr">&quot;latency&quot;</span>: <span class="number">100</span>,</span><br><span class="line">  <span class="attr">&quot;status&quot;</span>: <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>声明代表逻辑端点的当前本地跨度。</li>
+</ol>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">&quot;logic-span&quot;</span>: <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="高级APIS"><a href="#高级APIS" class="headerlink" title="高级APIS"></a>高级APIS</h2><h3 id="Aysnc-Span-APIS"><a href="#Aysnc-Span-APIS" class="headerlink" title="Aysnc Span APIS"></a>Aysnc Span APIS</h3><p>Span 中有一组高级 API，专门为异步用例设计。 当需要在另一个线程中设置Span的标签、日志和属性（包括结束时间）时，您应该使用这些 API。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * The span finish at current tracing context, but the current span is still alive, until &#123;<span class="doctag">@link</span> #asyncFinish&#125;</span></span><br><span class="line"><span class="comment"> * called.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * This method must be called&lt;br/&gt;</span></span><br><span class="line"><span class="comment"> * 1. In original thread(tracing context).</span></span><br><span class="line"><span class="comment"> * 2. Current span is active span.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * During alive, tags, logs and attributes of the span could be changed, in any thread.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * The execution times of &#123;<span class="doctag">@link</span> #prepareForAsync&#125; and &#123;<span class="doctag">@link</span> #asyncFinish()&#125; must match.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> the current span</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">AbstractSpan <span class="title">prepareForAsync</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Notify the span, it could be finished.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * The execution times of &#123;<span class="doctag">@link</span> #prepareForAsync&#125; and &#123;<span class="doctag">@link</span> #asyncFinish()&#125; must match.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> the current span</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">AbstractSpan <span class="title">asyncFinish</span><span class="params">()</span></span>;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>在原始上下文中调用 <code>#prepareForAsync</code></li>
+<li>当当前线程任务完成时，在原始上下文中运行 <code>ContextManager#stopSpan</code></li>
+<li>将Span传递给任意其他线程</li>
+<li>完成上述步骤后，在任意线程中调用``#asyncFinish`。</li>
+<li>当所有Span完成<code>#prepareForAsync</code> ，跟踪上下文将完成并告知后端(基于 API 执行次数)</li>
+</ol>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#apm" >
+    <span class="tag-code">apm</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/06/14/Java-SPI%E6%80%9D%E6%83%B3%E6%A2%B3%E7%90%86/">
+        <span class="nav-arrow">← </span>
+        
+          java | SPI思想梳理
+        
+      </a>
+    
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="toc-nav-text">概念</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Span"><span class="toc-nav-text">Span</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#ContextCarrier"><span class="toc-nav-text">ContextCarrier</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%A4%BA%E4%BE%8B1%EF%BC%9AApache-HTTPComponent-%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%8F%92%E4%BB%B6-%E5%92%8C-Tomcat7-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%8F%92%E4%BB%B6"><span class="toc-nav-text">示例1：Apache HTTPComponent 客户端插件 和 Tomcat7 服务端插件</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#ContextSnapshot"><span class="toc-nav-text">ContextSnapshot</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%A0%B8%E5%BF%83APIS"><span class="toc-nav-text">核心APIS</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#ContextManager"><span class="toc-nav-text">ContextManager</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#AbstractSpan"><span class="toc-nav-text">AbstractSpan</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Special-Span-Tags"><span class="toc-nav-text">Special Span Tags</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%AB%98%E7%BA%A7APIS"><span class="toc-nav-text">高级APIS</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#Aysnc-Span-APIS"><span class="toc-nav-text">Aysnc Span APIS</span></a></li></ol></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/06/14/apm-Tracing插件/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "apm | 跟踪上下文管理器ContextManager",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
