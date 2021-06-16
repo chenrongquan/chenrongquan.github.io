@@ -154,6 +154,38 @@
   
     <article class="article-card">
       <h2 class="article-head">
+        <a href="/2021/06/04/%E5%BE%AE%E6%9C%8D%E5%8A%A1-%E4%B8%BA%E4%BB%80%E4%B9%88nacos%E6%AF%94zookeeper%E6%9B%B4%E9%80%82%E5%90%88%E5%81%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/">微服务 | 为什么nacos比zookeeper更适合做注册中心</a>
+      </h2>
+      <p class="article-date">2021年6月4日</p>
+      
+      <div class="article-summary">
+        
+          为什么说zookeeper不适合做服务注册中心呢？
+
+服务注册中心是为了服务间调用服务的，那么绝对不允许因为服务注册中心出现了问题而导致服务间的调用出问题。
+
+ 假如有node1,node2,node3,集群节点。 保存着可用服务列表ip1，ip2，ip3，试想如果此时不一致，比如node1 ...
+        
+      </div>
+      <a class="more" href="/2021/06/04/%E5%BE%AE%E6%9C%8D%E5%8A%A1-%E4%B8%BA%E4%BB%80%E4%B9%88nacos%E6%AF%94zookeeper%E6%9B%B4%E9%80%82%E5%90%88%E5%81%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/06/03/apm-%E5%85%B3%E9%94%AE%E7%BB%9F%E8%AE%A1%E6%8C%87%E6%A0%87%E8%AF%B4%E6%98%8E/">apm | 关键统计指标说明</a>
+      </h2>
+      <p class="article-date">2021年6月3日</p>
+      
+      <div class="article-summary">
+        
+          
+        
+      </div>
+      <a class="more" href="/2021/06/03/apm-%E5%85%B3%E9%94%AE%E7%BB%9F%E8%AE%A1%E6%8C%87%E6%A0%87%E8%AF%B4%E6%98%8E/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
         <a href="/2021/06/03/%E8%BF%90%E7%BB%B4-%E4%B8%AD%E8%8B%B1%E6%96%87%E6%9C%AF%E8%AF%AD%E5%AF%B9%E7%85%A7/">运维 | 中英文术语对照</a>
       </h2>
       <p class="article-date">2021年6月3日</p>
@@ -399,58 +431,6 @@ Apache Kafka
         
       </div>
       <a class="more" href="/2021/05/11/apm-ES%E5%AD%98%E5%82%A8%E5%AD%97%E6%AE%B5%E8%AF%B4%E6%98%8E/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/03/21/apm-SpringKafkaListener%E5%8A%A8%E6%80%81%E6%89%A9%E5%B1%95/">apm | SpringKafkaListener动态扩展</a>
-      </h2>
-      <p class="article-date">2021年3月21日</p>
-      
-        
-  <a href="/tags#apm" >
-    <span class="tag-code">apm</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          需求背景
-框架: spring-kafka
-需求：实现@KafkaListener的动态生成
-
-参考来源stackoverflowgithub
-样例配置123456789apm:  kafka:    listeners:      enable: true      details:    ...
-        
-      </div>
-      <a class="more" href="/2021/03/21/apm-SpringKafkaListener%E5%8A%A8%E6%80%81%E6%89%A9%E5%B1%95/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/03/05/kafka-%E5%9F%BA%E7%A1%80%E9%83%A8%E5%88%86/">kafka | 基础部分</a>
-      </h2>
-      <p class="article-date">2021年3月5日</p>
-      
-        
-  <a href="/tags#kafka" >
-    <span class="tag-code">kafka</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          整体架构
-
-核心概念
-消息
-Kafka中最基本的数据单元
-消息是一串主要由key和value构成的字符串，key和value也都是byte数组
-key的主要作用是根据一定的策略，将此消息路由到指定的Partition中，这样就可以保证包含同一key的消息全部写入同一分区中
-消息的真正有效负载 ...
-        
-      </div>
-      <a class="more" href="/2021/03/05/kafka-%E5%9F%BA%E7%A1%80%E9%83%A8%E5%88%86/">阅读全文</a>
     </article>
   
 

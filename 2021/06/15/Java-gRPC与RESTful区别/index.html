@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      Java | gRPC与RESTful区别 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>Java | gRPC与RESTful区别</h2>
+  <p class="post-date">2021年6月15日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>RPC主要是基于TCP/IP协议<br>HTTP服务主要是基于HTTP协议，在TCP协议之上。<br>所以从效率上来说，RPC更胜一筹</p>
+<h2 id="OSI网络七层模型"><a href="#OSI网络七层模型" class="headerlink" title="OSI网络七层模型"></a>OSI网络七层模型</h2><p>实际应用基本都是五层，可以分为(从上到下):</p>
+<ul>
+<li>第一层：应用层 定义用于在网络中进行通信和传输数据的接口</li>
+<li>第二层：表示层 定义不同的系统中数据的传输格式，编码和解码规范等</li>
+<li>第三层：会话层 管理用户的会话，控制用户间逻辑连接的建立和中断</li>
+<li>第四层：传输层 管理网络中的端到端的数据传输</li>
+<li>第五层：网络层 定义网络设备间如何传输数据</li>
+<li>第六层：链路层 将上面的网络层的数据包封装成数据帧，便于物理层传输</li>
+<li>第七层：物理层 传输二进制数据</li>
+</ul>
+<p>实际应用过程中，五层协议结构里面没有表示层和会话层，即与应用层合并了。<br><img src="https://upload-images.jianshu.io/upload_images/20332119-5962f0b24118c839?imageMogr2/auto-orient/strip%7CimageView2/2/w/400/format/webp"><br>因为是HTTP是应用层协议，而TCP是传输层协议</p>
+<h2 id="RPC服务"><a href="#RPC服务" class="headerlink" title="RPC服务"></a>RPC服务</h2><h3 id="RPC架构"><a href="#RPC架构" class="headerlink" title="RPC架构"></a>RPC架构</h3><p><img src="https://upload-images.jianshu.io/upload_images/20332119-6c57d1561b498eb4?imageMogr2/auto-orient/strip%7CimageView2/2/w/640/format/webp"></p>
+<ul>
+<li>客户端client: 服务的调用方</li>
+<li>服务端server：真正的服务提供者</li>
+<li>客户端存根client stub：存放服务端的地址信息，再将客户端的请求参数打包成网络信息，然后通过网络远程发送给服务方</li>
+<li>服务端存根server stub：接收客户端发送过来的信息，将消息解包，并调用本地的方法。<h3 id="同步异步代用"><a href="#同步异步代用" class="headerlink" title="同步异步代用"></a>同步异步代用</h3></li>
+<li>同步调用：客户端等待调用执行完成并返回结果</li>
+<li>异步调用：客户端不等待调用执行完成返回结果，不过依然可以通过回调函数接收到返回结果的通知。如果客户端不关系结果，则可以变成一个单向的调用。类似于Java中的Runnable 和callable接口。<h3 id="流行的RPC框架"><a href="#流行的RPC框架" class="headerlink" title="流行的RPC框架"></a>流行的RPC框架</h3></li>
+</ul>
+<ol>
+<li>gRPC是Google最新公布的开源软件，基于HTTP2.0协议，支持众多编程语言。HTTP2.0是基于二进制的HTTP协议的升级版本。这个RPC框架是基于HTTP协议实现的，底层使用到了Netty框架的支持。</li>
+<li>Thrift是Facebook的一个开源项目，主要是一个跨语言的服务开发框架。与一个代码生成器对它所定义的IDL定义文件自动生成服务代码框架。用户只要在其之前进行二次开发就行。对于底层的RPC通讯等都是透明的。</li>
+<li>Dubbo是阿里开源的RPC框架，协议和序列化框架都可插拔是其特色。通用远程接口是基于Java接口，并且依托于spring框架方便开发。可以方便的打包成单一文件，独立运行。</li>
+</ol>
+<h2 id="HTTP服务"><a href="#HTTP服务" class="headerlink" title="HTTP服务"></a>HTTP服务</h2><p>即RESTful风格的服务接口。对于在接口不多、系统与系统交互较少的情况下，解决信息孤岛初期常使用的一种通信手段；优点就是简单、直接、开发方便。利用现成的http协议进行传输。<br>接口可能返回一个JSON字符串或者是XML文档。然后客户端再去处理这个返回的信息，从而可以比较快速的进行开发。但是对于大型企业来说，内部子系统较多、接口非常多的情况下，RPC框架的好处就显示出来了</p>
+<ul>
+<li>长连接：不必每次通信都要像http一样去3次握手，减少网络开销</li>
+<li>RPC框架一般有注册中心，丰富的监控管理；发布、下线接口、动态扩展等。</li>
+<li>对调用方无感知，统一化的操作</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>一般来说，RPC服务主要是针对大型企业的，而HTTP服务主要是针对小企业的，因为RPC效率更高，而HTTP服务开发迭代会更快。</p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/06/15/gRPC-%E5%9F%BA%E7%A1%80%E6%95%99%E7%A8%8B/">
+        <span class="nav-arrow">← </span>
+        
+          gRPC | 基础教程
+        
+      </a>
+    
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-nav-text">引言</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#OSI%E7%BD%91%E7%BB%9C%E4%B8%83%E5%B1%82%E6%A8%A1%E5%9E%8B"><span class="toc-nav-text">OSI网络七层模型</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#RPC%E6%9C%8D%E5%8A%A1"><span class="toc-nav-text">RPC服务</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#RPC%E6%9E%B6%E6%9E%84"><span class="toc-nav-text">RPC架构</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%90%8C%E6%AD%A5%E5%BC%82%E6%AD%A5%E4%BB%A3%E7%94%A8"><span class="toc-nav-text">同步异步代用</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B5%81%E8%A1%8C%E7%9A%84RPC%E6%A1%86%E6%9E%B6"><span class="toc-nav-text">流行的RPC框架</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#HTTP%E6%9C%8D%E5%8A%A1"><span class="toc-nav-text">HTTP服务</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-text">总结</span></a></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/06/15/Java-gRPC与RESTful区别/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "Java | gRPC与RESTful区别",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
