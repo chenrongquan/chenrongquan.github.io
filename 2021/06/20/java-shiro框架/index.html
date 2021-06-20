@@ -10,7 +10,7 @@
   
   <title>
      
-      gRPC | 服务端创建和调用原理 | ™技术博客 
+      java | shiro框架 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>gRPC | 服务端创建和调用原理</h2>
-  <p class="post-date">2021年6月16日</p>
+  <h2>java | shiro框架</h2>
+  <p class="post-date">2021年6月20日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,35 +160,62 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h1 id="RPC介绍"><a href="#RPC介绍" class="headerlink" title="RPC介绍"></a>RPC介绍</h1><h2 id="RPC框架原理"><a href="#RPC框架原理" class="headerlink" title="RPC框架原理"></a>RPC框架原理</h2><p>RPC 框架的目标就是让远程服务调用更加简单、透明，RPC 框架负责屏蔽底层的传输方式（TCP 或者 UDP）、序列化方式（XML/Json/ 二进制）和通信细节。服务调用者可以像调用本地接口一样调用远程的服务提供者，而不需要关心底层通信细节和调用过程。</p>
-<p>RPC 框架的调用原理图如下所示：<br><img src="https://static001.geekbang.org/resource/image/b2/fb/b265dc0bd6eae1b88b236f517609c9fb.png"></p>
-<h2 id="业界主流RPC框架"><a href="#业界主流RPC框架" class="headerlink" title="业界主流RPC框架"></a>业界主流RPC框架</h2><p>业界主流的 RPC 框架整体上分为三类：</p>
-<ol>
-<li>支持多语言的 RPC 框架，比较成熟的有 Google 的 gRPC、Apache（Facebook）的 Thrift；</li>
-<li>只支持特定语言的 RPC 框架，例如新浪微博的 Motan；</li>
-<li>支持服务治理等服务化特性的分布式服务框架，其底层内核仍然是 RPC 框架, 例如阿里的 Dubbo。</li>
-</ol>
-<p>随着微服务的发展，基于语言中立性原则构建微服务，逐渐成为一种主流模式，例如对于后端并发处理要求高的微服务，比较适合采用 Go 语言构建，而对于前端的 Web 界面，则更适合 Java 和 JavaScript。</p>
-<p>因此，基于多语言的 RPC 框架来构建微服务，是一种比较好的技术选择。例如 Netflix，API 服务编排层和后端的微服务之间就采用 gRPC 进行通信。</p>
-<h1 id="gRPC简介"><a href="#gRPC简介" class="headerlink" title="gRPC简介"></a>gRPC简介</h1><p>gRPC 是一个高性能、开源和通用的 RPC 框架，面向服务端和移动端，基于 HTTP/2 设计。</p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>gRPC 是由 Google 开发并开源的一种语言中立的 RPC 框架，当前支持 C、Java 和 Go 语言，其中 C 版本支持 C、C++、Node.js、C# 等。<br><a target="_blank" rel="noopener" href="https://github.com/grpc/grpc-java">Git地址</a></p>
-<p>gRPC 的调用示例如下所示：<br><img src="https://static001.geekbang.org/resource/image/6d/d9/6d9a335ad96491e4d610a31b5089a2d9.png"></p>
-<h2 id="gRPC-特点"><a href="#gRPC-特点" class="headerlink" title="gRPC 特点"></a>gRPC 特点</h2><ol>
-<li>语言中立，支持多种语言；</li>
-<li>基于 IDL 文件定义服务，通过 proto3 工具生成指定语言的数据结构、服务端接口以及客户端 Stub；</li>
-<li>通信协议基于标准的 HTTP/2 设计，支持双向流、消息头压缩、单 TCP 的多路复用、服务端推送等特性，这些特性使得 gRPC 在移动端设备上更加省电和节省网络流量；</li>
-<li>序列化支持 PB（Protocol Buffer）和 JSON，PB 是一种语言无关的高性能序列化框架，基于 HTTP/2 + PB, 保障了 RPC 调用的高性能。</li>
-</ol>
-<h1 id="gRPC服务端创建"><a href="#gRPC服务端创建" class="headerlink" title="gRPC服务端创建"></a>gRPC服务端创建</h1><p>以官方的 helloworld 为例，介绍 gRPC 服务端创建以及 service 调用流程（采用简单 RPC 模式）。</p>
-<h2 id="服务端创建业务代码"><a href="#服务端创建业务代码" class="headerlink" title="服务端创建业务代码"></a>服务端创建业务代码</h2><p>服务定义(helloworld.proto)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">service Greeter &#123;</span><br><span class="line">  rpc SayHello (HelloRequest) returns (HelloReply) &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line">message HelloRequest &#123;</span><br><span class="line">  string name &#x3D; 1;</span><br><span class="line">&#125;</span><br><span class="line">message HelloReply &#123;</span><br><span class="line">  string message &#x3D; 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></section>
+    <section class="markdown-content"><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Apache Shiro 是一个强大灵活的开源安全框架，可以完全处理身份验证、授权、加密和会话管理。</p>
+<h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><p><img src="https://pic2.zhimg.com/80/v2-e72930a8351ccf1590779ea87ac5cb65_720w.jpg"></p>
+<p> Shiro 框架的开发团队称之为应用安全的四大基石</p>
+<ul>
+<li><p>Authentication（认证）</p>
+</li>
+<li><p>Authorization（授权）</p>
+</li>
+<li><p>Session Management（会话管理）</p>
+</li>
+<li><p>Cryptography（加密）</p>
+<p>扩展功能</p>
+</li>
+<li><p>Web支持：Shiro的Web支持API有助于保护Web应用程序。</p>
+</li>
+<li><p>缓存：缓存是Apache Shiro API中的第一级，以确保安全操作保持快速和高效。</p>
+</li>
+<li><p>并发性：Apache Shiro支持具有并发功能的多线程应用程序。</p>
+</li>
+<li><p>测试：存在测试支持，可帮助您编写单元测试和集成测试，并确保代码按预期得到保障。</p>
+</li>
+<li><p>“运行方式”：允许用户承担另一个用户的身份(如果允许)的功能，有时在管理方案中很有用。</p>
+</li>
+<li><p>“记住我”：记住用户在会话中的身份，所以用户只需要强制登录即可。</p>
+</li>
+</ul>
+<blockquote>
+<p> Shiro不会去维护用户、维护权限，这些需要我们自己去设计/提供，然后通过相应的接口注入给Shiro</p>
+</blockquote>
+<h2 id="高级概述"><a href="#高级概述" class="headerlink" title="高级概述"></a>高级概述</h2><p><img src="https://pic3.zhimg.com/80/v2-c0841dfc8cb19a94c322eef635371cf6_720w.jpg"></p>
+<ul>
+<li>Subject：当前用户，Subject 可以是一个人，但也可以是第三方服务、守护进程帐户、时钟守护任务或者其它–当前和软件交互的任何事件。</li>
+<li>SecurityManager：管理所有Subject，SecurityManager 是 Shiro 架构的核心，配合内部安全组件共同组成安全伞。</li>
+<li>Realms：用于进行权限信息的验证，我们自己实现。Realm 本质上是一个特定的安全 DAO：它封装与数据源连接的细节，得到Shiro 所需的相关的数据。在配置 Shiro 的时候，你必须指定至少一个Realm 来实现认证（authentication）和/或授权（authorization）。</li>
+</ul>
+<p>我们需要实现Realms的Authentication 和 Authorization。其中 Authentication 是用来验证用户身份，Authorization 是授权访问控制，用于对用户进行的操作授权，证明该用户是否允许进行当前操作，如访问某个链接，某个资源文件等。</p>
+<h2 id="Shiro-认证过程"><a href="#Shiro-认证过程" class="headerlink" title="Shiro 认证过程"></a>Shiro 认证过程</h2><p><img src="https://pic4.zhimg.com/80/v2-2531156d2e6fb3ec0702f1d1ed795f43_720w.jpg"></p>
+<ul>
+<li>首先调用 Subject.login(token) 进行登录，其会自动委托给 Security Manager，调用之前必须通过 SecurityUtils.setSecurityManager() 设置；</li>
+<li>SecurityManager 负责真正的身份验证逻辑；它会委托给 Authenticator 进行身份验证；</li>
+<li>Authenticator 才是真正的身份验证者，Shiro API 中核心的身份认证入口点，此处可以自定义插入自己的实现；</li>
+<li>Authenticator 可能会委托给相应的 AuthenticationStrategy 进行多 Realm 身份验证，默认 ModularRealmAuthenticator 会调用 AuthenticationStrategy 进行多 Realm 身份验证；</li>
+<li>Authenticator 会把相应的 token 传入 Realm，从 Realm 获取身份验证信息，如果没有返回 / 抛出异常表示身份验证失败了。此处可以配置多个 Realm，将按照相应的顺序及策略进行访问。</li>
+</ul>
+<h2 id="Shiro-授权过程"><a href="#Shiro-授权过程" class="headerlink" title="Shiro 授权过程"></a>Shiro 授权过程</h2><p><img src="https://pic1.zhimg.com/80/v2-66b6458df10fd05db4aea732b0199080_720w.jpg"></p>
+<h2 id="自定义-Realm"><a href="#自定义-Realm" class="headerlink" title="自定义 Realm"></a>自定义 Realm</h2><p>Shiro 框架内部默认提供了两种实现，一种是查询.ini文件的IniRealm，另一种是查询数据库的JdbcRealm</p>
+<h2 id="shiro-加密"><a href="#shiro-加密" class="headerlink" title="shiro 加密"></a>shiro 加密</h2><p>通常都会使用非对称加密，简单理解也就是不可逆的加密，而 md5 加密算法就是符合这样的一种算法。<br><strong>虽然无法直接通过计算反推回密码，但是我们仍然可以通过计算一些简单的密码加密后的 Md5 值进行比较，推算出原来的密码</strong></p>
+<p>加盐 + 多次加密<br>相同的密码 md5 一样，那么我们就让我们的原始密码再加一个随机数，然后再进行 md5 加密，这个随机数就是我们说的盐(salt)，这样处理下来就能得到不同的 Md5 值。当然我们需要把这个随机数盐也保存进数据库中，以便我们进行验证。<br>另外我们可以通过多次加密的方法，即使黑客通过一定的技术手段拿到了我们的密码 md5 值，但它并不知道我们到底加密了多少次，所以这也使得破解工作变得艰难。</p>
+<h2 id="SpringBoot-Shiro"><a href="#SpringBoot-Shiro" class="headerlink" title="SpringBoot + Shiro"></a>SpringBoot + Shiro</h2></section>
     <!-- Tags START -->
     
       <div class="tags">
         <span>Tags:</span>
         
-  <a href="/tags#gRPC" >
-    <span class="tag-code">gRPC</span>
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
   </a>
 
       </div>
@@ -199,17 +226,17 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/06/15/Java-gRPC%E4%B8%8ERESTful%E5%8C%BA%E5%88%AB/">
+      <a class="nav-left" href="/2021/06/16/gRPC-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%88%9B%E5%BB%BA%E5%92%8C%E8%B0%83%E7%94%A8%E5%8E%9F%E7%90%86/">
         <span class="nav-arrow">← </span>
         
-          Java | gRPC与RESTful区别
+          gRPC | 服务端创建和调用原理
         
       </a>
     
     
-      <a class="nav-right" href="/2021/06/20/java-shiro%E6%A1%86%E6%9E%B6/">
+      <a class="nav-right" href="/2021/06/21/java-CAS%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95%E5%8E%9F%E7%90%86/">
         
-          java | shiro框架
+          java | CAS单点登录原理
         
         <span class="nav-arrow"> →</span>
       </a>
@@ -241,7 +268,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#RPC%E4%BB%8B%E7%BB%8D"><span class="toc-nav-text">RPC介绍</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#RPC%E6%A1%86%E6%9E%B6%E5%8E%9F%E7%90%86"><span class="toc-nav-text">RPC框架原理</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%B8%9A%E7%95%8C%E4%B8%BB%E6%B5%81RPC%E6%A1%86%E6%9E%B6"><span class="toc-nav-text">业界主流RPC框架</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#gRPC%E7%AE%80%E4%BB%8B"><span class="toc-nav-text">gRPC简介</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-nav-text">概述</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#gRPC-%E7%89%B9%E7%82%B9"><span class="toc-nav-text">gRPC 特点</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#gRPC%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%88%9B%E5%BB%BA"><span class="toc-nav-text">gRPC服务端创建</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%88%9B%E5%BB%BA%E4%B8%9A%E5%8A%A1%E4%BB%A3%E7%A0%81"><span class="toc-nav-text">服务端创建业务代码</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-nav-text">简介</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%89%B9%E6%80%A7"><span class="toc-nav-text">特性</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%AB%98%E7%BA%A7%E6%A6%82%E8%BF%B0"><span class="toc-nav-text">高级概述</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Shiro-%E8%AE%A4%E8%AF%81%E8%BF%87%E7%A8%8B"><span class="toc-nav-text">Shiro 认证过程</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Shiro-%E6%8E%88%E6%9D%83%E8%BF%87%E7%A8%8B"><span class="toc-nav-text">Shiro 授权过程</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89-Realm"><span class="toc-nav-text">自定义 Realm</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#shiro-%E5%8A%A0%E5%AF%86"><span class="toc-nav-text">shiro 加密</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#SpringBoot-Shiro"><span class="toc-nav-text">SpringBoot + Shiro</span></a></li></ol>
     
   </div>
 </aside>
@@ -251,7 +278,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/06/16/gRPC-服务端创建和调用原理/';
+    var url = 'http://chenrongquan.github.com/2021/06/20/java-shiro框架/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -315,7 +342,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "gRPC | 服务端创建和调用原理",
+        id: "java | shiro框架",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {

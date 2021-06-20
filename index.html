@@ -154,6 +154,57 @@
   
     <article class="article-card">
       <h2 class="article-head">
+        <a href="/2021/06/21/java-CAS%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95%E5%8E%9F%E7%90%86/">java | CAS单点登录原理</a>
+      </h2>
+      <p class="article-date">2021年6月21日</p>
+      
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          基于Cookie的单点登录的回顾基于Cookie的单点登录核心原理：
+
+将用户名密码加密之后存于Cookie中，之后访问网站时在过滤器（filter）中校验用户权限，如果没有权限则从Cookie中取出用户名密码进行登录，让用户从某种意义上觉得只登录了一次。
+该方式缺点就是多次传送用户名密码， ...
+        
+      </div>
+      <a class="more" href="/2021/06/21/java-CAS%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95%E5%8E%9F%E7%90%86/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/06/20/java-shiro%E6%A1%86%E6%9E%B6/">java | shiro框架</a>
+      </h2>
+      <p class="article-date">2021年6月20日</p>
+      
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          简介Apache Shiro 是一个强大灵活的开源安全框架，可以完全处理身份验证、授权、加密和会话管理。
+特性
+ Shiro 框架的开发团队称之为应用安全的四大基石
+
+Authentication（认证）
+
+Authorization（授权）
+
+Session Management（会话管理 ...
+        
+      </div>
+      <a class="more" href="/2021/06/20/java-shiro%E6%A1%86%E6%9E%B6/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
         <a href="/2021/06/16/gRPC-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%88%9B%E5%BB%BA%E5%92%8C%E8%B0%83%E7%94%A8%E5%8E%9F%E7%90%86/">gRPC | 服务端创建和调用原理</a>
       </h2>
       <p class="article-date">2021年6月16日</p>
@@ -166,7 +217,8 @@
       
       <div class="article-summary">
         
-          
+          RPC介绍RPC框架原理RPC 框架的目标就是让远程服务调用更加简单、透明，RPC 框架负责屏蔽底层的传输方式（TCP 或者 UDP）、序列化方式（XML/Json/ 二进制）和通信细节。服务调用者可以像调用本地接口一样调用远程的服务提供者，而不需要关心底层通信细节和调用过程。
+RPC 框架 ...
         
       </div>
       <a class="more" href="/2021/06/16/gRPC-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%88%9B%E5%BB%BA%E5%92%8C%E8%B0%83%E7%94%A8%E5%8E%9F%E7%90%86/">阅读全文</a>
@@ -325,44 +377,6 @@ Skywalking从2017年开始支持OpenTracing和OpenTracing API; Skywalking中Span
         
       </div>
       <a class="more" href="/2021/06/13/apm-agent%E5%AD%97%E8%8A%82%E7%A0%81%E5%A2%9E%E5%BC%BA%E5%AE%9E%E7%8E%B0/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/06/13/Java-System-getProperty-vs-System-getenv/">Java | System.getProperty与System.getenv</a>
-      </h2>
-      <p class="article-date">2021年6月13日</p>
-      
-        
-  <a href="/tags#java" >
-    <span class="tag-code">java</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          Java System.getProperty 与 System.getenv 区别1. 引用在一个Java应用中java.lang包是自动引入的。这个包包括许多常见的类，如 NullPointerException、Math、String。Java.lang.System是一个final修 ...
-        
-      </div>
-      <a class="more" href="/2021/06/13/Java-System-getProperty-vs-System-getenv/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/06/04/%E5%BE%AE%E6%9C%8D%E5%8A%A1-%E4%B8%BA%E4%BB%80%E4%B9%88nacos%E6%AF%94zookeeper%E6%9B%B4%E9%80%82%E5%90%88%E5%81%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/">微服务 | 为什么nacos比zookeeper更适合做注册中心</a>
-      </h2>
-      <p class="article-date">2021年6月4日</p>
-      
-      <div class="article-summary">
-        
-          为什么说zookeeper不适合做服务注册中心呢？
-
-服务注册中心是为了服务间调用服务的，那么绝对不允许因为服务注册中心出现了问题而导致服务间的调用出问题。
-
- 假如有node1,node2,node3,集群节点。 保存着可用服务列表ip1，ip2，ip3，试想如果此时不一致，比如node1 ...
-        
-      </div>
-      <a class="more" href="/2021/06/04/%E5%BE%AE%E6%9C%8D%E5%8A%A1-%E4%B8%BA%E4%BB%80%E4%B9%88nacos%E6%AF%94zookeeper%E6%9B%B4%E9%80%82%E5%90%88%E5%81%9A%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/">阅读全文</a>
     </article>
   
 
