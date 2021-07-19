@@ -10,7 +10,7 @@
   
   <title>
      
-      ™技术博客 
+      中间件 | Zookeeper设计 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -79,7 +79,7 @@
       
         <li class="list-item">
           
-            <a href="/" class="item-link active">主页</a>
+            <a href="/" class="item-link">主页</a>
           
         </li>
       
@@ -118,7 +118,7 @@
         
           <li class="menu-item">
             
-              <a href="/" class="menu-link mobile-active">主页</a>
+              <a href="/" class="menu-link">主页</a>
             
           </li>
         
@@ -150,162 +150,168 @@
     </div>
   </div>
 </header>
-    <main class="app-body">
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/02/22/skywalking-%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF/">skywalking | 元数据信息</a>
-      </h2>
-      <p class="article-date">2021年2月22日</p>
-      
-        
-  <a href="/tags#skywalking" >
-    <span class="tag-code">skywalking</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          服务信息表名srvice_traffic
-字段属性
-
-
-字段
-类型
-含义
-
-
-
-service_group
-String
-服务组名
-
-
-name
-String
-服务名
-
-
-node_type
-integer
-节点类型
-
-
-id
-String
-base64(serviceName).(norm ...
-        
-      </div>
-      <a class="more" href="/2021/02/22/skywalking-%E5%85%83%E6%95%B0%E6%8D%AE%E4%BF%A1%E6%81%AF/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/02/20/skywalking-%E9%98%9F%E5%88%97%E5%86%85%E6%A0%B8/">skywalking | 队列内核</a>
-      </h2>
-      <p class="article-date">2021年2月20日</p>
-      
-        
-  <a href="/tags#skywalking" >
-    <span class="tag-code">skywalking</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          队列内核
-基于无锁环状队列，生产者-消费者 内存消息队列模型；
-作用是在生产者和消费者之间创建一个缓冲异步内存队列，防止因skywalking收集数据方生产数据的速度大于往后端发送数据的速度而造成数据积压和生产方阻塞
-
-Buffer
-两种实现方式：ArrayBlockingQueueBuff ...
-        
-      </div>
-      <a class="more" href="/2021/02/20/skywalking-%E9%98%9F%E5%88%97%E5%86%85%E6%A0%B8/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/02/17/skywalking-gRPC%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86/">skywalking | gRPC连接管理</a>
-      </h2>
-      <p class="article-date">2021年2月17日</p>
-      
-        
-  <a href="/tags#skywalking" >
-    <span class="tag-code">skywalking</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          gRPC Channel管理GRPCChannelManager    负责维护Agent与后端OAP集群通信时使用的网络连接
-GRPCChannelgRPC客户端的核心类之一，逻辑上表示一个Channel，底层持有一个TCP链接，负责维护此连接的活性。在RPC调用的任何时机，如果检测到底层 ...
-        
-      </div>
-      <a class="more" href="/2021/02/17/skywalking-gRPC%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/02/17/skywalking-Agent%E6%8F%92%E4%BB%B6%E5%8E%9F%E7%90%86/">skywalking | Agent插件原理</a>
-      </h2>
-      <p class="article-date">2021年2月17日</p>
-      
-        
-  <a href="/tags#skywalking" >
-    <span class="tag-code">skywalking</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          字节码增强JavaAgent
-Java Agent是java命令的一个参数(即 -javaagent)，参数之后需要指定一个jar包
-
-在Java虚拟机启动时，执行main()函数之前，虚拟机会先找到-javaagent命令指定jar包，然后执行 premain-class中的premain ...
-        
-      </div>
-      <a class="more" href="/2021/02/17/skywalking-Agent%E6%8F%92%E4%BB%B6%E5%8E%9F%E7%90%86/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/02/17/skywalking-Agent%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/">skywalking | Agent启动原理</a>
-      </h2>
-      <p class="article-date">2021年2月17日</p>
-      
-        
-  <a href="/tags#skywalking" >
-    <span class="tag-code">skywalking</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          微内核架构 和 SPI机制微内核架构
-微内核架构(Microkernel Architecture) 也称插件化架构（Plug-in Architecture），是一种面向功能进行拆分的可扩展性架构
-
-
-
-内核系统：负责管理插件的生命周期，保证系统不因功能扩展而不断进行修改。
-插件模块：独立 ...
-        
-      </div>
-      <a class="more" href="/2021/02/17/skywalking-Agent%E5%90%AF%E5%8A%A8%E5%8E%9F%E7%90%86/">阅读全文</a>
-    </article>
-  
-
-  
-    <div class="guide-pager">
-  
-    <a href="/page/3/"><span class="page-arrow">← </span>Prev</a>
-  
-  
-    <a class="unvisible" href="/">Next <span class="page-arrow">→</span></a>
-  
+    <div id="article-banner">
+  <h2>中间件 | Zookeeper设计</h2>
+  <p class="post-date">2021年7月15日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
 </div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"></section>
+    <!-- Tags START -->
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/06/21/java-Session%E3%80%81Cookie%E5%92%8CToken/">
+        <span class="nav-arrow">← </span>
+        
+          java | Session、Cookie和Token
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2021/07/18/go-%E5%88%9D%E5%A7%8B%E7%AF%8701/">
+        
+          go | 初始篇01
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
   
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="nav">none</ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
 </main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/07/15/中间件-Zookeeper设计/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "中间件 | Zookeeper设计",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
     <div class="scroll-top">
   <span class="arrow-icon"></span>
 </div>
