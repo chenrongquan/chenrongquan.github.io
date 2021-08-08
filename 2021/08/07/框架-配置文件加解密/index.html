@@ -10,7 +10,7 @@
   
   <title>
      
-      go | 语法篇02 | ™技术博客 
+      框架-1.配置文件加解密 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>go | 语法篇02</h2>
-  <p class="post-date">2021年7月20日</p>
+  <h2>框架-1.配置文件加解密</h2>
+  <p class="post-date">2021年8月7日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,58 +160,51 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="基本数据类型"><a href="#基本数据类型" class="headerlink" title="基本数据类型"></a>基本数据类型</h2><table>
-<thead>
-<tr>
-<th>类型</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>bool</td>
-</tr>
-<tr>
-<td>string</td>
-</tr>
-<tr>
-<td>int int8 int16 int32 int64</td>
-</tr>
-<tr>
-<td>uint uint8 uint16 uint32 uint64 uintptr</td>
-</tr>
-<tr>
-<td>byte // alias for uint8</td>
-</tr>
-<tr>
-<td>rune // alias for int32, represetns a Unicode code point</td>
-</tr>
-<tr>
-<td>float32 float64</td>
-</tr>
-<tr>
-<td>complex64 complex128</td>
-</tr>
-</tbody></table>
-<h3 id="类型转换"><a href="#类型转换" class="headerlink" title="类型转换"></a>类型转换</h3><ul>
-<li>Go语言不允许隐式类型转换</li>
-<li>别名和原有类型也不能进行隐式类型转换</li>
+    <section class="markdown-content"><h2 id="1-Jasypt库"><a href="#1-Jasypt库" class="headerlink" title="1. Jasypt库"></a>1. Jasypt库</h2><hr>
+<p>Java库，允许开发人员以很简单的方式添加基本加密功能，而无需深入研究加密原理。<br>具有以下特性</p>
+<ul>
+<li>高安全性，基于标准的加密技术，无论是单向和双向加密</li>
+<li>集成HIbernate的</li>
+<li>可集成到Spring应用程序中，与SpringSecurity集成</li>
+<li>集成的能力，用于加密的应用程序(即数据源)的配置</li>
+<li>特点功能的高性能加密的multi-processor/multi-core系统</li>
+<li>与任何JCE提供者使用开放的API</li>
 </ul>
-<h3 id="类型的预定义值"><a href="#类型的预定义值" class="headerlink" title="类型的预定义值"></a>类型的预定义值</h3><ul>
-<li>math.MaxInt64</li>
-<li>math.MaxFloat64</li>
-<li>math.MaxUint32</li>
+<h2 id="2-jasypt-spring-boot"><a href="#2-jasypt-spring-boot" class="headerlink" title="2. jasypt-spring-boot"></a>2. jasypt-spring-boot</h2><hr>
+<p><a target="_blank" rel="noopener" href="https://github.com/ulisesbocchio/jasypt-spring-boot">github</a></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.github.ulisesbocchio<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jasypt-spring-boot<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.0.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><strong>最重要参数</strong></p>
+<ul>
+<li>根密码：<code>jasypt.encryptor.password</code></li>
 </ul>
-<h3 id="指针类型"><a href="#指针类型" class="headerlink" title="指针类型"></a>指针类型</h3><ul>
-<li>不支持指针运算</li>
-<li>string是值类型，其默认的初始化值为空字符串，而不是nil</li>
+<h2 id="3-封装加密工具类"><a href="#3-封装加密工具类" class="headerlink" title="3. 封装加密工具类"></a>3. 封装加密工具类</h2><hr>
+<ol>
+<li>关键类</li>
+</ol>
+<ul>
+<li>StringEncryptor</li>
+<li>Environment</li>
 </ul>
+<ol start="2">
+<li>单例demo<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testJasypt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    System.setProperty(<span class="string">&quot;jasypt.encryptor.password&quot;</span>, <span class="string">&quot;aiops&quot;</span>);</span><br><span class="line">    StringEncryptor stringEncryptor = <span class="keyword">new</span> DefaultLazyEncryptor(<span class="keyword">new</span> StandardEnvironment());</span><br><span class="line">    System.out.println(stringEncryptor.encrypt(<span class="string">&quot;aiops&quot;</span>));</span><br><span class="line">    System.out.println(stringEncryptor.decrypt(<span class="string">&quot;bqLog0DzT0mfuHYJC1i5SSreKg6GV5I3WBU4SuPokMWZT7CsMW26Q/QMmDw0QHjv&quot;</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="4-与Spring配置文件的结合使用"><a href="#4-与Spring配置文件的结合使用" class="headerlink" title="4. 与Spring配置文件的结合使用"></a>4. 与Spring配置文件的结合使用</h2></li>
+</ol>
+<hr>
+<p>加密配置</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">jasypt:</span></span><br><span class="line">  <span class="attr">encryptor:</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">aiops</span></span><br><span class="line">    <span class="attr">algorithm:</span> <span class="string">PBEWithMD5AndDES</span></span><br><span class="line">    <span class="attr">iv-generator-classname:</span> <span class="string">org.jasypt.iv.NoIvGenerator</span></span><br></pre></td></tr></table></figure>
+<p>使用示例</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">security:</span></span><br><span class="line">  <span class="attr">oauth2:</span></span><br><span class="line">    <span class="attr">client:</span></span><br><span class="line">      <span class="attr">client-id:</span> <span class="string">ENC(lPmuUC/KN6r7E/ulzAyH0BW3Ol8L5kqq)</span></span><br><span class="line">      <span class="attr">client-secret:</span> <span class="string">ENC(fJ4pux/6P4aeZ3BYUgDB7awPxjIvBV4o)</span></span><br><span class="line">      <span class="attr">scope:</span> <span class="string">server</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>注意事项</strong><br>配置文件有明确加密要求时才使用</p>
+</blockquote>
 </section>
     <!-- Tags START -->
     
       <div class="tags">
         <span>Tags:</span>
         
-  <a href="/tags#go" >
-    <span class="tag-code">go</span>
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
   </a>
 
       </div>
@@ -222,20 +215,13 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/07/18/go-%E5%88%9D%E5%A7%8B%E7%AF%8701/">
+      <a class="nav-left" href="/2021/07/20/go-%E8%AF%AD%E6%B3%95%E7%AF%8702/">
         <span class="nav-arrow">← </span>
         
-          go | 初始篇01
+          go | 语法篇02
         
       </a>
     
-    
-      <a class="nav-right" href="/2021/08/07/%E6%A1%86%E6%9E%B6-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%8A%A0%E8%A7%A3%E5%AF%86/">
-        
-          框架-1.配置文件加解密
-        
-        <span class="nav-arrow"> →</span>
-      </a>
     
   </div>
 
@@ -264,7 +250,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-nav-text">基本数据类型</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2"><span class="toc-nav-text">类型转换</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%B1%BB%E5%9E%8B%E7%9A%84%E9%A2%84%E5%AE%9A%E4%B9%89%E5%80%BC"><span class="toc-nav-text">类型的预定义值</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%8C%87%E9%92%88%E7%B1%BB%E5%9E%8B"><span class="toc-nav-text">指针类型</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#1-Jasypt%E5%BA%93"><span class="toc-nav-text">1. Jasypt库</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#2-jasypt-spring-boot"><span class="toc-nav-text">2. jasypt-spring-boot</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#3-%E5%B0%81%E8%A3%85%E5%8A%A0%E5%AF%86%E5%B7%A5%E5%85%B7%E7%B1%BB"><span class="toc-nav-text">3. 封装加密工具类</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#4-%E4%B8%8ESpring%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E7%BB%93%E5%90%88%E4%BD%BF%E7%94%A8"><span class="toc-nav-text">4. 与Spring配置文件的结合使用</span></a></li></ol>
     
   </div>
 </aside>
@@ -274,7 +260,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/07/20/go-语法篇02/';
+    var url = 'http://chenrongquan.github.com/2021/08/07/框架-配置文件加解密/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -338,7 +324,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "go | 语法篇02",
+        id: "框架-1.配置文件加解密",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
