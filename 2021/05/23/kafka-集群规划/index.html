@@ -161,7 +161,7 @@
   <!-- Article START -->
   <article class="post-article">
     <section class="markdown-content"><h2 id="Kafka线上集群部署方案怎么做？"><a href="#Kafka线上集群部署方案怎么做？" class="headerlink" title="Kafka线上集群部署方案怎么做？"></a>Kafka线上集群部署方案怎么做？</h2><hr>
-<h3 id="操作系统选型"><a href="#操作系统选型" class="headerlink" title="操作系统选型"></a>操作系统选型</h3><ul>
+<h3 id="1-操作系统选型"><a href="#1-操作系统选型" class="headerlink" title="1. 操作系统选型"></a>1. 操作系统选型</h3><ul>
 <li>Linux最佳，原因包括三个维度<ul>
 <li>I/O模型的使用</li>
 <li>数据网络传输效率</li>
@@ -169,7 +169,7 @@
 </ul>
 </li>
 </ul>
-<h4 id="I-O模型分类"><a href="#I-O模型分类" class="headerlink" title="I/O模型分类"></a>I/O模型分类</h4><ul>
+<h4 id="1-1-I-O模型分类"><a href="#1-1-I-O模型分类" class="headerlink" title="1.1 I/O模型分类"></a>1.1 I/O模型分类</h4><ul>
 <li>阻塞式IO BIO</li>
 <li>非阻塞时IO NIO</li>
 <li>IO多路复用 Select函数</li>
@@ -177,7 +177,7 @@
 <li>异步IO AIO</li>
 </ul>
 <p>Kafka的Java客户端底层使用了selector，在Linux上的实现机制是epoll，在windows平台上的实现机制是select；<br><strong>因此在这一点上将 Kafka 部署在 Linux 上是有优势的，因为能够获得更高效的 I/O 性能。</strong></p>
-<h4 id="网络传输效率"><a href="#网络传输效率" class="headerlink" title="网络传输效率"></a>网络传输效率</h4><ul>
+<h4 id="1-2-网络传输效率"><a href="#1-2-网络传输效率" class="headerlink" title="1.2 网络传输效率"></a>1.2 网络传输效率</h4><ul>
 <li>kafka需要在磁盘和网络间进行大量数据传输，考虑Linux的零拷贝技术</li>
 <li>零拷贝（Zero Copy）技术，就是当数据在磁盘和网络进行传输时避免昂贵的内核态数据拷贝从而实现快速的数据传输</li>
 <li>一句话总结一下，在 Linux 部署 Kafka 能够享受到零拷贝技术所带来的快速数据传输特性。<blockquote>
@@ -185,11 +185,11 @@
 </blockquote>
 </li>
 </ul>
-<h4 id="社区的支持度"><a href="#社区的支持度" class="headerlink" title="社区的支持度"></a>社区的支持度</h4><ul>
+<h4 id="1-3-社区的支持度"><a href="#1-3-社区的支持度" class="headerlink" title="1.3 社区的支持度"></a>1.3 社区的支持度</h4><ul>
 <li>社区目前对 Windows 平台上发现的 Kafka Bug 不做任何承诺。</li>
 <li>Windows 平台上部署 Kafka 只适合于个人测试或用于功能验证，千万不要应用于生产环境。</li>
 </ul>
-<h3 id="磁盘选型"><a href="#磁盘选型" class="headerlink" title="磁盘选型"></a>磁盘选型</h3><ul>
+<h3 id="2-磁盘选型"><a href="#2-磁盘选型" class="headerlink" title="2. 磁盘选型"></a>2. 磁盘选型</h3><ul>
 <li>建议使用普通机械硬盘即可，原因<ul>
 <li>Kafka使用的方式多是顺序读写操作，一定程度上规避了机械磁盘最大的劣势，即随机读写操作慢。</li>
 <li>从性价比上来说，机械磁盘物美价廉，而它因易损坏而造成的可靠性差等缺陷，又由 Kafka 在软件层面提供机制来保证，故使用普通机械磁盘是很划算的</li>
@@ -203,7 +203,7 @@
 </ul>
 </li>
 </ul>
-<h4 id="磁盘容量"><a href="#磁盘容量" class="headerlink" title="磁盘容量"></a>磁盘容量</h4><ul>
+<h4 id="2-1-磁盘容量"><a href="#2-1-磁盘容量" class="headerlink" title="2.1 磁盘容量"></a>2.1 磁盘容量</h4><ul>
 <li>Kafka 集群到底需要多大的存储空间？应该如何结合自身业务场景和存储需求来规划 Kafka 集群的存储容量呢？</li>
 <li>计算例子：<br>假设有个业务每天需要向 Kafka 集群发送 1 亿条消息，每条消息保存两份以防止数据丢失，另外消息默认保存两周时间。现在假设消息的平均大小是 1KB，那么你能说出你的 Kafka 集群需要为这个业务预留多少磁盘空间吗？<ul>
 <li>每天 1 亿条 1KB 大小的消息，保存两份且留存两周的时间，那么总的空间大小就等于 1 亿 * 1KB * 2 / 1000 / 1000 = 200GB。</li>
@@ -221,7 +221,7 @@
 </ul>
 </li>
 </ul>
-<h4 id="带宽"><a href="#带宽" class="headerlink" title="带宽"></a>带宽</h4><ul>
+<h4 id="2-2-带宽"><a href="#2-2-带宽" class="headerlink" title="2.2 带宽"></a>2.2 带宽</h4><ul>
 <li>带宽主要有两种：1Gbps 的千兆网络和 10Gbps 的万兆网络</li>
 <li>带宽资源的规划背后其实是要规划所需的 Kafka 服务器的数量</li>
 <li>计算例子：<br>假设你公司的机房环境是千兆网络，即 1Gbps，现有个业务，其业务目标或 SLA 是在 1 小时内处理 1TB 的业务数据。那么问题来了，你到底需要多少台 Kafka 服务器来完成这个业务呢？<ul>
@@ -294,7 +294,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Kafka%E7%BA%BF%E4%B8%8A%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88%E6%80%8E%E4%B9%88%E5%81%9A%EF%BC%9F"><span class="toc-nav-text">Kafka线上集群部署方案怎么做？</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E9%80%89%E5%9E%8B"><span class="toc-nav-text">操作系统选型</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#I-O%E6%A8%A1%E5%9E%8B%E5%88%86%E7%B1%BB"><span class="toc-nav-text">I&#x2F;O模型分类</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%BD%91%E7%BB%9C%E4%BC%A0%E8%BE%93%E6%95%88%E7%8E%87"><span class="toc-nav-text">网络传输效率</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%A4%BE%E5%8C%BA%E7%9A%84%E6%94%AF%E6%8C%81%E5%BA%A6"><span class="toc-nav-text">社区的支持度</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E7%A3%81%E7%9B%98%E9%80%89%E5%9E%8B"><span class="toc-nav-text">磁盘选型</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E7%A3%81%E7%9B%98%E5%AE%B9%E9%87%8F"><span class="toc-nav-text">磁盘容量</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#%E5%B8%A6%E5%AE%BD"><span class="toc-nav-text">带宽</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-text">总结</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Kafka%E7%BA%BF%E4%B8%8A%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88%E6%80%8E%E4%B9%88%E5%81%9A%EF%BC%9F"><span class="toc-nav-text">Kafka线上集群部署方案怎么做？</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E9%80%89%E5%9E%8B"><span class="toc-nav-text">1. 操作系统选型</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#1-1-I-O%E6%A8%A1%E5%9E%8B%E5%88%86%E7%B1%BB"><span class="toc-nav-text">1.1 I&#x2F;O模型分类</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#1-2-%E7%BD%91%E7%BB%9C%E4%BC%A0%E8%BE%93%E6%95%88%E7%8E%87"><span class="toc-nav-text">1.2 网络传输效率</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#1-3-%E7%A4%BE%E5%8C%BA%E7%9A%84%E6%94%AF%E6%8C%81%E5%BA%A6"><span class="toc-nav-text">1.3 社区的支持度</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-%E7%A3%81%E7%9B%98%E9%80%89%E5%9E%8B"><span class="toc-nav-text">2. 磁盘选型</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#2-1-%E7%A3%81%E7%9B%98%E5%AE%B9%E9%87%8F"><span class="toc-nav-text">2.1 磁盘容量</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#2-2-%E5%B8%A6%E5%AE%BD"><span class="toc-nav-text">2.2 带宽</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-text">总结</span></a></li></ol>
     
   </div>
 </aside>
