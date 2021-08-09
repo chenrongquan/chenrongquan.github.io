@@ -10,7 +10,7 @@
   
   <title>
      
-      框架-1.配置文件加解密 | ™技术博客 
+      框架-2.oauth2登录流程处理 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>框架-1.配置文件加解密</h2>
-  <p class="post-date">2021年8月7日</p>
+  <h2>框架-2.oauth2登录流程处理</h2>
+  <p class="post-date">2021年8月8日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,44 +160,73 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="1-Jasypt库"><a href="#1-Jasypt库" class="headerlink" title="1. Jasypt库"></a>1. Jasypt库</h2><hr>
-<p>Java库，允许开发人员以很简单的方式添加基本加密功能，而无需深入研究加密原理。<br>具有以下特性</p>
+    <section class="markdown-content"><h2 id="登录逻辑"><a href="#登录逻辑" class="headerlink" title="登录逻辑"></a>登录逻辑</h2><hr>
+<p><img src="http://assets.processon.com/chart_image/610ff758e401fd5eeb7d1ca4.png"></p>
+<p><img src="https://minio.pigx.vip/oss/1627625474.png"></p>
+<h2 id="网关部分"><a href="#网关部分" class="headerlink" title="网关部分"></a>网关部分</h2><h3 id="1-验证码生成逻辑-网关"><a href="#1-验证码生成逻辑-网关" class="headerlink" title="1. 验证码生成逻辑(网关)"></a>1. 验证码生成逻辑(网关)</h3><hr>
 <ul>
-<li>高安全性的，基于标准的加密技术，无论是单向和双向加密</li>
-<li>集成HIbernate的</li>
-<li>可集成到Spring应用程序中，与SpringSecurity集成</li>
-<li>集成的能力，用于加密的应用程序(即数据源)的配置</li>
-<li>特定功能的高性能加密的multi-processor/multi-core系统</li>
-<li>与任何JCE提供者使用开放的API</li>
+<li>模块 <code>aiops-gateway</code></li>
+<li>接口 <code>GET aiops-gateway/code</code></li>
+<li>处理类 <code>ImageCodeCreateHandler</code></li>
 </ul>
-<h2 id="2-jasypt-spring-boot"><a href="#2-jasypt-spring-boot" class="headerlink" title="2. jasypt-spring-boot"></a>2. jasypt-spring-boot</h2><hr>
-<p><a target="_blank" rel="noopener" href="https://github.com/ulisesbocchio/jasypt-spring-boot">github</a></p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.github.ulisesbocchio<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jasypt-spring-boot<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.0.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p><strong>最重要参数</strong></p>
+<h3 id="2-登录参数-认证中心"><a href="#2-登录参数-认证中心" class="headerlink" title="2. 登录参数(认证中心)"></a>2. 登录参数(认证中心)</h3><hr>
+<p>接口<br><code>/auth/oauth/token</code></p>
+<p>请求体</p>
 <ul>
-<li>根密码：<code>jasypt.encryptor.password</code></li>
+<li>username 用户名</li>
+<li>password 密码(密文) AES加密；<code>U2FsdGVkX19zqXDDWDmHtyPjTfv3nT3wNNYINJ8z54I=</code></li>
+<li>code 验证码</li>
+<li>randomStr 随机参数</li>
+<li>grant_type：password</li>
+<li>scope: server</li>
 </ul>
-<h2 id="3-封装加密工具类"><a href="#3-封装加密工具类" class="headerlink" title="3. 封装加密工具类"></a>3. 封装加密工具类</h2><hr>
-<ol>
-<li>关键类</li>
-</ol>
+<p>请求头</p>
 <ul>
-<li>StringEncryptor</li>
-<li>Environment</li>
+<li>TENANT-ID: 默认为1</li>
+<li>Authorization: Basic信息  后台的base64(client_id:client_secret)<br><code>YWlvcHM6YWlvcHM=</code></li>
 </ul>
-<ol start="2">
-<li>单例demo<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testJasypt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    System.setProperty(<span class="string">&quot;jasypt.encryptor.password&quot;</span>, <span class="string">&quot;aiops&quot;</span>);</span><br><span class="line">    StringEncryptor stringEncryptor = <span class="keyword">new</span> DefaultLazyEncryptor(<span class="keyword">new</span> StandardEnvironment());</span><br><span class="line">    System.out.println(stringEncryptor.encrypt(<span class="string">&quot;aiops&quot;</span>));</span><br><span class="line">    System.out.println(stringEncryptor.decrypt(<span class="string">&quot;bqLog0DzT0mfuHYJC1i5SSreKg6GV5I3WBU4SuPokMWZT7CsMW26Q/QMmDw0QHjv&quot;</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="4-与Spring配置文件的结合使用"><a href="#4-与Spring配置文件的结合使用" class="headerlink" title="4. 与Spring配置文件的结合使用"></a>4. 与Spring配置文件的结合使用</h2></li>
-</ol>
-<hr>
-<p>加密配置</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">jasypt:</span></span><br><span class="line">  <span class="attr">encryptor:</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">aiops</span></span><br><span class="line">    <span class="attr">algorithm:</span> <span class="string">PBEWithMD5AndDES</span></span><br><span class="line">    <span class="attr">iv-generator-classname:</span> <span class="string">org.jasypt.iv.NoIvGenerator</span></span><br></pre></td></tr></table></figure>
-<p>使用示例</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">security:</span></span><br><span class="line">  <span class="attr">oauth2:</span></span><br><span class="line">    <span class="attr">client:</span></span><br><span class="line">      <span class="attr">client-id:</span> <span class="string">ENC(lPmuUC/KN6r7E/ulzAyH0BW3Ol8L5kqq)</span></span><br><span class="line">      <span class="attr">client-secret:</span> <span class="string">ENC(fJ4pux/6P4aeZ3BYUgDB7awPxjIvBV4o)</span></span><br><span class="line">      <span class="attr">scope:</span> <span class="string">server</span></span><br></pre></td></tr></table></figure>
+<h3 id="3-验证码校验逻辑-网关"><a href="#3-验证码校验逻辑-网关" class="headerlink" title="3. 验证码校验逻辑(网关)"></a>3. 验证码校验逻辑(网关)</h3><hr>
+<ul>
+<li>拦截器 <code>ValidateCodeGatewayFilter</code></li>
+<li>如何处理验证码不校验的客户端 数据库表 <code>sys_oauth_client_details</code>  字段 <code>additional_information</code>  给值 <code>&#123;&quot;captcha_flag&quot;:&quot;0&quot;&#125;</code></li>
+<li>前端密码解密逻辑 <code>PasswordDecoderFilter</code>  密钥 <code>gateway.encodeKey</code></li>
+<li>登录为何post body为空，只能url params形式；</li>
+<li>*因为 webflux 获取post body很麻烦，且会出现丢包的现象**；</li>
+</ul>
 <blockquote>
-<p><strong>注意事项</strong><br>配置文件有明确加密要求时才使用</p>
+<p>如何不想放url，就传明文</p>
 </blockquote>
-</section>
+<h2 id="认证中心"><a href="#认证中心" class="headerlink" title="认证中心"></a>认证中心</h2><h3 id="1-生成token"><a href="#1-生成token" class="headerlink" title="1. 生成token"></a>1. 生成token</h3><hr>
+<p><img src="https://pigx.coding.net/p/oss/d/oss1/git/raw/master/2020-9/20200915163528.png"></p>
+<ul>
+<li>入口: <code>TokenEndpoint</code>  <code>/oauth/token</code>  （spring-security.jar包下）</li>
+<li>校验clientId： <code>ClientDetailsService</code> 实现类 <code>AiopsClientDetailsServiceImpl.loadClientByClientId</code> 查库 <code>sys_oauth_client_details</code>  与传入校验对比</li>
+<li>授权：<code>ResourceOwnerPasswordTokenGranter.getOAuth2Authentication</code>；</li>
+<li><code>ProviderManager</code></li>
+<li><code>DaoAuthenticationProvider</code></li>
+<li>校验用户：<code>UserDetailsService</code> 实现类 <code>AiopsUserDetailsServiceImpl.loadUserByUsername</code>方法</li>
+<li>调用 <strong>用户中心</strong> <code>remoteUserService</code> 查数据库 <code>sys_user</code> 用户信息</li>
+<li>生成token <code>AbstractTokenGranter.grant</code></li>
+<li><code>DefaultTokenServices.createAccessToken</code></li>
+<li><code>AiopsRedisTokenStore.getAccessToken</code></li>
+</ul>
+<blockquote>
+<p>注意点 租户处理 如 两个不同租户下，有相同的用户 但密码不一样<br>即：服务之间如何传递租户信息</p>
+</blockquote>
+<ul>
+<li><code>TenantContextHolderFilter</code>  放入ttl中</li>
+</ul>
+<h2 id="资源服务器"><a href="#资源服务器" class="headerlink" title="资源服务器"></a>资源服务器</h2><h3 id="1-校验token"><a href="#1-校验token" class="headerlink" title="1. 校验token"></a>1. 校验token</h3><ul>
+<li>入口拦截器 <code>OAuth2AuthenticationProcessingFilter</code></li>
+<li><code>OAuth2AuthenticationManager.authenticate</code></li>
+<li><code>RemoteTokenServices.loadAuthentication</code> 通过token换用户信息；调用认证中心的 <code>/check_token</code> 接口</li>
+<li>check_token地址: <code>CheckTokenEndpoint</code><ul>
+<li><code>DefaultTokenServices.readAccessToken</code></li>
+<li><code>AiopsRedisTokenStore.readAccessToken</code></li>
+</ul>
+</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">security:</span></span><br><span class="line">    <span class="attr">resource:</span></span><br><span class="line">      <span class="attr">token-info-uri:</span> <span class="string">http://aiops-auth/oauth/check_token</span></span><br></pre></td></tr></table></figure></section>
     <!-- Tags START -->
     
       <div class="tags">
@@ -215,20 +244,13 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/07/20/go-%E8%AF%AD%E6%B3%95%E7%AF%8702/">
+      <a class="nav-left" href="/2021/08/07/%E6%A1%86%E6%9E%B6-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%8A%A0%E8%A7%A3%E5%AF%86/">
         <span class="nav-arrow">← </span>
         
-          go | 语法篇02
+          框架-1.配置文件加解密
         
       </a>
     
-    
-      <a class="nav-right" href="/2021/08/08/%E6%A1%86%E6%9E%B6-2-oauth2%E7%99%BB%E5%BD%95%E6%B5%81%E7%A8%8B%E5%A4%84%E7%90%86/">
-        
-          框架-2.oauth2登录流程处理
-        
-        <span class="nav-arrow"> →</span>
-      </a>
     
   </div>
 
@@ -257,7 +279,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#1-Jasypt%E5%BA%93"><span class="toc-nav-text">1. Jasypt库</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#2-jasypt-spring-boot"><span class="toc-nav-text">2. jasypt-spring-boot</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#3-%E5%B0%81%E8%A3%85%E5%8A%A0%E5%AF%86%E5%B7%A5%E5%85%B7%E7%B1%BB"><span class="toc-nav-text">3. 封装加密工具类</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#4-%E4%B8%8ESpring%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E7%BB%93%E5%90%88%E4%BD%BF%E7%94%A8"><span class="toc-nav-text">4. 与Spring配置文件的结合使用</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%99%BB%E5%BD%95%E9%80%BB%E8%BE%91"><span class="toc-nav-text">登录逻辑</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BD%91%E5%85%B3%E9%83%A8%E5%88%86"><span class="toc-nav-text">网关部分</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E9%AA%8C%E8%AF%81%E7%A0%81%E7%94%9F%E6%88%90%E9%80%BB%E8%BE%91-%E7%BD%91%E5%85%B3"><span class="toc-nav-text">1. 验证码生成逻辑(网关)</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-%E7%99%BB%E5%BD%95%E5%8F%82%E6%95%B0-%E8%AE%A4%E8%AF%81%E4%B8%AD%E5%BF%83"><span class="toc-nav-text">2. 登录参数(认证中心)</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#3-%E9%AA%8C%E8%AF%81%E7%A0%81%E6%A0%A1%E9%AA%8C%E9%80%BB%E8%BE%91-%E7%BD%91%E5%85%B3"><span class="toc-nav-text">3. 验证码校验逻辑(网关)</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%AE%A4%E8%AF%81%E4%B8%AD%E5%BF%83"><span class="toc-nav-text">认证中心</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E7%94%9F%E6%88%90token"><span class="toc-nav-text">1. 生成token</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-nav-text">资源服务器</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E6%A0%A1%E9%AA%8Ctoken"><span class="toc-nav-text">1. 校验token</span></a></li></ol></li></ol>
     
   </div>
 </aside>
@@ -267,7 +289,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/08/07/框架-配置文件加解密/';
+    var url = 'http://chenrongquan.github.com/2021/08/08/框架-2-oauth2登录流程处理/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -331,7 +353,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "框架-1.配置文件加解密",
+        id: "框架-2.oauth2登录流程处理",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
