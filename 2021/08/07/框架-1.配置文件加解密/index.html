@@ -187,9 +187,10 @@
 </ul>
 <ol start="2">
 <li>单例demo<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testJasypt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    System.setProperty(<span class="string">&quot;jasypt.encryptor.password&quot;</span>, <span class="string">&quot;aiops&quot;</span>);</span><br><span class="line">    StringEncryptor stringEncryptor = <span class="keyword">new</span> DefaultLazyEncryptor(<span class="keyword">new</span> StandardEnvironment());</span><br><span class="line">    System.out.println(stringEncryptor.encrypt(<span class="string">&quot;aiops&quot;</span>));</span><br><span class="line">    System.out.println(stringEncryptor.decrypt(<span class="string">&quot;bqLog0DzT0mfuHYJC1i5SSreKg6GV5I3WBU4SuPokMWZT7CsMW26Q/QMmDw0QHjv&quot;</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="4-与Spring配置文件的结合使用"><a href="#4-与Spring配置文件的结合使用" class="headerlink" title="4. 与Spring配置文件的结合使用"></a>4. 与Spring配置文件的结合使用</h2></li>
+
+</li>
 </ol>
-<hr>
+<h2 id="4-与Spring配置文件的结合使用"><a href="#4-与Spring配置文件的结合使用" class="headerlink" title="4. 与Spring配置文件的结合使用"></a>4. 与Spring配置文件的结合使用</h2><hr>
 <p>加密配置</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">jasypt:</span></span><br><span class="line">  <span class="attr">encryptor:</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">aiops</span></span><br><span class="line">    <span class="attr">algorithm:</span> <span class="string">PBEWithMD5AndDES</span></span><br><span class="line">    <span class="attr">iv-generator-classname:</span> <span class="string">org.jasypt.iv.NoIvGenerator</span></span><br></pre></td></tr></table></figure>
 <p>使用示例</p>
