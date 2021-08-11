@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      框架-9.OAuth格式化token输出 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>框架-9.OAuth格式化token输出</h2>
+  <p class="post-date">2021年8月11日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="个性化token-背景"><a href="#个性化token-背景" class="headerlink" title="个性化token 背景"></a>个性化token 背景</h2><hr>
+<p>oauth2.0 接口默认返回的报文格式如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;access_token&quot;</span>: <span class="string">&quot;e6669cdf-b6cd-43fe-af5c-f91a65041382&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;token_type&quot;</span>: <span class="string">&quot;bearer&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;refresh_token&quot;</span>: <span class="string">&quot;da91294d-446c-4a89-bdcf-88aee15a75e8&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;expires_in&quot;</span>: <span class="number">43199</span>, </span><br><span class="line">    <span class="attr">&quot;scope&quot;</span>: <span class="string">&quot;server&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以扩展增加部分业务字段。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;access_token&quot;</span>:<span class="string">&quot;a6f3b6d6-93e6-4eb8-a97d-3ae72240a7b0&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;token_type&quot;</span>:<span class="string">&quot;bearer&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;refresh_token&quot;</span>:<span class="string">&quot;710ab162-a482-41cd-8bad-26456af38e4f&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;expires_in&quot;</span>:<span class="number">42396</span>,</span><br><span class="line">    <span class="attr">&quot;scope&quot;</span>:<span class="string">&quot;server&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;tenant_id&quot;</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">&quot;license&quot;</span>:<span class="string">&quot;made by pigx&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;dept_id&quot;</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">&quot;user_id&quot;</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">&quot;username&quot;</span>:<span class="string">&quot;admin&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在一些场景下我们需要自定义一下返回报文的格式,例如使用R 对象返回，全部包含code业务码信息</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;code&quot;</span>:<span class="number">1</span>,</span><br><span class="line">    <span class="attr">&quot;msg&quot;</span>:<span class="string">&quot;&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;data&quot;</span>:&#123;</span><br><span class="line">        <span class="attr">&quot;access_token&quot;</span>:<span class="string">&quot;e6669cdf-b6cd-43fe-af5c-f91a65041382&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;token_type&quot;</span>:<span class="string">&quot;bearer&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;refresh_token&quot;</span>:<span class="string">&quot;da91294d-446c-4a89-bdcf-88aee15a75e8&quot;</span>,</span><br><span class="line">        <span class="attr">&quot;expires_in&quot;</span>:<span class="number">43199</span>,</span><br><span class="line">        <span class="attr">&quot;scope&quot;</span>:<span class="string">&quot;server&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="1-方法一：HandlerMethodReturnValueHandler"><a href="#1-方法一：HandlerMethodReturnValueHandler" class="headerlink" title="1. 方法一：HandlerMethodReturnValueHandler"></a>1. 方法一：HandlerMethodReturnValueHandler</h3><p>顾名思义这是 Spring MVC 提供给我们修改方法返回值的接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FormatterToken</span> <span class="keyword">implements</span> <span class="title">HandlerMethodReturnValueHandler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String POST_ACCESS_TOKEN = <span class="string">&quot;postAccessToken&quot;</span>;</span><br><span class="line"></span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">supportsReturnType</span><span class="params">(MethodParameter returnType)</span> </span>&#123;</span><br><span class="line">     <span class="comment">// 判断方法名是否是 oauth2 的token 接口，是就处理</span></span><br><span class="line">  <span class="keyword">return</span> POST_ACCESS_TOKEN.equals(Objects</span><br><span class="line">    .requireNonNull(returnType.getMethod()).getName());</span><br><span class="line"> &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// 获取到返回值然后使用 R对象统一包装</span></span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleReturnValue</span><span class="params">(Object returnValue, MethodParameter returnType, ModelAndViewContainer container, NativeWebRequest request)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">  ResponseEntity&lt;OAuth2AccessToken&gt; responseEntity = (ResponseEntity) returnValue;</span><br><span class="line">  OAuth2AccessToken body = responseEntity.getBody();</span><br><span class="line"></span><br><span class="line">  HttpServletResponse response = request.getNativeResponse(HttpServletResponse.class);</span><br><span class="line">  <span class="keyword">assert</span> response != <span class="keyword">null</span>;</span><br><span class="line">  WebUtils.renderJson(response, R.ok(body));</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>注入FormatterToken，一定要这么处理，不要直接使用 MVCconfig 注入，保证此Handler比 SpringMVC 默认的提前执行。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FormatterTokenAutoConfiguration</span> <span class="keyword">implements</span> <span class="title">ApplicationContextAware</span>, <span class="title">InitializingBean</span> </span>&#123;</span><br><span class="line"> <span class="keyword">private</span> ApplicationContext applicationContext;</span><br><span class="line"></span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterPropertiesSet</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  RequestMappingHandlerAdapter handlerAdapter = applicationContext.getBean(RequestMappingHandlerAdapter.class);</span><br><span class="line">  List&lt;HandlerMethodReturnValueHandler&gt; returnValueHandlers = handlerAdapter.getReturnValueHandlers();</span><br><span class="line"></span><br><span class="line">  List&lt;HandlerMethodReturnValueHandler&gt; newHandlers = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">  newHandlers.add(<span class="keyword">new</span> FormatterToken());</span><br><span class="line">  <span class="keyword">assert</span> returnValueHandlers != <span class="keyword">null</span>;</span><br><span class="line">  newHandlers.addAll(returnValueHandlers);</span><br><span class="line">  handlerAdapter.setReturnValueHandlers(newHandlers);</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setApplicationContext</span><span class="params">(ApplicationContext applicationContext)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.applicationContext = applicationContext;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-方法二：aop-拦截增强-oauth-token-接口"><a href="#2-方法二：aop-拦截增强-oauth-token-接口" class="headerlink" title="2. 方法二：aop 拦截增强 /oauth/token 接口"></a>2. 方法二：aop 拦截增强 /oauth/token 接口</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Around(&quot;execution(* org.springframework.security.oauth2.provider.endpoint.TokenEndpoint.postAccessToken(..))&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">handlePostAccessTokenMethod</span><span class="params">(ProceedingJoinPoint joinPoint)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">   <span class="comment">// 获取原有值，进行包装返回</span></span><br><span class="line">      Object proceed = joinPoint.proceed();</span><br><span class="line"></span><br><span class="line">      ResponseEntity&lt;OAuth2AccessToken&gt; responseEntity = (ResponseEntity&lt;OAuth2AccessToken&gt;) proceed;</span><br><span class="line">        OAuth2AccessToken body = responseEntity.getBody();</span><br><span class="line">        <span class="keyword">return</span> ResponseEntity</span><br><span class="line">                  .status(HttpStatus.OK)</span><br><span class="line">                  .body(R.ok(body));</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><hr>
+<ul>
+<li>实际项目中不建议修改此接口的访问格式，不兼容oauth2协议 导致其他组件不能正常使用<ul>
+<li>swagger 自带的认证授权</li>
+<li>其他网关组件自带的oauth2<br>都将失效总体来权衡 弊大于利</li>
+</ul>
+</li>
+</ul>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+  <a href="/tags#oauth2" >
+    <span class="tag-code">oauth2</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/08/11/%E6%A1%86%E6%9E%B6-8.OAuth2%E5%AE%9E%E7%8E%B0%E7%99%BB%E5%BD%95%E4%BA%92%E8%B8%A2/">
+        <span class="nav-arrow">← </span>
+        
+          框架 | 8.OAuth2实现登录互踢
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2021/08/11/%E6%A1%86%E6%9E%B6-10.oauth2%E4%BB%A4%E7%89%8C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BB%88%E7%AB%AF%E7%99%BB%E5%BD%95%E7%8A%B6%E6%80%81%E5%90%8C%E6%AD%A5/">
+        
+          框架10-oauth2令牌实现多终端登录状态同步
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%B8%AA%E6%80%A7%E5%8C%96token-%E8%83%8C%E6%99%AF"><span class="toc-nav-text">个性化token 背景</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E6%96%B9%E6%B3%95%E4%B8%80%EF%BC%9AHandlerMethodReturnValueHandler"><span class="toc-nav-text">1. 方法一：HandlerMethodReturnValueHandler</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-%E6%96%B9%E6%B3%95%E4%BA%8C%EF%BC%9Aaop-%E6%8B%A6%E6%88%AA%E5%A2%9E%E5%BC%BA-oauth-token-%E6%8E%A5%E5%8F%A3"><span class="toc-nav-text">2. 方法二：aop 拦截增强 &#x2F;oauth&#x2F;token 接口</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-nav-text">总结</span></a></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/08/11/框架-9.OAuth格式化token输出/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "框架-9.OAuth格式化token输出",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

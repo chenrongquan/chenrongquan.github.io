@@ -154,6 +154,144 @@
   
     <article class="article-card">
       <h2 class="article-head">
+        <a href="/2021/08/11/%E6%A1%86%E6%9E%B6-11.%E6%89%A9%E5%B1%95%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E5%86%B3oauth2%E6%80%A7%E8%83%BD%E7%93%B6%E9%A2%88/">框架-11.扩展资源服务器解决oauth2性能瓶颈</a>
+      </h2>
+      <p class="article-date">2021年8月11日</p>
+      
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+  <a href="/tags#ouath2" >
+    <span class="tag-code">ouath2</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+
+用户携带token 请求资源服务器
+资源服务器拦截器 携带token 去认证服务器 调用tokenstore 对token 合法性校验
+资源服务器拿到token，默认只会含有用户名信息
+通过用户名调用userdetailsservice.loadbyusername 查询用户全部信息
+
+ ...
+        
+      </div>
+      <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-11.%E6%89%A9%E5%B1%95%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E5%86%B3oauth2%E6%80%A7%E8%83%BD%E7%93%B6%E9%A2%88/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/08/11/%E6%A1%86%E6%9E%B6-10.oauth2%E4%BB%A4%E7%89%8C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BB%88%E7%AB%AF%E7%99%BB%E5%BD%95%E7%8A%B6%E6%80%81%E5%90%8C%E6%AD%A5/">框架10-oauth2令牌实现多终端登录状态同步</a>
+      </h2>
+      <p class="article-date">2021年8月11日</p>
+      
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+  <a href="/tags#oauth2" >
+    <span class="tag-code">oauth2</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          目的说明
+解决不同客户端使用token,各个客户端的登录状态必须保持一致，退出状态实现一致。同上述问题类似如何解决不同租户相同用户名的人员的登录状态问题。
+1.默认的DefaultTokenServices 创建逻辑12345678910111213141516171819202122232 ...
+        
+      </div>
+      <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-10.oauth2%E4%BB%A4%E7%89%8C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BB%88%E7%AB%AF%E7%99%BB%E5%BD%95%E7%8A%B6%E6%80%81%E5%90%8C%E6%AD%A5/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/08/11/%E6%A1%86%E6%9E%B6-9.OAuth%E6%A0%BC%E5%BC%8F%E5%8C%96token%E8%BE%93%E5%87%BA/">框架-9.OAuth格式化token输出</a>
+      </h2>
+      <p class="article-date">2021年8月11日</p>
+      
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+  <a href="/tags#oauth2" >
+    <span class="tag-code">oauth2</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          个性化token 背景
+oauth2.0 接口默认返回的报文格式如下：
+1234567&#123;    &quot;access_token&quot;: &quot;e6669cdf-b6cd-43fe-af5c-f91a65041382&quot;,    &quot;token_ty ...
+        
+      </div>
+      <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-9.OAuth%E6%A0%BC%E5%BC%8F%E5%8C%96token%E8%BE%93%E5%87%BA/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/08/11/%E6%A1%86%E6%9E%B6-8.OAuth2%E5%AE%9E%E7%8E%B0%E7%99%BB%E5%BD%95%E4%BA%92%E8%B8%A2/">框架 | 8.OAuth2实现登录互踢</a>
+      </h2>
+      <p class="article-date">2021年8月11日</p>
+      
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+  <a href="/tags#oauth2" >
+    <span class="tag-code">oauth2</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+背景说明
+一个账号只能一处登录，类似的业务需求在现有后管类系统是非常常见的。 但在原有的 spring security oauth2 令牌方法流程（所谓的登录）无法满足类似的需求。
+我们先来看 TokenEndpoint 的方法流程
+客户端 带参访问 /oauth/token 接口，最后 ...
+        
+      </div>
+      <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-8.OAuth2%E5%AE%9E%E7%8E%B0%E7%99%BB%E5%BD%95%E4%BA%92%E8%B8%A2/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/08/11/%E6%A1%86%E6%9E%B6-7.OAuth2%E7%9A%84token-expire-in%E4%BD%BF%E7%94%A8/">框架 | 7.OAuth2的token_expire_in使用</a>
+      </h2>
+      <p class="article-date">2021年8月11日</p>
+      
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+  <a href="/tags#oauth2" >
+    <span class="tag-code">oauth2</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          问题背景
+源码剖析
+我们来看下 oauth2 的令牌方法机制,如果客户端 配置的 validitySeconds (令牌有效期) 大于 0 会返回当前令牌的有效时间 expires_in 参数，
+1234567891011OAuth2AccessToken createAccessToken ...
+        
+      </div>
+      <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-7.OAuth2%E7%9A%84token-expire-in%E4%BD%BF%E7%94%A8/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
         <a href="/2021/08/11/%E6%A1%86%E6%9E%B6-6.oauth2%E5%8F%91%E6%94%BE%E4%BB%A4%E7%89%8C%E6%8E%A5%E5%8F%A3%E5%9C%B0%E5%9D%80%E8%87%AA%E5%AE%9A%E4%B9%89/">框架 | 6.oauth2发放令牌接口地址自定义</a>
       </h2>
       <p class="article-date">2021年8月11日</p>
@@ -161,6 +299,10 @@
         
   <a href="/tags#java" >
     <span class="tag-code">java</span>
+  </a>
+
+  <a href="/tags#oauth2" >
+    <span class="tag-code">oauth2</span>
   </a>
 
       
@@ -187,6 +329,10 @@
     <span class="tag-code">java</span>
   </a>
 
+  <a href="/tags#oauth2" >
+    <span class="tag-code">oauth2</span>
+  </a>
+
       
       <div class="article-summary">
         
@@ -207,6 +353,10 @@
         
   <a href="/tags#java" >
     <span class="tag-code">java</span>
+  </a>
+
+  <a href="/tags#oauth2" >
+    <span class="tag-code">oauth2</span>
   </a>
 
       
@@ -231,6 +381,10 @@
         
   <a href="/tags#java" >
     <span class="tag-code">java</span>
+  </a>
+
+  <a href="/tags#oauth2" >
+    <span class="tag-code">oauth2</span>
   </a>
 
       
@@ -262,6 +416,10 @@
     <span class="tag-code">java</span>
   </a>
 
+  <a href="/tags#oauth2" >
+    <span class="tag-code">oauth2</span>
+  </a>
+
       
       <div class="article-summary">
         
@@ -280,134 +438,6 @@
         
       </div>
       <a class="more" href="/2021/08/08/%E6%A1%86%E6%9E%B6-2.oauth2%E7%99%BB%E5%BD%95%E6%B5%81%E7%A8%8B%E5%A4%84%E7%90%86/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/08/07/%E6%A1%86%E6%9E%B6-1.%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%8A%A0%E8%A7%A3%E5%AF%86/">框架 | 1.配置文件加解密</a>
-      </h2>
-      <p class="article-date">2021年8月7日</p>
-      
-        
-  <a href="/tags#java" >
-    <span class="tag-code">java</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          1. Jasypt库
-Java库，允许开发人员以很简单的方式添加基本加密功能，而无需深入研究加密原理。具有以下特性
-
-高安全性的，基于标准的加密技术，无论是单向和双向加密
-集成HIbernate的
-可集成到Spring应用程序中，与SpringSecurity集成
-集成的能力，用于加密的应用 ...
-        
-      </div>
-      <a class="more" href="/2021/08/07/%E6%A1%86%E6%9E%B6-1.%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%8A%A0%E8%A7%A3%E5%AF%86/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/07/20/go-%E8%AF%AD%E6%B3%95%E7%AF%8702/">go | 语法篇02</a>
-      </h2>
-      <p class="article-date">2021年7月20日</p>
-      
-        
-  <a href="/tags#go" >
-    <span class="tag-code">go</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          基本数据类型
-
-
-类型
-
-
-
-bool
-
-
-string
-
-
-int int8 int16 int32 int64
-
-
-uint uint8 uint16 uint32 uint64 uintptr
-
-
-byte // alias for uint8
-
-
-rune // alias for  ...
-        
-      </div>
-      <a class="more" href="/2021/07/20/go-%E8%AF%AD%E6%B3%95%E7%AF%8702/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/07/18/go-%E5%88%9D%E5%A7%8B%E7%AF%8701/">go | 初始篇01</a>
-      </h2>
-      <p class="article-date">2021年7月18日</p>
-      
-        
-  <a href="/tags#go" >
-    <span class="tag-code">go</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          1. 安装安装地址
-1.1 环境变量 GOPATH
-1.8之前必须设置这个环境变量
-1.8及之后如果没有设置使用默认值；Unix默认为$HOME/go Windows默认为%USERPROFILE%/go mac上GOPATH可通过修改~/.bash_profile来设置
-
-1.2 Hell ...
-        
-      </div>
-      <a class="more" href="/2021/07/18/go-%E5%88%9D%E5%A7%8B%E7%AF%8701/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/07/15/%E4%B8%AD%E9%97%B4%E4%BB%B6-Zookeeper%E8%AE%BE%E8%AE%A1/">中间件 | Zookeeper设计</a>
-      </h2>
-      <p class="article-date">2021年7月15日</p>
-      
-      <div class="article-summary">
-        
-          
-        
-      </div>
-      <a class="more" href="/2021/07/15/%E4%B8%AD%E9%97%B4%E4%BB%B6-Zookeeper%E8%AE%BE%E8%AE%A1/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/06/21/java-Session%E3%80%81Cookie%E5%92%8CToken/">java | Session、Cookie和Token</a>
-      </h2>
-      <p class="article-date">2021年6月21日</p>
-      
-        
-  <a href="/tags#java" >
-    <span class="tag-code">java</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          引言http是一个无状态协议什么是无状态呢？就是说这一次请求和上一次请求是没有任何关系的，互不认识的，没有关联的。这种无状态的的好处是快速。坏处是假如我们想要把www.zhihu.com/login.html和www.zhihu.com/index.html关联起来，必须使用某些手段和工具
- ...
-        
-      </div>
-      <a class="more" href="/2021/06/21/java-Session%E3%80%81Cookie%E5%92%8CToken/">阅读全文</a>
     </article>
   
 

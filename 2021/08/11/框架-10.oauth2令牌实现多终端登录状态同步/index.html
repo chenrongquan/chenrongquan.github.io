@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      框架10-oauth2令牌实现多终端登录状态同步 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>框架10-oauth2令牌实现多终端登录状态同步</h2>
+  <p class="post-date">2021年8月11日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="目的说明"><a href="#目的说明" class="headerlink" title="目的说明"></a>目的说明</h2><hr>
+<p>解决不同客户端使用token,各个客户端的登录状态必须保持一致，退出状态实现一致。同上述问题类似如何解决不同租户相同用户名的人员的登录状态问题。</p>
+<h3 id="1-默认的DefaultTokenServices-创建逻辑"><a href="#1-默认的DefaultTokenServices-创建逻辑" class="headerlink" title="1.默认的DefaultTokenServices 创建逻辑"></a>1.默认的DefaultTokenServices 创建逻辑</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> OAuth2AccessToken <span class="title">createAccessToken</span><span class="params">(OAuth2Authentication authentication)</span> <span class="keyword">throws</span> AuthenticationException </span>&#123;</span><br><span class="line">    <span class="comment">// 1. 判断是否存在Token</span></span><br><span class="line">    OAuth2AccessToken existingAccessToken = tokenStore.getAccessToken(authentication);</span><br><span class="line">    OAuth2RefreshToken refreshToken = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">if</span> (existingAccessToken != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (existingAccessToken.isExpired()) &#123;</span><br><span class="line">            <span class="keyword">if</span> (existingAccessToken.getRefreshToken() != <span class="keyword">null</span>) &#123;</span><br><span class="line">                refreshToken = existingAccessToken.getRefreshToken();</span><br><span class="line">                tokenStore.removeRefreshToken(refreshToken);</span><br><span class="line">            &#125;</span><br><span class="line">            tokenStore.removeAccessToken(existingAccessToken);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            tokenStore.storeAccessToken(existingAccessToken, authentication);</span><br><span class="line">            <span class="keyword">return</span> existingAccessToken;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 创建新token</span></span><br><span class="line">    OAuth2AccessToken accessToken = createAccessToken(authentication, refreshToken);</span><br><span class="line">    tokenStore.storeAccessToken(accessToken, authentication);</span><br><span class="line">    <span class="comment">// In case it was modified</span></span><br><span class="line">    refreshToken = accessToken.getRefreshToken();</span><br><span class="line">    <span class="keyword">if</span> (refreshToken != <span class="keyword">null</span>) &#123;</span><br><span class="line">        tokenStore.storeRefreshToken(refreshToken, authentication);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> accessToken;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-判断当前用户是否存在token"><a href="#2-判断当前用户是否存在token" class="headerlink" title="2.判断当前用户是否存在token"></a>2.判断当前用户是否存在token</h3><p><img src="https://image-static.segmentfault.com/290/572/2905722720-5d8499d59d22a_articlex"></p>
+<p>我们来看 RedisTokenStore 的默认逻辑，注意Token key 的生成逻辑</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">OAuth2AccessToken existingAccessToken = tokenStore.getAccessToken(authentication);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> OAuth2AccessToken <span class="title">getAccessToken</span><span class="params">(OAuth2Authentication authentication)</span> </span>&#123;</span><br><span class="line">   <span class="comment">// 构造 默认保存的</span></span><br><span class="line">    String key = authenticationKeyGenerator.extractKey(authentication);</span><br><span class="line">    <span class="comment">// key 加上前缀</span></span><br><span class="line">    <span class="keyword">byte</span>[] serializedKey = serializeKey(AUTH_TO_ACCESS + key);</span><br><span class="line">    <span class="keyword">byte</span>[] bytes = <span class="keyword">null</span>;</span><br><span class="line">    RedisConnection conn = getConnection();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        bytes = conn.get(serializedKey);</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        conn.close();</span><br><span class="line">    &#125;</span><br><span class="line">    OAuth2AccessToken accessToken = deserializeAccessToken(bytes);</span><br><span class="line">    <span class="keyword">if</span> (accessToken != <span class="keyword">null</span>) &#123;</span><br><span class="line">        OAuth2Authentication storedAuthentication = readAuthentication(accessToken.getValue());</span><br><span class="line">        <span class="keyword">if</span> ((storedAuthentication == <span class="keyword">null</span> || !key.equals(authenticationKeyGenerator.extractKey(storedAuthentication)))) &#123;</span><br><span class="line">            storeAccessToken(accessToken, authentication);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> accessToken;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="3-DefaultAuthenticationKeyGenerator"><a href="#3-DefaultAuthenticationKeyGenerator" class="headerlink" title="3. DefaultAuthenticationKeyGenerator"></a>3. DefaultAuthenticationKeyGenerator</h3><ul>
+<li>主要参考一下 当前用户的 username clientId scope ，这样导致不同客户端的token 不一致，某个客户端退出不会影响其他客户端</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">extractKey</span><span class="params">(OAuth2Authentication authentication)</span> </span>&#123;</span><br><span class="line">    Map&lt;String, String&gt; values = <span class="keyword">new</span> LinkedHashMap&lt;String, String&gt;();</span><br><span class="line">    OAuth2Request authorizationRequest = authentication.getOAuth2Request();</span><br><span class="line">    <span class="keyword">if</span> (!authentication.isClientOnly()) &#123;</span><br><span class="line">        values.put(USERNAME, authentication.getName());</span><br><span class="line">    &#125;</span><br><span class="line">    values.put(CLIENT_ID, authorizationRequest.getClientId());</span><br><span class="line">    <span class="keyword">if</span> (authorizationRequest.getScope() != <span class="keyword">null</span>) &#123;</span><br><span class="line">        values.put(SCOPE, OAuth2Utils.formatParameterList(<span class="keyword">new</span> TreeSet&lt;String&gt;(authorizationRequest.getScope())));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> generateKey(values);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="重写token-key-的生成规则"><a href="#重写token-key-的生成规则" class="headerlink" title="重写token key 的生成规则"></a>重写token key 的生成规则</h2><hr>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AiopsAuthenticationKeyGenerator</span> <span class="keyword">extends</span> <span class="title">DefaultAuthenticationKeyGenerator</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String SCOPE = <span class="string">&quot;scope&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String USERNAME = <span class="string">&quot;username&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">extractKey</span><span class="params">(OAuth2Authentication authentication)</span> </span>&#123;</span><br><span class="line">        Map&lt;String, String&gt; values = <span class="keyword">new</span> LinkedHashMap&lt;String, String&gt;();</span><br><span class="line">        OAuth2Request authorizationRequest = authentication.getOAuth2Request();</span><br><span class="line">        <span class="keyword">if</span> (!authentication.isClientOnly()) &#123;</span><br><span class="line">            values.put(USERNAME, authentication.getName());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (authorizationRequest.getScope() != <span class="keyword">null</span>) &#123;</span><br><span class="line">            values.put(SCOPE, OAuth2Utils.formatParameterList(<span class="keyword">new</span> TreeSet&lt;String&gt;(authorizationRequest.getScope())));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 如果是多租户系统，这里要区分租户ID 条件</span></span><br><span class="line">        <span class="keyword">return</span> generateKey(values);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="注入tokenstroe-即可实现如上效果"><a href="#注入tokenstroe-即可实现如上效果" class="headerlink" title="注入tokenstroe 即可实现如上效果"></a>注入tokenstroe 即可实现如上效果</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> TokenStore <span class="title">tokenStore</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    RedisTokenStore tokenStore = <span class="keyword">new</span> RedisTokenStore(redisConnectionFactory);</span><br><span class="line">    tokenStore.setPrefix(SecurityConstants.AIOPS_PREFIX + SecurityConstants.OAUTH_PREFIX);</span><br><span class="line">    tokenStore.setAuthenticationKeyGenerator(<span class="keyword">new</span> AiopsAuthenticationKeyGenerator());</span><br><span class="line">    <span class="keyword">return</span> tokenStore;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+  <a href="/tags#oauth2" >
+    <span class="tag-code">oauth2</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/08/11/%E6%A1%86%E6%9E%B6-9.OAuth%E6%A0%BC%E5%BC%8F%E5%8C%96token%E8%BE%93%E5%87%BA/">
+        <span class="nav-arrow">← </span>
+        
+          框架-9.OAuth格式化token输出
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2021/08/11/%E6%A1%86%E6%9E%B6-11.%E6%89%A9%E5%B1%95%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E5%86%B3oauth2%E6%80%A7%E8%83%BD%E7%93%B6%E9%A2%88/">
+        
+          框架-11.扩展资源服务器解决oauth2性能瓶颈
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%9B%AE%E7%9A%84%E8%AF%B4%E6%98%8E"><span class="toc-nav-text">目的说明</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E9%BB%98%E8%AE%A4%E7%9A%84DefaultTokenServices-%E5%88%9B%E5%BB%BA%E9%80%BB%E8%BE%91"><span class="toc-nav-text">1.默认的DefaultTokenServices 创建逻辑</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-%E5%88%A4%E6%96%AD%E5%BD%93%E5%89%8D%E7%94%A8%E6%88%B7%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8token"><span class="toc-nav-text">2.判断当前用户是否存在token</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#3-DefaultAuthenticationKeyGenerator"><span class="toc-nav-text">3. DefaultAuthenticationKeyGenerator</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%87%8D%E5%86%99token-key-%E7%9A%84%E7%94%9F%E6%88%90%E8%A7%84%E5%88%99"><span class="toc-nav-text">重写token key 的生成规则</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E6%B3%A8%E5%85%A5tokenstroe-%E5%8D%B3%E5%8F%AF%E5%AE%9E%E7%8E%B0%E5%A6%82%E4%B8%8A%E6%95%88%E6%9E%9C"><span class="toc-nav-text">注入tokenstroe 即可实现如上效果</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/08/11/框架-10.oauth2令牌实现多终端登录状态同步/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "框架10-oauth2令牌实现多终端登录状态同步",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

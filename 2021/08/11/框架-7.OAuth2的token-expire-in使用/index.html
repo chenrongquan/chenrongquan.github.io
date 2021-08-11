@@ -10,7 +10,7 @@
   
   <title>
      
-      框架 | 2.oauth2登录流程处理 | ™技术博客 
+      框架 | 7.OAuth2的token_expire_in使用 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>框架 | 2.oauth2登录流程处理</h2>
-  <p class="post-date">2021年8月8日</p>
+  <h2>框架 | 7.OAuth2的token_expire_in使用</h2>
+  <p class="post-date">2021年8月11日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,74 +160,27 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="登录逻辑"><a href="#登录逻辑" class="headerlink" title="登录逻辑"></a>登录逻辑</h2><hr>
-<p><img src="http://assets.processon.com/chart_image/610ff758e401fd5eeb7d1ca4.png"></p>
-<p><img src="https://minio.pigx.vip/oss/1627625474.png"></p>
-<p>验证码 <a target="_blank" rel="noopener" href="https://gitee.com/anji-plus/captcha">行为验证码AJ-Captcha</a></p>
-<h2 id="网关部分"><a href="#网关部分" class="headerlink" title="网关部分"></a>网关部分</h2><h3 id="1-验证码生成逻辑-网关"><a href="#1-验证码生成逻辑-网关" class="headerlink" title="1. 验证码生成逻辑(网关)"></a>1. 验证码生成逻辑(网关)</h3><hr>
+    <section class="markdown-content"><h2 id="问题背景"><a href="#问题背景" class="headerlink" title="问题背景"></a>问题背景</h2><hr>
+<h2 id="源码剖析"><a href="#源码剖析" class="headerlink" title="源码剖析"></a>源码剖析</h2><hr>
+<p>我们来看下 oauth2 的令牌方法机制,如果客户端 配置的 validitySeconds (令牌有效期) 大于 0 会返回当前令牌的有效时间 expires_in 参数，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">OAuth2AccessToken <span class="title">createAccessToken</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  DefaultOAuth2AccessToken token = <span class="keyword">new</span> DefaultOAuth2AccessToken(UUID.randomUUID().toString());</span><br><span class="line">  <span class="keyword">int</span> validitySeconds = getAccessTokenValiditySeconds(authentication.getOAuth2Request());</span><br><span class="line">  <span class="keyword">if</span> (validitySeconds &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    token.setExpiration(<span class="keyword">new</span> Date(System.currentTimeMillis() + (validitySeconds * <span class="number">1000L</span>)));</span><br><span class="line">  &#125;</span><br><span class="line">  token.setRefreshToken(refreshToken);</span><br><span class="line">  token.setScope(authentication.getOAuth2Request().getScope());</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> accessTokenEnhancer != <span class="keyword">null</span> ? accessTokenEnhancer.enhance(token, authentication) : token;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <ul>
-<li>模块 <code>aiops-gateway</code></li>
-<li>接口 <code>GET aiops-gateway/code</code></li>
-<li>处理类 <code>ImageCodeCreateHandler</code></li>
+<li>tokenStore 去存储 令牌的时候，若过期参数为 0 或者 小于 0 Expiration 为空，不会设置有效时间也就意味着为永久有效，所以此时不会客户端响应 expires_in 参数</li>
 </ul>
-<h3 id="2-登录参数-认证中心"><a href="#2-登录参数-认证中心" class="headerlink" title="2. 登录参数(认证中心)"></a>2. 登录参数(认证中心)</h3><hr>
-<p>接口<br><code>/auth/oauth/token</code></p>
-<p>请求体</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (token.getExpiration() != <span class="keyword">null</span>) &#123;</span><br><span class="line">  <span class="keyword">int</span> seconds = token.getExpiresIn();</span><br><span class="line">  conn.expire(accessKey, seconds);</span><br><span class="line">  conn.expire(authKey, seconds);</span><br><span class="line">  conn.expire(authToAccessKey, seconds);</span><br><span class="line">  conn.expire(clientId, seconds);</span><br><span class="line">  conn.expire(approvalKey, seconds);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://segmentfault.com/img/bVbFK7D"></p>
+<h2 id="永久有效的令牌是否应该返回-expires-in-参数呢？"><a href="#永久有效的令牌是否应该返回-expires-in-参数呢？" class="headerlink" title="永久有效的令牌是否应该返回 expires_in 参数呢？"></a>永久有效的令牌是否应该返回 expires_in 参数呢？</h2><hr>
+<p>oauth2 协议规范</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">HTTP&#x2F;1.1 200 OK</span><br><span class="line">Content-Type: application&#x2F;json</span><br><span class="line">Cache-Control: no-store</span><br><span class="line">Pragma: no-cache</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  &quot;access_token&quot;:&quot;MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3&quot;,</span><br><span class="line">  &quot;token_type&quot;:&quot;bearer&quot;,</span><br><span class="line">  &quot;expires_in&quot;:3600,</span><br><span class="line">  &quot;refresh_token&quot;:&quot;IwOGYzYTlmM2YxOTQ5MGE3YmNmMDFkNTVk&quot;,</span><br><span class="line">  &quot;scope&quot;:&quot;create&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <ul>
-<li>username 用户名</li>
-<li>password 密码(密文) AES加密；<code>U2FsdGVkX19zqXDDWDmHtyPjTfv3nT3wNNYINJ8z54I=</code></li>
-<li>code 验证码</li>
-<li>randomStr 随机参数</li>
-<li>grant_type：password</li>
-<li>scope: server</li>
+<li>access_token (必需) 授权服务器发出的访问令牌</li>
+<li>token_type （必需）这是令牌的类型，通常只是字符串“bearer”。</li>
+<li>expires_in （推荐）如果访问令牌过期过期时间。</li>
+<li>refresh_token（可选）刷新令牌，在访问令牌过期后，可使用此令牌刷新。</li>
+<li>scope（可选）如果用户授予的范围与应用程序请求的范围相同，则此参数为可选。</li>
 </ul>
-<p>请求头</p>
-<ul>
-<li>TENANT-ID: 默认为1</li>
-<li>Authorization: Basic信息  后台的base64(client_id:client_secret)<br><code>YWlvcHM6YWlvcHM=</code></li>
-</ul>
-<h3 id="3-验证码校验逻辑-网关"><a href="#3-验证码校验逻辑-网关" class="headerlink" title="3. 验证码校验逻辑(网关)"></a>3. 验证码校验逻辑(网关)</h3><hr>
-<ul>
-<li>拦截器 <code>ValidateCodeGatewayFilter</code></li>
-<li>如何处理验证码不校验的客户端 数据库表 <code>sys_oauth_client_details</code>  字段 <code>additional_information</code>  给值 <code>&#123;&quot;captcha_flag&quot;:&quot;0&quot;&#125;</code></li>
-<li>前端密码解密逻辑 <code>PasswordDecoderFilter</code>  密钥 <code>gateway.encodeKey</code></li>
-<li>登录为何post body为空，只能url params形式；</li>
-<li>*因为 webflux 获取post body很麻烦，且会出现丢包的现象**；</li>
-</ul>
-<blockquote>
-<p>如何不想放url，就传明文</p>
-</blockquote>
-<h2 id="认证中心"><a href="#认证中心" class="headerlink" title="认证中心"></a>认证中心</h2><h3 id="1-生成token"><a href="#1-生成token" class="headerlink" title="1. 生成token"></a>1. 生成token</h3><hr>
-<p><img src="https://pigx.coding.net/p/oss/d/oss1/git/raw/master/2020-9/20200915163528.png"></p>
-<ul>
-<li>入口: <code>TokenEndpoint</code>  <code>/oauth/token</code>  （spring-security.jar包下）</li>
-<li>校验clientId： <code>ClientDetailsService</code> 实现类 <code>AiopsClientDetailsServiceImpl.loadClientByClientId</code> 查库 <code>sys_oauth_client_details</code>  与传入校验对比</li>
-<li>授权：<code>ResourceOwnerPasswordTokenGranter.getOAuth2Authentication</code>；</li>
-<li><code>ProviderManager</code></li>
-<li><code>DaoAuthenticationProvider</code></li>
-<li>校验用户：<code>UserDetailsService</code> 实现类 <code>AiopsUserDetailsServiceImpl.loadUserByUsername</code>方法</li>
-<li>调用 <strong>用户中心</strong> <code>remoteUserService</code> 查数据库 <code>sys_user</code> 用户信息</li>
-<li>生成token <code>AbstractTokenGranter.grant</code></li>
-<li><code>DefaultTokenServices.createAccessToken</code></li>
-<li><code>AiopsRedisTokenStore.getAccessToken</code></li>
-</ul>
-<blockquote>
-<p>注意点 租户处理 如 两个不同租户下，有相同的用户 但密码不一样<br>即：服务之间如何传递租户信息</p>
-</blockquote>
-<ul>
-<li><code>TenantContextHolderFilter</code>  放入ttl中</li>
-</ul>
-<h2 id="资源服务器"><a href="#资源服务器" class="headerlink" title="资源服务器"></a>资源服务器</h2><h3 id="1-校验token"><a href="#1-校验token" class="headerlink" title="1. 校验token"></a>1. 校验token</h3><ul>
-<li>入口拦截器 <code>OAuth2AuthenticationProcessingFilter</code></li>
-<li><code>OAuth2AuthenticationManager.authenticate</code></li>
-<li><code>RemoteTokenServices.loadAuthentication</code> 通过token换用户信息；调用认证中心的 <code>/check_token</code> 接口</li>
-<li>check_token地址: <code>CheckTokenEndpoint</code><ul>
-<li><code>DefaultTokenServices.readAccessToken</code></li>
-<li><code>AiopsRedisTokenStore.readAccessToken</code></li>
-</ul>
-</li>
-</ul>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">security:</span></span><br><span class="line">    <span class="attr">resource:</span></span><br><span class="line">      <span class="attr">token-info-uri:</span> <span class="string">http://aiops-auth/oauth/check_token</span></span><br></pre></td></tr></table></figure></section>
+<p>此处 <code>expires_in</code> 推荐返回，无论是有设置有效期限制还是无有效期限制。所以此处 spring security oauth2 的处理并不符合协议规范 。</p>
+</section>
     <!-- Tags START -->
     
       <div class="tags">
@@ -249,17 +202,17 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/08/07/%E6%A1%86%E6%9E%B6-1.%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%8A%A0%E8%A7%A3%E5%AF%86/">
+      <a class="nav-left" href="/2021/08/11/%E6%A1%86%E6%9E%B6-6.oauth2%E5%8F%91%E6%94%BE%E4%BB%A4%E7%89%8C%E6%8E%A5%E5%8F%A3%E5%9C%B0%E5%9D%80%E8%87%AA%E5%AE%9A%E4%B9%89/">
         <span class="nav-arrow">← </span>
         
-          框架 | 1.配置文件加解密
+          框架 | 6.oauth2发放令牌接口地址自定义
         
       </a>
     
     
-      <a class="nav-right" href="/2021/08/09/%E6%A1%86%E6%9E%B6-3.%E5%9F%BA%E4%BA%8Eoauth%E7%9A%84%E7%BB%9F%E4%B8%80%E7%99%BB%E5%BD%95%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">
+      <a class="nav-right" href="/2021/08/11/%E6%A1%86%E6%9E%B6-8.OAuth2%E5%AE%9E%E7%8E%B0%E7%99%BB%E5%BD%95%E4%BA%92%E8%B8%A2/">
         
-          框架 | 3.基于oauth的统一登录解决方案
+          框架 | 8.OAuth2实现登录互踢
         
         <span class="nav-arrow"> →</span>
       </a>
@@ -291,7 +244,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%99%BB%E5%BD%95%E9%80%BB%E8%BE%91"><span class="toc-nav-text">登录逻辑</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BD%91%E5%85%B3%E9%83%A8%E5%88%86"><span class="toc-nav-text">网关部分</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E9%AA%8C%E8%AF%81%E7%A0%81%E7%94%9F%E6%88%90%E9%80%BB%E8%BE%91-%E7%BD%91%E5%85%B3"><span class="toc-nav-text">1. 验证码生成逻辑(网关)</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-%E7%99%BB%E5%BD%95%E5%8F%82%E6%95%B0-%E8%AE%A4%E8%AF%81%E4%B8%AD%E5%BF%83"><span class="toc-nav-text">2. 登录参数(认证中心)</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#3-%E9%AA%8C%E8%AF%81%E7%A0%81%E6%A0%A1%E9%AA%8C%E9%80%BB%E8%BE%91-%E7%BD%91%E5%85%B3"><span class="toc-nav-text">3. 验证码校验逻辑(网关)</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%AE%A4%E8%AF%81%E4%B8%AD%E5%BF%83"><span class="toc-nav-text">认证中心</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E7%94%9F%E6%88%90token"><span class="toc-nav-text">1. 生成token</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-nav-text">资源服务器</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E6%A0%A1%E9%AA%8Ctoken"><span class="toc-nav-text">1. 校验token</span></a></li></ol></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-nav-text">问题背景</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90"><span class="toc-nav-text">源码剖析</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%B0%B8%E4%B9%85%E6%9C%89%E6%95%88%E7%9A%84%E4%BB%A4%E7%89%8C%E6%98%AF%E5%90%A6%E5%BA%94%E8%AF%A5%E8%BF%94%E5%9B%9E-expires-in-%E5%8F%82%E6%95%B0%E5%91%A2%EF%BC%9F"><span class="toc-nav-text">永久有效的令牌是否应该返回 expires_in 参数呢？</span></a></li></ol>
     
   </div>
 </aside>
@@ -301,7 +254,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/08/08/框架-2.oauth2登录流程处理/';
+    var url = 'http://chenrongquan.github.com/2021/08/11/框架-7.OAuth2的token-expire-in使用/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -365,7 +318,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "框架 | 2.oauth2登录流程处理",
+        id: "框架 | 7.OAuth2的token_expire_in使用",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {

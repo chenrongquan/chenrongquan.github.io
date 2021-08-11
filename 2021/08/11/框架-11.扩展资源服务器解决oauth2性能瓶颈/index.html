@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      框架-11.扩展资源服务器解决oauth2性能瓶颈 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>框架-11.扩展资源服务器解决oauth2性能瓶颈</h2>
+  <p class="post-date">2021年8月11日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><p><img src="https://segmentfault.com/img/remote/1460000018549849?w=519&h=402/view"></p>
+<ul>
+<li>用户携带token 请求资源服务器</li>
+<li>资源服务器拦截器 携带token 去认证服务器 调用tokenstore 对token 合法性校验</li>
+<li>资源服务器拿到token，默认只会含有用户名信息</li>
+<li>通过用户名调用userdetailsservice.loadbyusername 查询用户全部信息</li>
+</ul>
+<h2 id="默认check-token-解析逻辑"><a href="#默认check-token-解析逻辑" class="headerlink" title="默认check-token 解析逻辑"></a>默认check-token 解析逻辑</h2><hr>
+<ul>
+<li>RemoteTokenServices入口</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> OAuth2Authentication <span class="title">loadAuthentication</span><span class="params">(String accessToken)</span> <span class="keyword">throws</span> AuthenticationException, InvalidTokenException </span>&#123;</span><br><span class="line"></span><br><span class="line">    MultiValueMap&lt;String, String&gt; formData = <span class="keyword">new</span> LinkedMultiValueMap&lt;String, String&gt;();</span><br><span class="line">    formData.add(tokenName, accessToken);</span><br><span class="line">    HttpHeaders headers = <span class="keyword">new</span> HttpHeaders();</span><br><span class="line">    headers.set(<span class="string">&quot;Authorization&quot;</span>, getAuthorizationHeader(clientId, clientSecret));</span><br><span class="line">    <span class="comment">// 调用认证服务器的check-token 接口检查token</span></span><br><span class="line">    Map&lt;String, Object&gt; map = postForMap(checkTokenEndpointUrl, formData, headers);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> tokenConverter.extractAuthentication(map);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>解析认证服务器返回的信息 DefaultAccessTokenConverter</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> OAuth2Authentication <span class="title">extractAuthentication</span><span class="params">(Map&lt;String, ?&gt; map)</span> </span>&#123;</span><br><span class="line">        Map&lt;String, String&gt; parameters = <span class="keyword">new</span> HashMap&lt;String, String&gt;();</span><br><span class="line">        Set&lt;String&gt; scope = extractScope(map);</span><br><span class="line">        <span class="comment">// 主要是 用户的信息的抽取</span></span><br><span class="line">        Authentication user = userTokenConverter.extractAuthentication(map);</span><br><span class="line">        <span class="comment">// 一些oauth2 信息的填充</span></span><br><span class="line">        OAuth2Request request = <span class="keyword">new</span> OAuth2Request(parameters, clientId, authorities, <span class="keyword">true</span>, scope, resourceIds, <span class="keyword">null</span>, <span class="keyword">null</span>,</span><br><span class="line">                <span class="keyword">null</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> OAuth2Authentication(request, user);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>组装当前用户信息 DefaultUserAuthenticationConverter</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Authentication <span class="title">extractAuthentication</span><span class="params">(Map&lt;String, ?&gt; map)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (map.containsKey(USERNAME)) &#123;</span><br><span class="line">        Object principal = map.get(USERNAME);</span><br><span class="line">        Collection&lt;? extends GrantedAuthority&gt; authorities = getAuthorities(map);</span><br><span class="line">        <span class="keyword">if</span> (userDetailsService != <span class="keyword">null</span>) &#123;</span><br><span class="line">            UserDetails user = userDetailsService.loadUserByUsername((String) map.get(USERNAME));</span><br><span class="line">            authorities = user.getAuthorities();</span><br><span class="line">            principal = user;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> UsernamePasswordAuthenticationToken(principal, <span class="string">&quot;N/A&quot;</span>, authorities);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><hr>
+<ul>
+<li>认证服务器check-token 返回的全部信息</li>
+<li>资源服务器在根据返回信息组装用户信息的时候，只是用了username</li>
+<li>如果设置了 userDetailsService 的实现则去调用 loadUserByUsername 再去查询一次用户信息</li>
+</ul>
+<h2 id="造成问题现象"><a href="#造成问题现象" class="headerlink" title="造成问题现象"></a>造成问题现象</h2><hr>
+<ul>
+<li>如果设置了userDetailsService 即可在spring security 上下文获取用户的全部信息，不设置则只能得到用户名。</li>
+<li>增加了一次查询逻辑，对性能产生不必要的影响</li>
+</ul>
+<h2 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h2><hr>
+<ul>
+<li>扩展UserAuthenticationConverter 的解析过程，把认证服务器返回的信息全部组装到spring security的上下文对象中</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AiopsUserAuthenticationConverter</span> <span class="keyword">implements</span> <span class="title">UserAuthenticationConverter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String N_A = <span class="string">&quot;N/A&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Extract information about the user to be used in an access token (i.e. for resource</span></span><br><span class="line"><span class="comment">	 * servers).</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> authentication an authentication representing a user</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span> a map of key values representing the unique information about the user</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="keyword">public</span> Map&lt;String, ?&gt; convertUserAuthentication(Authentication authentication) &#123;</span><br><span class="line">		Map&lt;String, Object&gt; response = <span class="keyword">new</span> LinkedHashMap&lt;&gt;();</span><br><span class="line">		response.put(USERNAME, authentication.getName());</span><br><span class="line">		<span class="keyword">if</span> (authentication.getAuthorities() != <span class="keyword">null</span> &amp;&amp; !authentication.getAuthorities().isEmpty()) &#123;</span><br><span class="line">			response.put(AUTHORITIES, AuthorityUtils.authorityListToSet(authentication.getAuthorities()));</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> response;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Inverse of &#123;<span class="doctag">@link</span> #convertUserAuthentication(Authentication)&#125;. Extracts an</span></span><br><span class="line"><span class="comment">	 * Authentication from a map.</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> responseMap a map of user information</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span> an Authentication representing the user or null if there is none</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Authentication <span class="title">extractAuthentication</span><span class="params">(Map&lt;String, ?&gt; responseMap)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (responseMap.containsKey(USERNAME)) &#123;</span><br><span class="line">			Collection&lt;? extends GrantedAuthority&gt; authorities = getAuthorities(responseMap);</span><br><span class="line">			Map&lt;String, ?&gt; map = MapUtil.get(responseMap, SecurityConstants.DETAILS_USER, Map.class);</span><br><span class="line">			validateTenantId(map);</span><br><span class="line">			String username = MapUtil.getStr(map, SecurityConstants.DETAILS_USERNAME);</span><br><span class="line">			Integer id = MapUtil.getInt(map, SecurityConstants.DETAILS_USER_ID);</span><br><span class="line">			Integer deptId = MapUtil.getInt(map, SecurityConstants.DETAILS_DEPT_ID);</span><br><span class="line">			Integer tenantId = MapUtil.getInt(map, SecurityConstants.DETAILS_TENANT_ID);</span><br><span class="line">			String phone = MapUtil.getStr(map, SecurityConstants.DETAILS_PHONE);</span><br><span class="line">			String avatar = MapUtil.getStr(map, SecurityConstants.DETAILS_AVATAR);</span><br><span class="line">			AiopsUser user = <span class="keyword">new</span> AiopsUser(id, deptId, phone, avatar, tenantId, username, N_A, <span class="keyword">true</span>, <span class="keyword">true</span>, <span class="keyword">true</span>, <span class="keyword">true</span>,</span><br><span class="line">					authorities);</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">new</span> UsernamePasswordAuthenticationToken(user, N_A, authorities);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> Collection&lt;? extends GrantedAuthority&gt; getAuthorities(Map&lt;String, ?&gt; map) &#123;</span><br><span class="line">		Object authorities = map.get(AUTHORITIES);</span><br><span class="line">		<span class="keyword">if</span> (authorities <span class="keyword">instanceof</span> String) &#123;</span><br><span class="line">			<span class="keyword">return</span> AuthorityUtils.commaSeparatedStringToAuthorityList((String) authorities);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (authorities <span class="keyword">instanceof</span> Collection) &#123;</span><br><span class="line">			<span class="keyword">return</span> AuthorityUtils.commaSeparatedStringToAuthorityList(</span><br><span class="line">					StringUtils.collectionToCommaDelimitedString((Collection&lt;?&gt;) authorities));</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> AuthorityUtils.NO_AUTHORITIES;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validateTenantId</span><span class="params">(Map&lt;String, ?&gt; map)</span> </span>&#123;</span><br><span class="line">		String headerValue = getCurrentTenantId();</span><br><span class="line">		Integer userValue = MapUtil.getInt(map, SecurityConstants.DETAILS_TENANT_ID);</span><br><span class="line">		<span class="keyword">if</span> (StrUtil.isNotBlank(headerValue) &amp;&amp; !userValue.toString().equals(headerValue)) &#123;</span><br><span class="line">			log.warn(<span class="string">&quot;请求头中的租户ID(&#123;&#125;)和用户的租户ID(&#123;&#125;)不一致&quot;</span>, headerValue, userValue);</span><br><span class="line">			<span class="comment">// <span class="doctag">TODO:</span> 不要提示租户ID不对，可能被穷举</span></span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> AiopsAuth2Exception(AiopsSecurityMessageSourceUtil.getAccessor().getMessage(</span><br><span class="line">					<span class="string">&quot;AbstractUserDetailsAuthenticationProvider.badTenantId&quot;</span>, <span class="keyword">new</span> Object[] &#123; headerValue &#125;,</span><br><span class="line">					<span class="string">&quot;Bad tenant ID&quot;</span>));</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> Optional&lt;HttpServletRequest&gt; <span class="title">getCurrentHttpRequest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> Optional.ofNullable(RequestContextHolder.getRequestAttributes()).filter(</span><br><span class="line">				requestAttributes -&gt; ServletRequestAttributes.class.isAssignableFrom(requestAttributes.getClass()))</span><br><span class="line">				.map(requestAttributes -&gt; ((ServletRequestAttributes) requestAttributes))</span><br><span class="line">				.map(ServletRequestAttributes::getRequest);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> String <span class="title">getCurrentTenantId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> getCurrentHttpRequest()</span><br><span class="line">				.map(httpServletRequest -&gt; httpServletRequest.getHeader(CommonConstants.TENANT_ID)).orElse(<span class="keyword">null</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li>给remoteTokenServices 注入这个实现</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AiopsResourceServerConfigurerAdapter</span> <span class="keyword">extends</span> <span class="title">ResourceServerConfigurerAdapter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">protected</span> AuthenticationEntryPoint resourceAuthExceptionEntryPoint;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">protected</span> RemoteTokenServices remoteTokenServices;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> PermitAllUrlResolver permitAllUrlResolver;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> TokenExtractor tokenExtractor;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> RestTemplate lbRestTemplate;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 默认的配置，对外暴露</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> httpSecurity</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="meta">@SneakyThrows</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity httpSecurity)</span> </span>&#123;</span><br><span class="line">		<span class="comment">// 允许使用iframe 嵌套，避免swagger-ui 不被加载的问题</span></span><br><span class="line">		httpSecurity.headers().frameOptions().disable();</span><br><span class="line">		ExpressionUrlAuthorizationConfigurer&lt;HttpSecurity&gt;.ExpressionInterceptUrlRegistry registry = httpSecurity</span><br><span class="line">				.authorizeRequests();</span><br><span class="line">		<span class="comment">// 配置对外暴露接口</span></span><br><span class="line">		permitAllUrlResolver.registry(registry);</span><br><span class="line">		registry.anyRequest().authenticated().and().csrf().disable();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(ResourceServerSecurityConfigurer resources)</span> </span>&#123;</span><br><span class="line">		DefaultAccessTokenConverter accessTokenConverter = <span class="keyword">new</span> DefaultAccessTokenConverter();</span><br><span class="line">		UserAuthenticationConverter userTokenConverter = <span class="keyword">new</span> AiopsUserAuthenticationConverter();</span><br><span class="line">		accessTokenConverter.setUserTokenConverter(userTokenConverter);</span><br><span class="line"></span><br><span class="line">		remoteTokenServices.setRestTemplate(lbRestTemplate);</span><br><span class="line">		remoteTokenServices.setAccessTokenConverter(accessTokenConverter);</span><br><span class="line">		resources.authenticationEntryPoint(resourceAuthExceptionEntryPoint).tokenExtractor(tokenExtractor)</span><br><span class="line">				.tokenServices(remoteTokenServices);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<ul>
+<li>完成扩展，再来看文章开头的流程图就变成了如下</li>
+</ul>
+<p><img src="https://segmentfault.com/img/remote/1460000018580972?w=333&h=402"></p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+  <a href="/tags#ouath2" >
+    <span class="tag-code">ouath2</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/08/11/%E6%A1%86%E6%9E%B6-10.oauth2%E4%BB%A4%E7%89%8C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BB%88%E7%AB%AF%E7%99%BB%E5%BD%95%E7%8A%B6%E6%80%81%E5%90%8C%E6%AD%A5/">
+        <span class="nav-arrow">← </span>
+        
+          框架10-oauth2令牌实现多终端登录状态同步
+        
+      </a>
+    
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%BB%98%E8%AE%A4check-token-%E8%A7%A3%E6%9E%90%E9%80%BB%E8%BE%91"><span class="toc-nav-text">默认check-token 解析逻辑</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90"><span class="toc-nav-text">问题分析</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%80%A0%E6%88%90%E9%97%AE%E9%A2%98%E7%8E%B0%E8%B1%A1"><span class="toc-nav-text">造成问题现象</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%A7%A3%E5%86%B3%E9%97%AE%E9%A2%98"><span class="toc-nav-text">解决问题</span></a></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/08/11/框架-11.扩展资源服务器解决oauth2性能瓶颈/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "框架-11.扩展资源服务器解决oauth2性能瓶颈",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
