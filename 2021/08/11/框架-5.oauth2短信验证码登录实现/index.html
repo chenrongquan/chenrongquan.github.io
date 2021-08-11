@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      框架 | 5.oauth2短信验证码登录实现 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>框架 | 5.oauth2短信验证码登录实现</h2>
+  <p class="post-date">2021年8月11日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="1-spring-security-oauth2-登录过程详解"><a href="#1-spring-security-oauth2-登录过程详解" class="headerlink" title="1. spring security oauth2 登录过程详解"></a>1. spring security oauth2 登录过程详解</h2><hr>
+<p><img src="https://segmentfault.com/img/remote/1460000012811024%C3%9F%C3%9F"></p>
+<h3 id="1-定义手机号登录令牌"><a href="#1-定义手机号登录令牌" class="headerlink" title="1. 定义手机号登录令牌"></a>1. 定义手机号登录令牌</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 手机号登录令牌</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span>: chenrq</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span>: 2021年08月06日 00时08分</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MobileAuthenticationToken</span> <span class="keyword">extends</span> <span class="title">AbstractAuthenticationToken</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Object principal;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">MobileAuthenticationToken</span><span class="params">(String mobile)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(<span class="keyword">null</span>);</span><br><span class="line">		<span class="keyword">this</span>.principal = mobile;</span><br><span class="line">		setAuthenticated(<span class="keyword">false</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@JsonCreator</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">MobileAuthenticationToken</span><span class="params">(<span class="meta">@JsonProperty(&quot;principal&quot;)</span> Object principal,</span></span></span><br><span class="line"><span class="function"><span class="params">			<span class="meta">@JsonProperty(&quot;authorities&quot;)</span> Collection&lt;? extends GrantedAuthority&gt; authorities)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(authorities);</span><br><span class="line">		<span class="keyword">this</span>.principal = principal;</span><br><span class="line">		<span class="keyword">super</span>.setAuthenticated(<span class="keyword">true</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">getPrincipal</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">this</span>.principal;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">getCredentials</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="meta">@SneakyThrows</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAuthenticated</span><span class="params">(<span class="keyword">boolean</span> isAuthenticated)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (isAuthenticated) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(</span><br><span class="line">					<span class="string">&quot;Cannot set this token to trusted - use constructor which takes a GrantedAuthority list instead&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">super</span>.setAuthenticated(<span class="keyword">false</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">eraseCredentials</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>.eraseCredentials();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="2-手机号登录校验逻辑"><a href="#2-手机号登录校验逻辑" class="headerlink" title="2. 手机号登录校验逻辑"></a>2. 手机号登录校验逻辑</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 手机登录校验逻辑 验证码登录、社交登录</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span>: chenrq</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span>: 2021年08月06日 00时08分</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MobileAuthenticationProvider</span> <span class="keyword">implements</span> <span class="title">AuthenticationProvider</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> MessageSourceAccessor messages = AiopsSecurityMessageSourceUtil.getAccessor();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> UserDetailsChecker detailsChecker = <span class="keyword">new</span> AiopsPreAuthenticationChecks();</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Getter</span></span><br><span class="line">	<span class="meta">@Setter</span></span><br><span class="line">	<span class="keyword">private</span> AiopsUserDetailsService userDetailsService;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="meta">@SneakyThrows</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Authentication <span class="title">authenticate</span><span class="params">(Authentication authentication)</span> </span>&#123;</span><br><span class="line">		MobileAuthenticationToken mobileAuthenticationToken = (MobileAuthenticationToken) authentication;</span><br><span class="line"></span><br><span class="line">		String principal = mobileAuthenticationToken.getPrincipal().toString();</span><br><span class="line">		UserDetails userDetails = userDetailsService.loadUserBySocial(principal);</span><br><span class="line">		<span class="keyword">if</span> (userDetails == <span class="keyword">null</span>) &#123;</span><br><span class="line">			log.debug(<span class="string">&quot;Authentication failed: no credentials provided&quot;</span>);</span><br><span class="line"></span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> BadCredentialsException(messages</span><br><span class="line">					.getMessage(<span class="string">&quot;AbstractUserDetailsAuthenticationProvider.noopBindAccount&quot;</span>, <span class="string">&quot;Noop Bind Account&quot;</span>));</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 检查账号状态</span></span><br><span class="line">		detailsChecker.check(userDetails);</span><br><span class="line"></span><br><span class="line">		MobileAuthenticationToken authenticationToken = <span class="keyword">new</span> MobileAuthenticationToken(userDetails,</span><br><span class="line">				userDetails.getAuthorities());</span><br><span class="line">		authenticationToken.setDetails(mobileAuthenticationToken.getDetails());</span><br><span class="line">		<span class="keyword">return</span> authenticationToken;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">supports</span><span class="params">(Class&lt;?&gt; authentication)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> MobileAuthenticationToken.class.isAssignableFrom(authentication);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="3-登录过程filter处理"><a href="#3-登录过程filter处理" class="headerlink" title="3. 登录过程filter处理"></a>3. 登录过程filter处理</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 手机号登录验证filter</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span>: chenrq</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span>: 2021年08月06日 00时07分</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MobileAuthenticationFilter</span> <span class="keyword">extends</span> <span class="title">AbstractAuthenticationProcessingFilter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String SPRING_SECURITY_FORM_MOBILE_KEY = <span class="string">&quot;mobile&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Getter</span></span><br><span class="line">	<span class="meta">@Setter</span></span><br><span class="line">	<span class="keyword">private</span> String mobileParameter = SPRING_SECURITY_FORM_MOBILE_KEY;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Getter</span></span><br><span class="line">	<span class="meta">@Setter</span></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">boolean</span> postOnly = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Getter</span></span><br><span class="line">	<span class="meta">@Setter</span></span><br><span class="line">	<span class="keyword">private</span> AuthenticationEntryPoint authenticationEntryPoint;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">MobileAuthenticationFilter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(<span class="keyword">new</span> AntPathRequestMatcher(SecurityConstants.MOBILE_TOKEN_URL, <span class="string">&quot;POST&quot;</span>));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="meta">@SneakyThrows</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Authentication <span class="title">attemptAuthentication</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> (postOnly &amp;&amp; !request.getMethod().equals(HttpMethod.POST.name())) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> AuthenticationServiceException(<span class="string">&quot;Authentication method not supported: &quot;</span> + request.getMethod());</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		String mobile = obtainMobile(request);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (mobile == <span class="keyword">null</span>) &#123;</span><br><span class="line">			mobile = <span class="string">&quot;&quot;</span>;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		mobile = mobile.trim();</span><br><span class="line"></span><br><span class="line">		MobileAuthenticationToken mobileAuthenticationToken = <span class="keyword">new</span> MobileAuthenticationToken(mobile);</span><br><span class="line"></span><br><span class="line">		setDetails(request, mobileAuthenticationToken);</span><br><span class="line"></span><br><span class="line">		Authentication authResult = <span class="keyword">null</span>;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			authResult = <span class="keyword">this</span>.getAuthenticationManager().authenticate(mobileAuthenticationToken);</span><br><span class="line"></span><br><span class="line">			logger.debug(<span class="string">&quot;Authentication success: &quot;</span> + authResult);</span><br><span class="line">			SecurityContextHolder.getContext().setAuthentication(authResult);</span><br><span class="line"></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">catch</span> (Exception failed) &#123;</span><br><span class="line">			SecurityContextHolder.clearContext();</span><br><span class="line">			logger.debug(<span class="string">&quot;Authentication request failed: &quot;</span> + failed);</span><br><span class="line"></span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				authenticationEntryPoint.commence(request, response,</span><br><span class="line">						<span class="keyword">new</span> UsernameNotFoundException(failed.getMessage(), failed));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">				logger.error(<span class="string">&quot;authenticationEntryPoint handle error:&#123;&#125;&quot;</span>, failed);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> authResult;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> String <span class="title">obtainMobile</span><span class="params">(HttpServletRequest request)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> request.getParameter(mobileParameter);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">setDetails</span><span class="params">(HttpServletRequest request, MobileAuthenticationToken authRequest)</span> </span>&#123;</span><br><span class="line">		authRequest.setDetails(authenticationDetailsSource.buildDetails(request));</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="4-生产token-位置"><a href="#4-生产token-位置" class="headerlink" title="4. 生产token 位置"></a>4. 生产token 位置</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 手机号登录成功，返回oauth token</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span>: chenrq</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span>: 2021年08月05日 23时59分</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MobileLoginSuccessHandler</span> <span class="keyword">implements</span> <span class="title">AuthenticationSuccessHandler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String BASIC_ = <span class="string">&quot;Basic &quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> ObjectMapper objectMapper;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> PasswordEncoder passwordEncoder;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> ClientDetailsService clientDetailsService;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Lazy</span></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> AuthorizationServerTokenServices defaultAuthorizationServerTokenServices;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Called when a user has been successfully authenticated. 调用spring security oauth API</span></span><br><span class="line"><span class="comment">	 * 生成 oAuth2AccessToken</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> request the request which caused the successful authentication</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> response the response</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> authentication the &lt;tt&gt;Authentication&lt;/tt&gt; object which was created during</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAuthenticationSuccess</span><span class="params">(HttpServletRequest request, HttpServletResponse response,</span></span></span><br><span class="line"><span class="function"><span class="params">			Authentication authentication)</span> </span>&#123;</span><br><span class="line">		String header = request.getHeader(HttpHeaders.AUTHORIZATION);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (header == <span class="keyword">null</span> || !header.startsWith(BASIC_)) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> UnapprovedClientAuthenticationException(<span class="string">&quot;请求头中client信息为空&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			String[] tokens = AuthUtils.extractAndDecodeHeader(header);</span><br><span class="line">			<span class="keyword">assert</span> tokens.length == <span class="number">2</span>;</span><br><span class="line">			String clientId = tokens[<span class="number">0</span>];</span><br><span class="line"></span><br><span class="line">			ClientDetails clientDetails = clientDetailsService.loadClientByClientId(clientId);</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 校验secret</span></span><br><span class="line">			<span class="keyword">if</span> (!passwordEncoder.matches(tokens[<span class="number">1</span>], clientDetails.getClientSecret())) &#123;</span><br><span class="line">				<span class="keyword">throw</span> <span class="keyword">new</span> InvalidClientException(<span class="string">&quot;Given client ID does not match authenticated client&quot;</span>);</span><br><span class="line"></span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			TokenRequest tokenRequest = <span class="keyword">new</span> TokenRequest(MapUtil.newHashMap(), clientId, clientDetails.getScope(),</span><br><span class="line">					<span class="string">&quot;mobile&quot;</span>);</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 校验scope</span></span><br><span class="line">			<span class="keyword">new</span> DefaultOAuth2RequestValidator().validateScope(tokenRequest, clientDetails);</span><br><span class="line">			OAuth2Request oAuth2Request = tokenRequest.createOAuth2Request(clientDetails);</span><br><span class="line">			OAuth2Authentication oAuth2Authentication = <span class="keyword">new</span> OAuth2Authentication(oAuth2Request, authentication);</span><br><span class="line">			OAuth2AccessToken oAuth2AccessToken = defaultAuthorizationServerTokenServices</span><br><span class="line">					.createAccessToken(oAuth2Authentication);</span><br><span class="line">			log.info(<span class="string">&quot;获取token 成功：&#123;&#125;&quot;</span>, oAuth2AccessToken.getValue());</span><br><span class="line"></span><br><span class="line">			response.setCharacterEncoding(CharsetUtil.UTF_8);</span><br><span class="line">			response.setContentType(MediaType.APPLICATION_JSON_VALUE);</span><br><span class="line">			PrintWriter printWriter = response.getWriter();</span><br><span class="line">			printWriter.append(objectMapper.writeValueAsString(oAuth2AccessToken));</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> BadCredentialsException(<span class="string">&quot;Failed to decode basic authentication token&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="5-配置以上自定义"><a href="#5-配置以上自定义" class="headerlink" title="5. 配置以上自定义"></a>5. 配置以上自定义</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 手机号登录配置入口</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span>: chenrq</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span>: 2021年08月06日 00时08分</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MobileSecurityConfigurer</span> <span class="keyword">extends</span> <span class="title">SecurityConfigurerAdapter</span>&lt;<span class="title">DefaultSecurityFilterChain</span>, <span class="title">HttpSecurity</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> ObjectMapper objectMapper;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> AuthenticationSuccessHandler mobileLoginSuccessHandler;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Autowired</span></span><br><span class="line">	<span class="keyword">private</span> AiopsUserDetailsService userDetailsService;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> </span>&#123;</span><br><span class="line">		MobileAuthenticationFilter mobileAuthenticationFilter = <span class="keyword">new</span> MobileAuthenticationFilter();</span><br><span class="line">		mobileAuthenticationFilter.setAuthenticationManager(http.getSharedObject(AuthenticationManager.class));</span><br><span class="line">		mobileAuthenticationFilter.setAuthenticationSuccessHandler(mobileLoginSuccessHandler);</span><br><span class="line">		mobileAuthenticationFilter.setAuthenticationEntryPoint(<span class="keyword">new</span> AiopsCommenceAuthExceptionEntryPoint(objectMapper));</span><br><span class="line"></span><br><span class="line">		MobileAuthenticationProvider mobileAuthenticationProvider = <span class="keyword">new</span> MobileAuthenticationProvider();</span><br><span class="line">		mobileAuthenticationProvider.setUserDetailsService(userDetailsService);</span><br><span class="line">		http.authenticationProvider(mobileAuthenticationProvider).addFilterAfter(mobileAuthenticationFilter,</span><br><span class="line">				UsernamePasswordAuthenticationFilter.class);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="6-在spring-security-配置-上边定一个的那个聚合配置"><a href="#6-在spring-security-配置-上边定一个的那个聚合配置" class="headerlink" title="6. 在spring security 配置 上边定一个的那个聚合配置"></a>6. 在spring security 配置 上边定一个的那个聚合配置</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSecurityConfigurer</span> <span class="keyword">extends</span> <span class="title">WebSecurityConfigurerAdapter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="meta">@SneakyThrows</span></span><br><span class="line">	<span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(HttpSecurity http)</span> </span>&#123;</span><br><span class="line">		http.formLogin().loginPage(<span class="string">&quot;/token/login&quot;</span>).loginProcessingUrl(<span class="string">&quot;/token/form&quot;</span>)</span><br><span class="line">				.successHandler(tenantSavedRequestAwareAuthenticationSuccessHandler())</span><br><span class="line">				.failureHandler(authenticationFailureHandler()).and().logout()</span><br><span class="line">				.logoutSuccessHandler(logoutSuccessHandler()).deleteCookies(<span class="string">&quot;JSESSIONID&quot;</span>).invalidateHttpSession(<span class="keyword">true</span>)</span><br><span class="line">				.and().authorizeRequests().antMatchers(<span class="string">&quot;/token/**&quot;</span>, <span class="string">&quot;/actuator/**&quot;</span>, <span class="string">&quot;/mobile/**&quot;</span>).permitAll()</span><br><span class="line">				.anyRequest().authenticated().and().csrf().disable().apply(mobileSecurityConfigurer());</span><br><span class="line">	&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="7-使用"><a href="#7-使用" class="headerlink" title="7. 使用"></a>7. 使用</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -H &quot;Authorization:Basic cGlnOnBpZw==&quot; -d &quot;grant_type=mobile&amp;scope=server&amp;mobile=17034642119&amp;code=&quot; http://localhost:9999/auth/mobile/token</span><br><span class="line"></span><br></pre></td></tr></table></figure></section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/08/11/%E6%A1%86%E6%9E%B6-4.%E5%B9%B3%E5%8F%B0%E8%AE%A4%E8%AF%81%E4%B8%8E%E6%8E%88%E6%9D%83%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1/">
+        <span class="nav-arrow">← </span>
+        
+          框架 | 4.平台认证与授权系统设计
+        
+      </a>
+    
+    
+      <a class="nav-right" href="/2021/08/11/%E6%A1%86%E6%9E%B6-6.oauth2%E5%8F%91%E6%94%BE%E4%BB%A4%E7%89%8C%E6%8E%A5%E5%8F%A3%E5%9C%B0%E5%9D%80%E8%87%AA%E5%AE%9A%E4%B9%89/">
+        
+          框架 | 6.oauth2发放令牌接口地址自定义
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#1-spring-security-oauth2-%E7%99%BB%E5%BD%95%E8%BF%87%E7%A8%8B%E8%AF%A6%E8%A7%A3"><span class="toc-nav-text">1. spring security oauth2 登录过程详解</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E5%AE%9A%E4%B9%89%E6%89%8B%E6%9C%BA%E5%8F%B7%E7%99%BB%E5%BD%95%E4%BB%A4%E7%89%8C"><span class="toc-nav-text">1. 定义手机号登录令牌</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-%E6%89%8B%E6%9C%BA%E5%8F%B7%E7%99%BB%E5%BD%95%E6%A0%A1%E9%AA%8C%E9%80%BB%E8%BE%91"><span class="toc-nav-text">2. 手机号登录校验逻辑</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#3-%E7%99%BB%E5%BD%95%E8%BF%87%E7%A8%8Bfilter%E5%A4%84%E7%90%86"><span class="toc-nav-text">3. 登录过程filter处理</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#4-%E7%94%9F%E4%BA%A7token-%E4%BD%8D%E7%BD%AE"><span class="toc-nav-text">4. 生产token 位置</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#5-%E9%85%8D%E7%BD%AE%E4%BB%A5%E4%B8%8A%E8%87%AA%E5%AE%9A%E4%B9%89"><span class="toc-nav-text">5. 配置以上自定义</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#6-%E5%9C%A8spring-security-%E9%85%8D%E7%BD%AE-%E4%B8%8A%E8%BE%B9%E5%AE%9A%E4%B8%80%E4%B8%AA%E7%9A%84%E9%82%A3%E4%B8%AA%E8%81%9A%E5%90%88%E9%85%8D%E7%BD%AE"><span class="toc-nav-text">6. 在spring security 配置 上边定一个的那个聚合配置</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#7-%E4%BD%BF%E7%94%A8"><span class="toc-nav-text">7. 使用</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/08/11/框架-5.oauth2短信验证码登录实现/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "框架 | 5.oauth2短信验证码登录实现",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
