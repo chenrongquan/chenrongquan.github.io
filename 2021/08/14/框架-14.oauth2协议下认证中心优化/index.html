@@ -10,7 +10,7 @@
   
   <title>
      
-      框架 | 13.微服务架构授权是在网关做还是在微服务做 | ™技术博客 
+      框架 | 14.oauth2协议下认证中心优化 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,7 +151,7 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>框架 | 13.微服务架构授权是在网关做还是在微服务做</h2>
+  <h2>框架 | 14.oauth2协议下认证中心优化</h2>
   <p class="post-date">2021年8月14日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
@@ -160,58 +160,36 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><hr>
-<p>在SpringCloud架构中，实现授权功能有两种实现方式：</p>
-<ul>
-<li>在网关层进行授权</li>
-<li>由后端微服务自己授权</li>
-</ul>
-<p>两种方式在此系列文章中都有实现方案，那么问题来了：</p>
-<p><strong>哪种才是最优方案，哪种方案更合理呢？</strong></p>
-<p>很抱歉，结论是并没有最优方案，两种方案各有千秋，只有根据自身业务选择对应的方案。</p>
-<p>本文我们将两种方案做一个简单对比，以便大伙在做方案决策有个选择参考。</p>
-<h2 id="解决方案对比"><a href="#解决方案对比" class="headerlink" title="解决方案对比"></a>解决方案对比</h2><hr>
-<p>首先我们看看两种方案实现的原理：</p>
-<p>如果对具体实现方式有疑问的同学可以参考这篇文章：SpringCloud Alibaba微服务实战十九 - 集成RBAC授权</p>
-<h3 id="1-网关授权"><a href="#1-网关授权" class="headerlink" title="1. 网关授权"></a>1. 网关授权</h3><p>基于网关授权我们又叫基于路径匹配器授权，请求在经过网关的时候校验当前请求的路径是否在用户拥有的资源路径中。</p>
-<p>在基于路径匹配器授权时需要考虑restful风格的访问路径，如 /account-service/blog/user/{id} 或 /account-service/blog/**等，所以在网关进行授权主要是基于通配符匹配。</p>
-<h3 id="2-微服务授权"><a href="#2-微服务授权" class="headerlink" title="2. 微服务授权"></a>2. 微服务授权</h3><p>微服务授权我们又叫基于方法拦截，在资源上打上对应的方法标识然后分配给用户。</p>
-<p>在请求方法上通过对应的注解判断当前用户是否有访问此方法的权限。如SpringSecurity中的 @PreAuthorize(“hasAuthority(‘’)”)注解，Shiro中的 @RequiresPermissions(‘’)注解。</p>
-<p>不管是SpringSecurity还是Shiro他们实现原理都是基于关键字完全匹配。</p>
-<h2 id="优缺点对比"><a href="#优缺点对比" class="headerlink" title="优缺点对比"></a>优缺点对比</h2><hr>
-<h3 id="1-网关授权-1"><a href="#1-网关授权-1" class="headerlink" title="1. 网关授权"></a>1. 网关授权</h3><p>优点</p>
-<ul>
-<li>使用网关授权的优点很明显，后端所有微服务只需要是普通的服务即可，不再需要依赖权限那一套。</li>
-</ul>
-<p>缺点</p>
-<ul>
-<li><p>通配符匹配在网关做性能比较差，通配符要拆分，先匹配前缀，前缀匹配了再匹配通配符。<br>这里大家可以看看 org.springframework.util.AntPathMatcher#doMatch()的实现逻辑。</p>
-<p>对于Restful风格的URL路径，不能精细化控制权限</p>
-<p>例如一个微服务有如下API<br>  GET /v1/pb/user<br>  POST /v1/pb/user<br>  PUT /v1/pb/user</p>
-<p>  这样在网关通过 request.getURI().getPath()方法获取到用户请求路径的时候都是同一个地址，给一个用户授予 /v1/pb/user权限后他就拥有了 GET、PUT、POST三种不同权限，很显然这样不能满足精细权限控制。</p>
-</li>
-</ul>
-<blockquote>
-<p>至于如何解决这个问题，原来专门写过一篇文章讨论，感兴趣的同学可以看看：SpringCloud Alibaba微服务实战二十五 - Restful接口拦截</p>
-</blockquote>
-<h3 id="2-微服务授权-1"><a href="#2-微服务授权-1" class="headerlink" title="2. 微服务授权"></a>2. 微服务授权</h3><p>优点：</p>
-<ul>
-<li>上面提到网关授权的缺点实际上是微服务授权的优点，基于方法拦截是完全匹配，cpu消耗很少，而且也不存在RestFul的问题。</li>
-</ul>
+    <section class="markdown-content"><h2 id="原有认证方式问题"><a href="#原有认证方式问题" class="headerlink" title="原有认证方式问题"></a>原有认证方式问题</h2><hr>
+<ol>
+<li>认证中心 checktoken 接口去调用的是 redistokenstore 的序列化信息，若我们更新用户信息 、权限信息 并不会试试更新，需要用户重新登录</li>
+<li>性能瓶颈问题， 每次携带令牌调用资源服务器都会先执行 checktoken 网络远程校验令牌</li>
+</ol>
+<h2 id="优化扩展方案"><a href="#优化扩展方案" class="headerlink" title="优化扩展方案"></a>优化扩展方案</h2><hr>
+<ol>
+<li>重构资源服务器的 ResourceServerTokenServices ，直接本地调用 redis 查询 token 对应的用户username</li>
+<li>然后根据 username 调用 userDetailsService.loadUserByUsername 用户的全部信息（实时数据和库同步，使用cache 同步）</li>
+</ol>
 <p>缺点：</p>
 <ul>
-<li>实现较为复杂，在 SpringSecurity Oauth2体系中需要全部引入资源服务器相关配置，所以一般会建立一个单独的资源服务器模块，这也是系列文章下篇内容需要解决的问题。</li>
+<li>这样相当于所有资源服务器 直接访问认证服务器的redis数据,而不是通过rul请求的方式,会造成安全性的问题<br>(例如所有资源服务器都可以实时访问认证服务器的redis数据源) 做不到一个资源服务器一个redis库</li>
 </ul>
-<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><hr>
-<p>这里我们尝试对两种实现方案做一个总结，</p>
+<h2 id="实现参考-EnableAiopsResourceServer"><a href="#实现参考-EnableAiopsResourceServer" class="headerlink" title="实现参考 EnableAiopsResourceServer"></a>实现参考 EnableAiopsResourceServer</h2><hr>
 <ul>
-<li><p>如果系统功能、业务模块不是很多可以采用网关授权模式，这样实现最简单也最方便，虽然存在Restful风格不能精细化权限控制问题，但是我们加一个Method字段就可以解决。</p>
-</li>
-<li><p>如果你的系统规模比较大，有很多资源需要授权那就建议采用微服务授权模式，为了避免每个微服务都需要处理权限校验的逻辑，我们需要抽取一个公共的权限认证模块供后端服务引用。</p>
-</li>
+<li>isLocal=true  本地校验 提高性能，但是破坏了安全性，内网下建议采用</li>
+<li>isLocal=false 远程校验 遵循oauth2.0通用协议，牺牲性能</li>
 </ul>
 </section>
     <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#oauth" >
+    <span class="tag-code">oauth</span>
+  </a>
+
+      </div>
     
     <!-- Tags END -->
     <!-- NAV START -->
@@ -219,20 +197,13 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/08/13/%E9%87%91%E8%9E%8D%E5%B0%8F%E7%9F%A5%E8%AF%86-%E5%AF%B9%E8%B4%A6/">
+      <a class="nav-left" href="/2021/08/14/%E6%A1%86%E6%9E%B6-13.%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E6%8E%88%E6%9D%83%E6%98%AF%E5%9C%A8%E7%BD%91%E5%85%B3%E5%81%9A%E8%BF%98%E6%98%AF%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%81%9A/">
         <span class="nav-arrow">← </span>
         
-          金融小知识 | 对账
+          框架 | 13.微服务架构授权是在网关做还是在微服务做
         
       </a>
     
-    
-      <a class="nav-right" href="/2021/08/14/%E6%A1%86%E6%9E%B6-14.oauth2%E5%8D%8F%E8%AE%AE%E4%B8%8B%E8%AE%A4%E8%AF%81%E4%B8%AD%E5%BF%83%E4%BC%98%E5%8C%96/">
-        
-          框架 | 14.oauth2协议下认证中心优化
-        
-        <span class="nav-arrow"> →</span>
-      </a>
     
   </div>
 
@@ -261,7 +232,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-nav-text">背景</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E5%AF%B9%E6%AF%94"><span class="toc-nav-text">解决方案对比</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E7%BD%91%E5%85%B3%E6%8E%88%E6%9D%83"><span class="toc-nav-text">1. 网关授权</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%8E%88%E6%9D%83"><span class="toc-nav-text">2. 微服务授权</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9%E5%AF%B9%E6%AF%94"><span class="toc-nav-text">优缺点对比</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E7%BD%91%E5%85%B3%E6%8E%88%E6%9D%83-1"><span class="toc-nav-text">1. 网关授权</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%8E%88%E6%9D%83-1"><span class="toc-nav-text">2. 微服务授权</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-nav-text">结论</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%8E%9F%E6%9C%89%E8%AE%A4%E8%AF%81%E6%96%B9%E5%BC%8F%E9%97%AE%E9%A2%98"><span class="toc-nav-text">原有认证方式问题</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%BC%98%E5%8C%96%E6%89%A9%E5%B1%95%E6%96%B9%E6%A1%88"><span class="toc-nav-text">优化扩展方案</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%9E%E7%8E%B0%E5%8F%82%E8%80%83-EnableAiopsResourceServer"><span class="toc-nav-text">实现参考 EnableAiopsResourceServer</span></a></li></ol>
     
   </div>
 </aside>
@@ -271,7 +242,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/08/14/框架-13.微服务架构授权是在网关做还是在微服务做/';
+    var url = 'http://chenrongquan.github.com/2021/08/14/框架-14.oauth2协议下认证中心优化/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -335,7 +306,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "框架 | 13.微服务架构授权是在网关做还是在微服务做",
+        id: "框架 | 14.oauth2协议下认证中心优化",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {

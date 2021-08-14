@@ -154,6 +154,33 @@
   
     <article class="article-card">
       <h2 class="article-head">
+        <a href="/2021/08/14/%E6%A1%86%E6%9E%B6-14.oauth2%E5%8D%8F%E8%AE%AE%E4%B8%8B%E8%AE%A4%E8%AF%81%E4%B8%AD%E5%BF%83%E4%BC%98%E5%8C%96/">框架 | 14.oauth2协议下认证中心优化</a>
+      </h2>
+      <p class="article-date">2021年8月14日</p>
+      
+        
+  <a href="/tags#oauth" >
+    <span class="tag-code">oauth</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          原有认证方式问题
+
+认证中心 checktoken 接口去调用的是 redistokenstore 的序列化信息，若我们更新用户信息 、权限信息 并不会试试更新，需要用户重新登录
+性能瓶颈问题， 每次携带令牌调用资源服务器都会先执行 checktoken 网络远程校验令牌
+
+优化扩展方案
+
+ ...
+        
+      </div>
+      <a class="more" href="/2021/08/14/%E6%A1%86%E6%9E%B6-14.oauth2%E5%8D%8F%E8%AE%AE%E4%B8%8B%E8%AE%A4%E8%AF%81%E4%B8%AD%E5%BF%83%E4%BC%98%E5%8C%96/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
         <a href="/2021/08/14/%E6%A1%86%E6%9E%B6-13.%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E6%8E%88%E6%9D%83%E6%98%AF%E5%9C%A8%E7%BD%91%E5%85%B3%E5%81%9A%E8%BF%98%E6%98%AF%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%81%9A/">框架 | 13.微服务架构授权是在网关做还是在微服务做</a>
       </h2>
       <p class="article-date">2021年8月14日</p>
@@ -384,34 +411,6 @@ oauth2.0 接口默认返回的报文格式如下：
         
       </div>
       <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-7.OAuth2%E7%9A%84token-expire-in%E4%BD%BF%E7%94%A8/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/08/11/%E6%A1%86%E6%9E%B6-6.oauth2%E5%8F%91%E6%94%BE%E4%BB%A4%E7%89%8C%E6%8E%A5%E5%8F%A3%E5%9C%B0%E5%9D%80%E8%87%AA%E5%AE%9A%E4%B9%89/">框架 | 6.oauth2发放令牌接口地址自定义</a>
-      </h2>
-      <p class="article-date">2021年8月11日</p>
-      
-        
-  <a href="/tags#java" >
-    <span class="tag-code">java</span>
-  </a>
-
-  <a href="/tags#oauth2" >
-    <span class="tag-code">oauth2</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          OAuth 2.0 如何获取令牌
-
-以密码模式为例，获取 Token
-
-123456curl --location --request POST &#x27;http://oauth-server/oauth/token&#x27; \--header &#x27;Authorization ...
-        
-      </div>
-      <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-6.oauth2%E5%8F%91%E6%94%BE%E4%BB%A4%E7%89%8C%E6%8E%A5%E5%8F%A3%E5%9C%B0%E5%9D%80%E8%87%AA%E5%AE%9A%E4%B9%89/">阅读全文</a>
     </article>
   
 
