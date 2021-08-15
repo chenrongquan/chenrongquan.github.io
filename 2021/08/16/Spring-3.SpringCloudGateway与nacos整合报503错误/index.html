@@ -10,7 +10,7 @@
   
   <title>
      
-      Spring | 2.网关的全局过滤器与局部过滤器 | ™技术博客 
+      Spring | 3.SpringCloudGateway与nacos整合报503错误 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>Spring | 2.网关的全局过滤器与局部过滤器</h2>
-  <p class="post-date">2021年8月15日</p>
+  <h2>Spring | 3.SpringCloudGateway与nacos整合报503错误</h2>
+  <p class="post-date">2021年8月16日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,17 +160,17 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="全局过滤器GlobalFilter"><a href="#全局过滤器GlobalFilter" class="headerlink" title="全局过滤器GlobalFilter"></a>全局过滤器GlobalFilter</h2><blockquote>
-<p>springcloud版本 2020版本</p>
-</blockquote>
-<hr>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AiopsRequestGlobalFilter</span> <span class="keyword">implements</span> <span class="title">GlobalFilter</span>, <span class="title">Ordered</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Process the Web request and (optionally) delegate to the next &#123;<span class="doctag">@code</span> WebFilter&#125;</span></span><br><span class="line"><span class="comment">	 * through the given &#123;<span class="doctag">@link</span> GatewayFilterChain&#125;.</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> exchange the current server exchange</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> chain provides a way to delegate to the next filter</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span> &#123;<span class="doctag">@code</span> Mono&lt;Void&gt;&#125; to indicate when request processing is complete</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Mono&lt;Void&gt; <span class="title">filter</span><span class="params">(ServerWebExchange exchange, GatewayFilterChain chain)</span> </span>&#123;</span><br><span class="line">		<span class="comment">// 1. 清洗请求头中from 参数</span></span><br><span class="line">		ServerHttpRequest request = exchange.getRequest().mutate()</span><br><span class="line">				.headers(httpHeaders -&gt; httpHeaders.remove(SecurityConstants.FROM)).build();</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 2. 重写StripPrefix</span></span><br><span class="line">		addOriginalRequestUrl(exchange, request.getURI());</span><br><span class="line">		String rawPath = request.getURI().getRawPath();</span><br><span class="line">		String newPath = <span class="string">&quot;/&quot;</span> + Arrays.stream(StringUtils.tokenizeToStringArray(rawPath, <span class="string">&quot;/&quot;</span>)).skip(<span class="number">1L</span>)</span><br><span class="line">				.collect(Collectors.joining(<span class="string">&quot;/&quot;</span>));</span><br><span class="line">		ServerHttpRequest newRequest = request.mutate().path(newPath).build();</span><br><span class="line">		exchange.getAttributes().put(GATEWAY_REQUEST_URL_ATTR, newRequest.getURI());</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> chain.filter(exchange.mutate().request(newRequest.mutate().build()).build());</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getOrder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> -<span class="number">1000</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="AbstractGatewayFilterFactory-局部过滤器"><a href="#AbstractGatewayFilterFactory-局部过滤器" class="headerlink" title="AbstractGatewayFilterFactory 局部过滤器"></a>AbstractGatewayFilterFactory 局部过滤器</h2><hr>
+    <section class="markdown-content"><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><hr>
 <ul>
-<li>内部类写法，是为了指定过滤器的优先级，要优先于全局过滤器</li>
-<li>否则容易造成全局过滤器 拦截到指定 局部过滤器的配置内容，从而导致局部过滤器失效</li>
+<li>访问后台服务地址，微服务之间的调用出现 503错误 找不到该服务 <code>SERVICE_UNAVAILABLE</code></li>
+<li>nacos里面也有相应的服务</li>
+<li>springcloud版本 2020版本</li>
 </ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PreviewGatewayFilter</span> <span class="keyword">extends</span> <span class="title">AbstractGatewayFilterFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String TOKEN = <span class="string">&quot;token&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> GatewayFilter <span class="title">apply</span><span class="params">(Object config)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> (exchange, chain) -&gt; &#123;</span><br><span class="line">			ServerHttpRequest request = exchange.getRequest();</span><br><span class="line"></span><br><span class="line">			<span class="comment">// GET，直接向下执行</span></span><br><span class="line">			<span class="keyword">if</span> (StrUtil.equalsIgnoreCase(request.getMethodValue(), HttpMethod.GET.name())</span><br><span class="line">					|| StrUtil.containsIgnoreCase(request.getURI().getPath(), TOKEN)) &#123;</span><br><span class="line">				<span class="keyword">return</span> chain.filter(exchange);</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			log.warn(<span class="string">&quot;演示环境不能操作-&gt; &#123;&#125;,&#123;&#125;&quot;</span>, request.getMethodValue(), request.getURI().getPath());</span><br><span class="line">			ServerHttpResponse response = exchange.getResponse();</span><br><span class="line">			response.setStatusCode(HttpStatus.LOCKED);</span><br><span class="line">			<span class="keyword">return</span> response.setComplete();</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></section>
+<h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><hr>
+<ul>
+<li>升级到Spring Cloud 2020版本报503错误，需要手动添加loadbalancer依赖</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-loadbalancer<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure></section>
     <!-- Tags START -->
     
       <div class="tags">
@@ -192,20 +192,13 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/08/15/Spring-1.SpringCloudGateway%E8%8E%B7%E5%8F%96requestbody/">
+      <a class="nav-left" href="/2021/08/16/%E6%A1%86%E6%9E%B6-15.SpringSecurityOauth2%E8%8E%B7%E5%8F%96token%E6%8E%A5%E5%8F%A3%E6%94%B9%E9%80%A0%E6%94%AF%E6%8C%81json%E6%8F%90%E4%BA%A4/">
         <span class="nav-arrow">← </span>
-        
-          Spring-1.SpringCloudGateway获取requestbody
-        
-      </a>
-    
-    
-      <a class="nav-right" href="/2021/08/16/%E6%A1%86%E6%9E%B6-15.SpringSecurityOauth2%E8%8E%B7%E5%8F%96token%E6%8E%A5%E5%8F%A3%E6%94%B9%E9%80%A0%E6%94%AF%E6%8C%81json%E6%8F%90%E4%BA%A4/">
         
           框架 | 15.SpringSecurityOauth2获取token接口改造支持json提交
         
-        <span class="nav-arrow"> →</span>
       </a>
+    
     
   </div>
 
@@ -234,7 +227,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%85%A8%E5%B1%80%E8%BF%87%E6%BB%A4%E5%99%A8GlobalFilter"><span class="toc-nav-text">全局过滤器GlobalFilter</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#AbstractGatewayFilterFactory-%E5%B1%80%E9%83%A8%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="toc-nav-text">AbstractGatewayFilterFactory 局部过滤器</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="toc-nav-text">问题描述</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%8E%9F%E5%9B%A0"><span class="toc-nav-text">原因</span></a></li></ol>
     
   </div>
 </aside>
@@ -244,7 +237,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/08/15/Spring-2.网关的全局过滤器与局部过滤器/';
+    var url = 'http://chenrongquan.github.com/2021/08/16/Spring-3.SpringCloudGateway与nacos整合报503错误/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -308,7 +301,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "Spring | 2.网关的全局过滤器与局部过滤器",
+        id: "Spring | 3.SpringCloudGateway与nacos整合报503错误",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {

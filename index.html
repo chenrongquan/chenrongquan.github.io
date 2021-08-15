@@ -154,6 +154,65 @@
   
     <article class="article-card">
       <h2 class="article-head">
+        <a href="/2021/08/16/Spring-3.SpringCloudGateway%E4%B8%8Enacos%E6%95%B4%E5%90%88%E6%8A%A5503%E9%94%99%E8%AF%AF/">Spring | 3.SpringCloudGateway与nacos整合报503错误</a>
+      </h2>
+      <p class="article-date">2021年8月16日</p>
+      
+        
+  <a href="/tags#springcloud" >
+    <span class="tag-code">springcloud</span>
+  </a>
+
+  <a href="/tags#gateway" >
+    <span class="tag-code">gateway</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          问题描述
+
+访问后台服务地址，微服务之间的调用出现 503错误 找不到该服务 SERVICE_UNAVAILABLE
+nacos里面也有相应的服务
+springcloud版本 2020版本
+
+原因
+
+升级到Spring Cloud 2020版本报503错误，需要手动添加loadbalance ...
+        
+      </div>
+      <a class="more" href="/2021/08/16/Spring-3.SpringCloudGateway%E4%B8%8Enacos%E6%95%B4%E5%90%88%E6%8A%A5503%E9%94%99%E8%AF%AF/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/08/16/%E6%A1%86%E6%9E%B6-15.SpringSecurityOauth2%E8%8E%B7%E5%8F%96token%E6%8E%A5%E5%8F%A3%E6%94%B9%E9%80%A0%E6%94%AF%E6%8C%81json%E6%8F%90%E4%BA%A4/">框架 | 15.SpringSecurityOauth2获取token接口改造支持json提交</a>
+      </h2>
+      <p class="article-date">2021年8月16日</p>
+      
+        
+  <a href="/tags#java" >
+    <span class="tag-code">java</span>
+  </a>
+
+  <a href="/tags#oauth2" >
+    <span class="tag-code">oauth2</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          背景
+原始接口问题:仅支持url Params
+
+TokenEndpount.java12345@RequestMapping(value = &quot;/oauth/token&quot;, method=RequestMethod.POST)public ResponseEntity& ...
+        
+      </div>
+      <a class="more" href="/2021/08/16/%E6%A1%86%E6%9E%B6-15.SpringSecurityOauth2%E8%8E%B7%E5%8F%96token%E6%8E%A5%E5%8F%A3%E6%94%B9%E9%80%A0%E6%94%AF%E6%8C%81json%E6%8F%90%E4%BA%A4/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
         <a href="/2021/08/15/Spring-2.%E7%BD%91%E5%85%B3%E7%9A%84%E5%85%A8%E5%B1%80%E8%BF%87%E6%BB%A4%E5%99%A8%E4%B8%8E%E5%B1%80%E9%83%A8%E8%BF%87%E6%BB%A4%E5%99%A8/">Spring | 2.网关的全局过滤器与局部过滤器</a>
       </h2>
       <p class="article-date">2021年8月15日</p>
@@ -171,7 +230,10 @@
       <div class="article-summary">
         
           全局过滤器GlobalFilter
-123456789101112131415161718192021222324252627282930313233@Componentpublic class AiopsRequestGlobalFilter implements GlobalFilter ...
+springcloud版本 2020版本
+
+
+123456789101112131415161718192021222324252627282930313233@Componentpublic class AiopsRequestGlobalFilter  ...
         
       </div>
       <a class="more" href="/2021/08/15/Spring-2.%E7%BD%91%E5%85%B3%E7%9A%84%E5%85%A8%E5%B1%80%E8%BF%87%E6%BB%A4%E5%99%A8%E4%B8%8E%E5%B1%80%E9%83%A8%E8%BF%87%E6%BB%A4%E5%99%A8/">阅读全文</a>
@@ -196,7 +258,10 @@
       <div class="article-summary">
         
           创建一个全局过滤器把body中的数据缓存起来
-1234567891011121314151617181920212223242526272829303132333435@Slf4j@Componentpublic class CacheBodyGlobalFilter implements  ...
+springcloud版本 2020版本
+
+
+12345678910111213141516171819202122232425262728293031323334@Slf4j@Componentpublic class CacheBodyGlo ...
         
       </div>
       <a class="more" href="/2021/08/15/Spring-1.SpringCloudGateway%E8%8E%B7%E5%8F%96requestbody/">阅读全文</a>
@@ -368,58 +433,6 @@
         
       </div>
       <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-11.%E6%89%A9%E5%B1%95%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%A3%E5%86%B3oauth2%E6%80%A7%E8%83%BD%E7%93%B6%E9%A2%88/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/08/11/%E6%A1%86%E6%9E%B6-10.oauth2%E4%BB%A4%E7%89%8C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BB%88%E7%AB%AF%E7%99%BB%E5%BD%95%E7%8A%B6%E6%80%81%E5%90%8C%E6%AD%A5/">框架 | 10.oauth2令牌实现多终端登录状态同步</a>
-      </h2>
-      <p class="article-date">2021年8月11日</p>
-      
-        
-  <a href="/tags#java" >
-    <span class="tag-code">java</span>
-  </a>
-
-  <a href="/tags#oauth2" >
-    <span class="tag-code">oauth2</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          目的说明
-解决不同客户端使用token,各个客户端的登录状态必须保持一致，退出状态实现一致。同上述问题类似如何解决不同租户相同用户名的人员的登录状态问题。
-1.默认的DefaultTokenServices 创建逻辑12345678910111213141516171819202122232 ...
-        
-      </div>
-      <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-10.oauth2%E4%BB%A4%E7%89%8C%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%BB%88%E7%AB%AF%E7%99%BB%E5%BD%95%E7%8A%B6%E6%80%81%E5%90%8C%E6%AD%A5/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/08/11/%E6%A1%86%E6%9E%B6-9.OAuth%E6%A0%BC%E5%BC%8F%E5%8C%96token%E8%BE%93%E5%87%BA/">框架 | 9.OAuth格式化token输出</a>
-      </h2>
-      <p class="article-date">2021年8月11日</p>
-      
-        
-  <a href="/tags#java" >
-    <span class="tag-code">java</span>
-  </a>
-
-  <a href="/tags#oauth2" >
-    <span class="tag-code">oauth2</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          个性化token 背景
-oauth2.0 接口默认返回的报文格式如下：
-1234567&#123;    &quot;access_token&quot;: &quot;e6669cdf-b6cd-43fe-af5c-f91a65041382&quot;,    &quot;token_ty ...
-        
-      </div>
-      <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-9.OAuth%E6%A0%BC%E5%BC%8F%E5%8C%96token%E8%BE%93%E5%87%BA/">阅读全文</a>
     </article>
   
 
