@@ -10,7 +10,7 @@
   
   <title>
      
-      框架 | 14.oauth2协议下认证中心优化 | ™技术博客 
+      Spring | 2.网关的全局过滤器与局部过滤器 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>框架 | 14.oauth2协议下认证中心优化</h2>
-  <p class="post-date">2021年8月14日</p>
+  <h2>Spring | 2.网关的全局过滤器与局部过滤器</h2>
+  <p class="post-date">2021年8月15日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,37 +160,25 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="原有认证方式问题"><a href="#原有认证方式问题" class="headerlink" title="原有认证方式问题"></a>原有认证方式问题</h2><hr>
-<ol>
-<li>认证中心 checktoken 接口去调用的是 redistokenstore 的序列化信息，若我们更新用户信息 、权限信息 并不会试试更新，需要用户重新登录</li>
-<li>性能瓶颈问题， 每次携带令牌调用资源服务器都会先执行 checktoken 网络远程校验令牌</li>
-</ol>
-<h2 id="优化扩展方案"><a href="#优化扩展方案" class="headerlink" title="优化扩展方案"></a>优化扩展方案</h2><hr>
-<ol>
-<li>重构资源服务器的 ResourceServerTokenServices ，直接本地调用 redis 查询 token 对应的用户username</li>
-<li>然后根据 username 调用 userDetailsService.loadUserByUsername 用户的全部信息（实时数据和库同步，使用cache 同步）</li>
-</ol>
-<p>缺点：</p>
+    <section class="markdown-content"><h2 id="全局过滤器GlobalFilter"><a href="#全局过滤器GlobalFilter" class="headerlink" title="全局过滤器GlobalFilter"></a>全局过滤器GlobalFilter</h2><hr>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AiopsRequestGlobalFilter</span> <span class="keyword">implements</span> <span class="title">GlobalFilter</span>, <span class="title">Ordered</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Process the Web request and (optionally) delegate to the next &#123;<span class="doctag">@code</span> WebFilter&#125;</span></span><br><span class="line"><span class="comment">	 * through the given &#123;<span class="doctag">@link</span> GatewayFilterChain&#125;.</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> exchange the current server exchange</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> chain provides a way to delegate to the next filter</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@return</span> &#123;<span class="doctag">@code</span> Mono&lt;Void&gt;&#125; to indicate when request processing is complete</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Mono&lt;Void&gt; <span class="title">filter</span><span class="params">(ServerWebExchange exchange, GatewayFilterChain chain)</span> </span>&#123;</span><br><span class="line">		<span class="comment">// 1. 清洗请求头中from 参数</span></span><br><span class="line">		ServerHttpRequest request = exchange.getRequest().mutate()</span><br><span class="line">				.headers(httpHeaders -&gt; httpHeaders.remove(SecurityConstants.FROM)).build();</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 2. 重写StripPrefix</span></span><br><span class="line">		addOriginalRequestUrl(exchange, request.getURI());</span><br><span class="line">		String rawPath = request.getURI().getRawPath();</span><br><span class="line">		String newPath = <span class="string">&quot;/&quot;</span> + Arrays.stream(StringUtils.tokenizeToStringArray(rawPath, <span class="string">&quot;/&quot;</span>)).skip(<span class="number">1L</span>)</span><br><span class="line">				.collect(Collectors.joining(<span class="string">&quot;/&quot;</span>));</span><br><span class="line">		ServerHttpRequest newRequest = request.mutate().path(newPath).build();</span><br><span class="line">		exchange.getAttributes().put(GATEWAY_REQUEST_URL_ATTR, newRequest.getURI());</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> chain.filter(exchange.mutate().request(newRequest.mutate().build()).build());</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getOrder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> -<span class="number">1000</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="AbstractGatewayFilterFactory-局部过滤器"><a href="#AbstractGatewayFilterFactory-局部过滤器" class="headerlink" title="AbstractGatewayFilterFactory 局部过滤器"></a>AbstractGatewayFilterFactory 局部过滤器</h2><hr>
 <ul>
-<li>这样相当于所有资源服务器 直接访问认证服务器的redis数据,而不是通过rul请求的方式,会造成安全性的问题<br>(例如所有资源服务器都可以实时访问认证服务器的redis数据源) 做不到一个资源服务器一个redis库</li>
+<li>内部类写法，是为了指定过滤器的优先级，要优先于全局过滤器</li>
+<li>否则容易造成全局过滤器 拦截到指定 局部过滤器的配置内容，从而导致局部过滤器失效</li>
 </ul>
-<h2 id="实现参考-EnableAiopsResourceServer"><a href="#实现参考-EnableAiopsResourceServer" class="headerlink" title="实现参考 EnableAiopsResourceServer"></a>实现参考 EnableAiopsResourceServer</h2><hr>
-<ul>
-<li>isLocal=true  本地校验 提高性能，但是破坏了安全性，内网下建议采用</li>
-<li>isLocal=false 远程校验 遵循oauth2.0通用协议，牺牲性能</li>
-</ul>
-</section>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PreviewGatewayFilter</span> <span class="keyword">extends</span> <span class="title">AbstractGatewayFilterFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String TOKEN = <span class="string">&quot;token&quot;</span>;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> GatewayFilter <span class="title">apply</span><span class="params">(Object config)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> (exchange, chain) -&gt; &#123;</span><br><span class="line">			ServerHttpRequest request = exchange.getRequest();</span><br><span class="line"></span><br><span class="line">			<span class="comment">// GET，直接向下执行</span></span><br><span class="line">			<span class="keyword">if</span> (StrUtil.equalsIgnoreCase(request.getMethodValue(), HttpMethod.GET.name())</span><br><span class="line">					|| StrUtil.containsIgnoreCase(request.getURI().getPath(), TOKEN)) &#123;</span><br><span class="line">				<span class="keyword">return</span> chain.filter(exchange);</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			log.warn(<span class="string">&quot;演示环境不能操作-&gt; &#123;&#125;,&#123;&#125;&quot;</span>, request.getMethodValue(), request.getURI().getPath());</span><br><span class="line">			ServerHttpResponse response = exchange.getResponse();</span><br><span class="line">			response.setStatusCode(HttpStatus.LOCKED);</span><br><span class="line">			<span class="keyword">return</span> response.setComplete();</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></section>
     <!-- Tags START -->
     
       <div class="tags">
         <span>Tags:</span>
         
-  <a href="/tags#java" >
-    <span class="tag-code">java</span>
+  <a href="/tags#springcloud" >
+    <span class="tag-code">springcloud</span>
   </a>
 
-  <a href="/tags#oauth2" >
-    <span class="tag-code">oauth2</span>
+  <a href="/tags#gateway" >
+    <span class="tag-code">gateway</span>
   </a>
 
       </div>
@@ -201,20 +189,13 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/08/14/%E6%A1%86%E6%9E%B6-13.%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E6%8E%88%E6%9D%83%E6%98%AF%E5%9C%A8%E7%BD%91%E5%85%B3%E5%81%9A%E8%BF%98%E6%98%AF%E5%9C%A8%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%81%9A/">
+      <a class="nav-left" href="/2021/08/15/Spring-1.SpringCloudGateway%E8%8E%B7%E5%8F%96requestbody/">
         <span class="nav-arrow">← </span>
-        
-          框架 | 13.微服务架构授权是在网关做还是在微服务做
-        
-      </a>
-    
-    
-      <a class="nav-right" href="/2021/08/15/Spring-1.SpringCloudGateway%E8%8E%B7%E5%8F%96requestbody/">
         
           Spring-1.SpringCloudGateway获取requestbody
         
-        <span class="nav-arrow"> →</span>
       </a>
+    
     
   </div>
 
@@ -243,7 +224,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%8E%9F%E6%9C%89%E8%AE%A4%E8%AF%81%E6%96%B9%E5%BC%8F%E9%97%AE%E9%A2%98"><span class="toc-nav-text">原有认证方式问题</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%BC%98%E5%8C%96%E6%89%A9%E5%B1%95%E6%96%B9%E6%A1%88"><span class="toc-nav-text">优化扩展方案</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%9E%E7%8E%B0%E5%8F%82%E8%80%83-EnableAiopsResourceServer"><span class="toc-nav-text">实现参考 EnableAiopsResourceServer</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%85%A8%E5%B1%80%E8%BF%87%E6%BB%A4%E5%99%A8GlobalFilter"><span class="toc-nav-text">全局过滤器GlobalFilter</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#AbstractGatewayFilterFactory-%E5%B1%80%E9%83%A8%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="toc-nav-text">AbstractGatewayFilterFactory 局部过滤器</span></a></li></ol>
     
   </div>
 </aside>
@@ -253,7 +234,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/08/14/框架-14.oauth2协议下认证中心优化/';
+    var url = 'http://chenrongquan.github.com/2021/08/15/Spring-2.网关的全局过滤器与局部过滤器/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -317,7 +298,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "框架 | 14.oauth2协议下认证中心优化",
+        id: "Spring | 2.网关的全局过滤器与局部过滤器",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {

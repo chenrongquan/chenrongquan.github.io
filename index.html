@@ -154,30 +154,52 @@
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2021/08/15/Spring-1.gateway%E5%9C%A8GatewayFilter%E4%B8%AD%E8%8E%B7%E5%8F%96%E5%B9%B6%E4%BF%AE%E6%94%B9%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0/">Spring-1.gateway在GatewayFilter中获取并修改请求参数</a>
+        <a href="/2021/08/15/Spring-2.%E7%BD%91%E5%85%B3%E7%9A%84%E5%85%A8%E5%B1%80%E8%BF%87%E6%BB%A4%E5%99%A8%E4%B8%8E%E5%B1%80%E9%83%A8%E8%BF%87%E6%BB%A4%E5%99%A8/">Spring | 2.网关的全局过滤器与局部过滤器</a>
       </h2>
       <p class="article-date">2021年8月15日</p>
       
         
-  <a href="/tags#Spring" >
-    <span class="tag-code">Spring</span>
+  <a href="/tags#springcloud" >
+    <span class="tag-code">springcloud</span>
+  </a>
+
+  <a href="/tags#gateway" >
+    <span class="tag-code">gateway</span>
   </a>
 
       
       <div class="article-summary">
         
-          官网API
-参考
-
-1. 涉及到的源码拦截器
-AddRequestParameterGatewayFilterFactory.java
-ModifyRequestBodyGatewayFilterFactory.java
-
-根据上面源码定制自己的拦截器
-1. 修改请求参数GatewayFil ...
+          全局过滤器GlobalFilter
+123456789101112131415161718192021222324252627282930313233@Componentpublic class AiopsRequestGlobalFilter implements GlobalFilter ...
         
       </div>
-      <a class="more" href="/2021/08/15/Spring-1.gateway%E5%9C%A8GatewayFilter%E4%B8%AD%E8%8E%B7%E5%8F%96%E5%B9%B6%E4%BF%AE%E6%94%B9%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0/">阅读全文</a>
+      <a class="more" href="/2021/08/15/Spring-2.%E7%BD%91%E5%85%B3%E7%9A%84%E5%85%A8%E5%B1%80%E8%BF%87%E6%BB%A4%E5%99%A8%E4%B8%8E%E5%B1%80%E9%83%A8%E8%BF%87%E6%BB%A4%E5%99%A8/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/08/15/Spring-1.SpringCloudGateway%E8%8E%B7%E5%8F%96requestbody/">Spring-1.SpringCloudGateway获取requestbody</a>
+      </h2>
+      <p class="article-date">2021年8月15日</p>
+      
+        
+  <a href="/tags#springcloud" >
+    <span class="tag-code">springcloud</span>
+  </a>
+
+  <a href="/tags#gateway" >
+    <span class="tag-code">gateway</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          创建一个全局过滤器把body中的数据缓存起来
+1234567891011121314151617181920212223242526272829303132333435@Slf4j@Componentpublic class CacheBodyGlobalFilter implements  ...
+        
+      </div>
+      <a class="more" href="/2021/08/15/Spring-1.SpringCloudGateway%E8%8E%B7%E5%8F%96requestbody/">阅读全文</a>
     </article>
   
     <article class="article-card">
@@ -398,34 +420,6 @@ oauth2.0 接口默认返回的报文格式如下：
         
       </div>
       <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-9.OAuth%E6%A0%BC%E5%BC%8F%E5%8C%96token%E8%BE%93%E5%87%BA/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/08/11/%E6%A1%86%E6%9E%B6-8.OAuth2%E5%AE%9E%E7%8E%B0%E7%99%BB%E5%BD%95%E4%BA%92%E8%B8%A2/">框架 | 8.OAuth2实现登录互踢</a>
-      </h2>
-      <p class="article-date">2021年8月11日</p>
-      
-        
-  <a href="/tags#java" >
-    <span class="tag-code">java</span>
-  </a>
-
-  <a href="/tags#oauth2" >
-    <span class="tag-code">oauth2</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          
-背景说明
-一个账号只能一处登录，类似的业务需求在现有后管类系统是非常常见的。 但在原有的 spring security oauth2 令牌方法流程（所谓的登录）无法满足类似的需求。
-我们先来看 TokenEndpoint 的方法流程
-客户端 带参访问 /oauth/token 接口，最后 ...
-        
-      </div>
-      <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-8.OAuth2%E5%AE%9E%E7%8E%B0%E7%99%BB%E5%BD%95%E4%BA%92%E8%B8%A2/">阅读全文</a>
     </article>
   
 
