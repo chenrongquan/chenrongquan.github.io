@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="quan&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
+  
+    <link rel="shortcut icon" type="image/ico" href="/css/images/logo.png"/>
+  
+  <title>
+     
+      Spring-1.gateway在GatewayFilter中获取并修改请求参数 | ™技术博客 
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.3.0"></head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>™技术博客</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">主页</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">标签</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">归档</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">项目</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">关于</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">主页</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">标签</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">归档</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">项目</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">关于</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+    <div id="article-banner">
+  <h2>Spring-1.gateway在GatewayFilter中获取并修改请求参数</h2>
+  <p class="post-date">2021年8月15日</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><h2 id="官网API"><a href="#官网API" class="headerlink" title="官网API"></a>官网API</h2><hr>
+<p><a target="_blank" rel="noopener" href="https://cloud.spring.io/spring-cloud-static/spring-cloud-gateway/2.1.0.RC3/multi/multi_spring-cloud-gateway.html">参考</a></p>
+<p><img src="https://lhyd.top/wp-content/uploads/2020/02/20181221174324784.png"><br><img src="https://lhyd.top/wp-content/uploads/2020/02/20181221174345828.png"></p>
+<h3 id="1-涉及到的源码拦截器"><a href="#1-涉及到的源码拦截器" class="headerlink" title="1. 涉及到的源码拦截器"></a>1. 涉及到的源码拦截器</h3><ul>
+<li>AddRequestParameterGatewayFilterFactory.java</li>
+<li>ModifyRequestBodyGatewayFilterFactory.java</li>
+</ul>
+<h2 id="根据上面源码定制自己的拦截器"><a href="#根据上面源码定制自己的拦截器" class="headerlink" title="根据上面源码定制自己的拦截器"></a>根据上面源码定制自己的拦截器</h2><hr>
+<h3 id="1-修改请求参数GatewayFilterFactory拦截器"><a href="#1-修改请求参数GatewayFilterFactory拦截器" class="headerlink" title="1. 修改请求参数GatewayFilterFactory拦截器"></a>1. 修改请求参数GatewayFilterFactory拦截器</h3><ul>
+<li>类名格式必须为filterName + GatewayFilterFactory</li>
+<li>在GlobalFilter里面处理参数不成功，必须在GatewayFilter处理才行</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InjectParameterGatewayFilterFactory</span> <span class="keyword">extends</span> <span class="title">AbstractGatewayFilterFactory</span>&lt;<span class="title">InjectParameterGatewayFilterFactory</span>.<span class="title">Config</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(InjectParameterGatewayFilterFactory.class);</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> IUserServiceFeign iUserServiceFeign;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">InjectParameterGatewayFilterFactory</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(Config.class);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> GatewayFilter <span class="title">apply</span><span class="params">(Config config)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// grab configuration from Config object</span></span><br><span class="line">        <span class="keyword">return</span> (exchange, chain) -&gt; &#123;</span><br><span class="line">            logger.info(<span class="string">&quot;自定义注入参数网关拦截器生效&quot;</span>);</span><br><span class="line">            <span class="comment">//获取会话管理全局过滤（SessionGlobalFilter）中设置的用户属性</span></span><br><span class="line">            String info = exchange.getAttribute(ServiceConstants.SHIRO_SESSION_PRINCIPALS);</span><br><span class="line">            <span class="keyword">if</span>(StringUtils.isBlank(info))&#123;</span><br><span class="line">                <span class="comment">// 无用户属性，不用处理参数注入</span></span><br><span class="line">                <span class="keyword">return</span> chain.filter(exchange);</span><br><span class="line">            &#125;</span><br><span class="line">            SessionAuthenticationVO authenticationVO = (SessionAuthenticationVO)GsonUtils.fromJson(info,SessionAuthenticationVO.class);</span><br><span class="line">            <span class="keyword">return</span> handleParameter(authenticationVO,exchange,chain);</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Config</span> </span>&#123;</span><br><span class="line">        <span class="comment">//Put the configuration properties for your filter here</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-处理请求-添加全局类参数-方法"><a href="#2-处理请求-添加全局类参数-方法" class="headerlink" title="2. 处理请求(添加全局类参数)方法"></a>2. 处理请求(添加全局类参数)方法</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Mono&lt;Void&gt; <span class="title">handleParameter</span><span class="params">(SessionAuthenticationVO authenticationVO, ServerWebExchange exchange, GatewayFilterChain chain)</span> </span>&#123;</span><br><span class="line">    ServerHttpRequest serverHttpRequest = exchange.getRequest();</span><br><span class="line">    HttpMethod method = serverHttpRequest.getMethod();</span><br><span class="line">    String contentType = serverHttpRequest.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);</span><br><span class="line">    <span class="comment">//post请求时，如果是文件上传之类的请求，不修改请求消息体</span></span><br><span class="line">    <span class="keyword">if</span> (method == HttpMethod.POST &amp;&amp; (MediaType.APPLICATION_FORM_URLENCODED_VALUE.equalsIgnoreCase(contentType)</span><br><span class="line">            || MediaType.APPLICATION_JSON_VALUE.equalsIgnoreCase(contentType))) &#123;</span><br><span class="line">        <span class="comment">// <span class="doctag">TODO:</span> 2018/12/21 参考api文档中GatewapFilter中“修改请求消息体拦截器”：ModifyRequestBodyGatewayFilterFactory.java</span></span><br><span class="line">        <span class="comment">//从请求里获取Post请求体</span></span><br><span class="line">        String bodyStr = resolveBodyFromRequest(serverHttpRequest);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 这种处理方式，必须保证post请求时，原始post表单必须有数据过来，不然会报错</span></span><br><span class="line">        <span class="keyword">if</span> (StringUtils.isBlank(bodyStr)) &#123;</span><br><span class="line">            logger.error(<span class="string">&quot;请求异常：&#123;&#125; POST请求必须传递参数&quot;</span>, serverHttpRequest.getURI().getRawPath());</span><br><span class="line">            ServerHttpResponse response = exchange.getResponse();</span><br><span class="line">            response.setStatusCode(HttpStatus.BAD_REQUEST);</span><br><span class="line">            <span class="keyword">return</span> response.setComplete();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//application/x-www-form-urlencoded和application/json才添加参数</span></span><br><span class="line">        <span class="comment">//其他上传文件之类的，不做参数处理，因为文件流添加参数，文件原格式就会出问题了</span></span><br><span class="line">        <span class="keyword">if</span> (MediaType.APPLICATION_FORM_URLENCODED_VALUE.equalsIgnoreCase(contentType)) &#123;</span><br><span class="line">            <span class="comment">// 普通键值对，增加参数</span></span><br><span class="line">            bodyStr = String.format(bodyStr+<span class="string">&quot;&amp;%s=%s&amp;%s=%s&quot;</span>,ServiceConstants.COMMON_PARAMETER_ENTERPRISEID,authenticationVO.getEnterpriseId()</span><br><span class="line">                    ,ServiceConstants.COMMON_PARAMETER_USERID,authenticationVO.getUserId());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (MediaType.APPLICATION_JSON_VALUE.equalsIgnoreCase(contentType)) &#123;</span><br><span class="line">            <span class="comment">// json，增加参数</span></span><br><span class="line">            JsonParser parse = <span class="keyword">new</span> JsonParser();</span><br><span class="line">            JsonObject json = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">if</span> (StringUtils.isBlank(bodyStr)) &#123;</span><br><span class="line">                json = <span class="keyword">new</span> JsonObject();</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                json = parse.parse(bodyStr).getAsJsonObject();<span class="comment">//创建jsonObject对象</span></span><br><span class="line">            &#125;</span><br><span class="line">            json.addProperty(ServiceConstants.COMMON_PARAMETER_ENTERPRISEID,authenticationVO.getEnterpriseId());</span><br><span class="line">            json.addProperty(ServiceConstants.COMMON_PARAMETER_USERID,authenticationVO.getUserId());</span><br><span class="line">            <span class="comment">// 转换回字符串</span></span><br><span class="line">            Gson gson = <span class="keyword">new</span> Gson();</span><br><span class="line">            bodyStr = gson.toJson(json);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//记录日志</span></span><br><span class="line">        logger.info(<span class="string">&quot;全局参数处理: &#123;&#125; url：&#123;&#125; 参数：&#123;&#125;&quot;</span>, method.toString(), serverHttpRequest.getURI().getRawPath(), bodyStr);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//下面的将请求体再次封装写回到request里，传到下一级，否则，由于请求体已被消费，后续的服务将取不到值</span></span><br><span class="line">        URI uri = serverHttpRequest.getURI();</span><br><span class="line">        URI newUri = UriComponentsBuilder.fromUri(uri).build(<span class="keyword">true</span>).toUri();</span><br><span class="line">        ServerHttpRequest request = exchange.getRequest().mutate().uri(newUri).build();</span><br><span class="line">        DataBuffer bodyDataBuffer = stringBuffer(bodyStr);</span><br><span class="line">        Flux&lt;DataBuffer&gt; bodyFlux = Flux.just(bodyDataBuffer);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 定义新的消息头</span></span><br><span class="line">        HttpHeaders headers = <span class="keyword">new</span> HttpHeaders();</span><br><span class="line">        headers.putAll(exchange.getRequest().getHeaders());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 添加消息头</span></span><br><span class="line">        headers.set(ServiceConstants.SHIRO_SESSION_PRINCIPALS,GsonUtils.toJson(authenticationVO));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 由于修改了传递参数，需要重新设置CONTENT_LENGTH，长度是字节长度，不是字符串长度</span></span><br><span class="line">        <span class="keyword">int</span> length = bodyStr.getBytes().length;</span><br><span class="line">        headers.remove(HttpHeaders.CONTENT_LENGTH);</span><br><span class="line">        headers.setContentLength(length);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 设置CONTENT_TYPE</span></span><br><span class="line">        <span class="keyword">if</span> (StringUtils.isNotBlank(contentType)) &#123;</span><br><span class="line">            headers.set(HttpHeaders.CONTENT_TYPE, contentType);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 由于post的body只能订阅一次，由于上面代码中已经订阅过一次body。所以要再次封装请求到request才行，不然会报错请求已经订阅过</span></span><br><span class="line">        request = <span class="keyword">new</span> ServerHttpRequestDecorator(request) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> HttpHeaders <span class="title">getHeaders</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">long</span> contentLength = headers.getContentLength();</span><br><span class="line">                HttpHeaders httpHeaders = <span class="keyword">new</span> HttpHeaders();</span><br><span class="line">                httpHeaders.putAll(<span class="keyword">super</span>.getHeaders());</span><br><span class="line">                <span class="keyword">if</span> (contentLength &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    httpHeaders.setContentLength(contentLength);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="comment">// <span class="doctag">TODO:</span> this causes a &#x27;HTTP/1.1 411 Length Required&#x27; on httpbin.org</span></span><br><span class="line">                    httpHeaders.set(HttpHeaders.TRANSFER_ENCODING, <span class="string">&quot;chunked&quot;</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> httpHeaders;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> Flux&lt;DataBuffer&gt; <span class="title">getBody</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> bodyFlux;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//封装request，传给下一级</span></span><br><span class="line">        request.mutate().header(HttpHeaders.CONTENT_LENGTH, Integer.toString(bodyStr.length()));</span><br><span class="line">        <span class="keyword">return</span> chain.filter(exchange.mutate().request(request).build());</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (method == HttpMethod.GET) &#123;</span><br><span class="line">        <span class="comment">// <span class="doctag">TODO:</span> 2018/12/21 参考api文档中GatewapFilter中“添加请求参数拦截器”：AddRequestParameterGatewayFilterFactory.java</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//记录日志</span></span><br><span class="line">        <span class="comment">//logger.info(&quot;全局参数处理: &#123;&#125; url：&#123;&#125; 参数：&#123;&#125;&quot;,method.toString(),serverHttpRequest.getURI().getRawPath(),newRequestQueryParams.toString());</span></span><br><span class="line">        <span class="comment">// 获取原参数</span></span><br><span class="line">        URI uri = serverHttpRequest.getURI();</span><br><span class="line">        StringBuilder query = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        String originalQuery = uri.getRawQuery();</span><br><span class="line">        <span class="keyword">if</span> (org.springframework.util.StringUtils.hasText(originalQuery)) &#123;</span><br><span class="line">            query.append(originalQuery);</span><br><span class="line">            <span class="keyword">if</span> (originalQuery.charAt(originalQuery.length() - <span class="number">1</span>) != <span class="string">&#x27;&amp;&#x27;</span>) &#123;</span><br><span class="line">                query.append(<span class="string">&#x27;&amp;&#x27;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 添加查询参数</span></span><br><span class="line">        query.append(ServiceConstants.COMMON_PARAMETER_ENTERPRISEID+<span class="string">&quot;=&quot;</span>+authenticationVO.getEnterpriseId()</span><br><span class="line">                +<span class="string">&quot;&amp;&quot;</span>+ServiceConstants.COMMON_PARAMETER_USERID+<span class="string">&quot;=&quot;</span>+authenticationVO.getUserId());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 替换查询参数</span></span><br><span class="line">        URI newUri = UriComponentsBuilder.fromUri(uri)</span><br><span class="line">                .replaceQuery(query.toString())</span><br><span class="line">                .build(<span class="keyword">true</span>)</span><br><span class="line">                .toUri();</span><br><span class="line"></span><br><span class="line">        ServerHttpRequest request = exchange.getRequest().mutate().uri(newUri).build();</span><br><span class="line">        <span class="keyword">return</span> chain.filter(exchange.mutate().request(request).build());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> chain.filter(exchange);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="3-从Flux中获取字符串的方法"><a href="#3-从Flux中获取字符串的方法" class="headerlink" title="3.  从Flux中获取字符串的方法"></a>3.  从Flux<DataBuffer>中获取字符串的方法</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> String <span class="title">resolveBodyFromRequest</span><span class="params">(ServerHttpRequest serverHttpRequest)</span> </span>&#123;</span><br><span class="line">   <span class="comment">//获取请求体</span></span><br><span class="line">   Flux&lt;DataBuffer&gt; body = serverHttpRequest.getBody();</span><br><span class="line"></span><br><span class="line">   AtomicReference&lt;String&gt; bodyRef = <span class="keyword">new</span> AtomicReference&lt;&gt;();</span><br><span class="line">   body.subscribe(buffer -&gt; &#123;</span><br><span class="line">       CharBuffer charBuffer = StandardCharsets.UTF_8.decode(buffer.asByteBuffer());</span><br><span class="line">       DataBufferUtils.release(buffer);</span><br><span class="line">       bodyRef.set(charBuffer.toString());</span><br><span class="line">   &#125;);</span><br><span class="line">   <span class="comment">//获取request body</span></span><br><span class="line">   <span class="keyword">return</span> bodyRef.get();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="4-字符串转DataBuffer"><a href="#4-字符串转DataBuffer" class="headerlink" title="4. 字符串转DataBuffer"></a>4. 字符串转DataBuffer</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> DataBuffer <span class="title">stringBuffer</span><span class="params">(String value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">byte</span>[] bytes = value.getBytes(StandardCharsets.UTF_8);</span><br><span class="line">    NettyDataBufferFactory nettyDataBufferFactory = <span class="keyword">new</span> NettyDataBufferFactory(ByteBufAllocator.DEFAULT);</span><br><span class="line">    DataBuffer buffer = nettyDataBufferFactory.allocateBuffer(bytes.length);</span><br><span class="line">    buffer.write(bytes);</span><br><span class="line">    <span class="keyword">return</span> buffer;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>主心骨是获取post、get请求的参数，在原参数基础上，注入2个参数到post，get中，然后再转发到下层</strong></p>
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#Spring" >
+    <span class="tag-code">Spring</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+      <a class="nav-left" href="/2021/08/14/%E6%A1%86%E6%9E%B6-14.oauth2%E5%8D%8F%E8%AE%AE%E4%B8%8B%E8%AE%A4%E8%AF%81%E4%B8%AD%E5%BF%83%E4%BC%98%E5%8C%96/">
+        <span class="nav-arrow">← </span>
+        
+          框架 | 14.oauth2协议下认证中心优化
+        
+      </a>
+    
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">目录</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E5%AE%98%E7%BD%91API"><span class="toc-nav-text">官网API</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E6%B6%89%E5%8F%8A%E5%88%B0%E7%9A%84%E6%BA%90%E7%A0%81%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="toc-nav-text">1. 涉及到的源码拦截器</span></a></li></ol></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%A0%B9%E6%8D%AE%E4%B8%8A%E9%9D%A2%E6%BA%90%E7%A0%81%E5%AE%9A%E5%88%B6%E8%87%AA%E5%B7%B1%E7%9A%84%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="toc-nav-text">根据上面源码定制自己的拦截器</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#1-%E4%BF%AE%E6%94%B9%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0GatewayFilterFactory%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="toc-nav-text">1. 修改请求参数GatewayFilterFactory拦截器</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#2-%E5%A4%84%E7%90%86%E8%AF%B7%E6%B1%82-%E6%B7%BB%E5%8A%A0%E5%85%A8%E5%B1%80%E7%B1%BB%E5%8F%82%E6%95%B0-%E6%96%B9%E6%B3%95"><span class="toc-nav-text">2. 处理请求(添加全局类参数)方法</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#3-%E4%BB%8EFlux%E4%B8%AD%E8%8E%B7%E5%8F%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E6%96%B9%E6%B3%95"><span class="toc-nav-text">3.  从Flux中获取字符串的方法</span></a></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#4-%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%BD%ACDataBuffer"><span class="toc-nav-text">4. 字符串转DataBuffer</span></a></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://chenrongquan.github.com/2021/08/15/Spring-1.gateway在GatewayFilter中获取并修改请求参数/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    // qrcode
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    // gitment
+    var gitmentConfig = "chenrongquan";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "Spring-1.gateway在GatewayFilter中获取并修改请求参数",
+        owner: "chenrongquan",
+        repo: "chenrongquan.github.io",
+        oauth: {
+          client_id: "f1711d39536b30d7ad8b",
+          client_secret: "a1359714a0061235611e2e06302572ac0b40a17f"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<footer class="app-footer">
+    <p class="copyright">
+      &copy; 2021 | powered by <a href="https://github.com/chenrongquan/chenrongquan.github.io" target="_blank">chenrongquan</a>
+    </p>
+    <p id="busuanzi_container_site_pv">
+      本站总访问量<span id="busuanzi_value_site_pv"></span>次 &nbsp;&nbsp;
+    </p>
+    <p id="busuanzi_container_page_pv">
+      本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+    </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { 
+      o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function () {
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>

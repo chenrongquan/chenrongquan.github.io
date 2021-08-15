@@ -154,6 +154,34 @@
   
     <article class="article-card">
       <h2 class="article-head">
+        <a href="/2021/08/15/Spring-1.gateway%E5%9C%A8GatewayFilter%E4%B8%AD%E8%8E%B7%E5%8F%96%E5%B9%B6%E4%BF%AE%E6%94%B9%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0/">Spring-1.gateway在GatewayFilter中获取并修改请求参数</a>
+      </h2>
+      <p class="article-date">2021年8月15日</p>
+      
+        
+  <a href="/tags#Spring" >
+    <span class="tag-code">Spring</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          官网API
+参考
+
+1. 涉及到的源码拦截器
+AddRequestParameterGatewayFilterFactory.java
+ModifyRequestBodyGatewayFilterFactory.java
+
+根据上面源码定制自己的拦截器
+1. 修改请求参数GatewayFil ...
+        
+      </div>
+      <a class="more" href="/2021/08/15/Spring-1.gateway%E5%9C%A8GatewayFilter%E4%B8%AD%E8%8E%B7%E5%8F%96%E5%B9%B6%E4%BF%AE%E6%94%B9%E8%AF%B7%E6%B1%82%E5%8F%82%E6%95%B0/">阅读全文</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
         <a href="/2021/08/14/%E6%A1%86%E6%9E%B6-14.oauth2%E5%8D%8F%E8%AE%AE%E4%B8%8B%E8%AE%A4%E8%AF%81%E4%B8%AD%E5%BF%83%E4%BC%98%E5%8C%96/">框架 | 14.oauth2协议下认证中心优化</a>
       </h2>
       <p class="article-date">2021年8月14日</p>
@@ -398,33 +426,6 @@ oauth2.0 接口默认返回的报文格式如下：
         
       </div>
       <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-8.OAuth2%E5%AE%9E%E7%8E%B0%E7%99%BB%E5%BD%95%E4%BA%92%E8%B8%A2/">阅读全文</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/08/11/%E6%A1%86%E6%9E%B6-7.OAuth2%E7%9A%84token-expire-in%E4%BD%BF%E7%94%A8/">框架 | 7.OAuth2的token_expire_in使用</a>
-      </h2>
-      <p class="article-date">2021年8月11日</p>
-      
-        
-  <a href="/tags#java" >
-    <span class="tag-code">java</span>
-  </a>
-
-  <a href="/tags#oauth2" >
-    <span class="tag-code">oauth2</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          问题背景
-源码剖析
-我们来看下 oauth2 的令牌方法机制,如果客户端 配置的 validitySeconds (令牌有效期) 大于 0 会返回当前令牌的有效时间 expires_in 参数，
-1234567891011OAuth2AccessToken createAccessToken ...
-        
-      </div>
-      <a class="more" href="/2021/08/11/%E6%A1%86%E6%9E%B6-7.OAuth2%E7%9A%84token-expire-in%E4%BD%BF%E7%94%A8/">阅读全文</a>
     </article>
   
 
