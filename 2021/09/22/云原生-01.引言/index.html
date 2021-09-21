@@ -10,7 +10,7 @@
   
   <title>
      
-      框架 | 6.oauth2发放令牌接口地址自定义 | ™技术博客 
+      云原生 | 01.引言 | ™技术博客 
     
   </title>
   <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -151,8 +151,8 @@
   </div>
 </header>
     <div id="article-banner">
-  <h2>框架 | 6.oauth2发放令牌接口地址自定义</h2>
-  <p class="post-date">2021年8月11日</p>
+  <h2>云原生 | 01.引言</h2>
+  <p class="post-date">2021年9月22日</p>
   <div class="arrow-down">
     <a href="javascript:;"></a>
   </div>
@@ -160,47 +160,45 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h2 id="OAuth-2-0-如何获取令牌"><a href="#OAuth-2-0-如何获取令牌" class="headerlink" title="OAuth 2.0 如何获取令牌"></a>OAuth 2.0 如何获取令牌</h2><hr>
+    <section class="markdown-content"><h2 id="什么是云原生"><a href="#什么是云原生" class="headerlink" title="什么是云原生"></a>什么是云原生</h2><hr>
 <ul>
-<li>以密码模式为例，获取 Token</li>
+<li>在包括公有云、私有云、混合云等动态环境中构建和运行规模化应用的能力</li>
+<li>云原生是一种思想，是技术、企业管理方法的集合<ul>
+<li>技术层面<ul>
+<li>应用程序从设计之初就为在云上运行而做好准备</li>
+<li>云平台基于自动化体系</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">curl --location --request POST &#x27;http://oauth-server/oauth/token&#x27; \</span><br><span class="line">--header &#x27;Authorization: Basic dGVzdDp0ZXN0&#x27; \</span><br><span class="line">--data-urlencode &#x27;username=admin&#x27; \</span><br><span class="line">--data-urlencode &#x27;password=123456&#x27; \</span><br><span class="line">--data-urlencode &#x27;scope=server&#x27; \</span><br><span class="line">--data-urlencode &#x27;grant_type=password&#x27;</span><br></pre></td></tr></table></figure>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line"> <span class="attr">&quot;access_token&quot;</span>:<span class="string">&quot;2YotnFZFEjr1zCsicMWpAA&quot;</span>,</span><br><span class="line"> <span class="attr">&quot;token_type&quot;</span>:<span class="string">&quot;example&quot;</span>,</span><br><span class="line"> <span class="attr">&quot;expires_in&quot;</span>:<span class="number">3600</span>,</span><br><span class="line"> <span class="attr">&quot;refresh_token&quot;</span>:<span class="string">&quot;tGzv3JOkF0XG5Qx2TlKWIA&quot;</span>,</span><br><span class="line"> <span class="attr">&quot;example_parameter&quot;</span>:<span class="string">&quot;example_value&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>原流程其实去访问 OAuth 2.0 提供的 /oauth/token 源码如下</li>
+</li>
+<li>流程层面<ul>
+<li>基于DevOps，CI/CD</li>
 </ul>
-<p>TokenEndpoint.postAccessToken</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(value = &quot;/oauth/token&quot;, method=RequestMethod.POST)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> ResponseEntity&lt;OAuth2AccessToken&gt; <span class="title">postAccessToken</span><span class="params">(Principal principal, <span class="meta">@RequestParam</span></span></span></span><br><span class="line"><span class="function"><span class="params">Map&lt;String, String&gt; parameters)</span></span>&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">return</span> getResponse(token);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="自定义默认获取令牌地址"><a href="#自定义默认获取令牌地址" class="headerlink" title="自定义默认获取令牌地址"></a>自定义默认获取令牌地址</h2><hr>
-<ol>
-<li>如上文，默认情况下我们需要访问 /oauth/token 获取，也就是所有业务系统的 “登录”接口 都变成这个地址，如何在不重写此接口的情况下，自定义路径地址。</li>
-<li>Spring Security OAuth2 为我们提供了丰富的 配置，我们可以在 AuthorizationServerConfigurerAdapter 设置所有内置端点 （Endpoint）路径的自定义 pathMapping</li>
-<li>如下 使用 /aiops/login 覆盖 原有的/oauth/token，注意这里是覆盖一旦配置 原有路径将失效<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableAuthorizationServer</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AuthorizationServerConfig</span> <span class="keyword">extends</span> <span class="title">AuthorizationServerConfigurerAdapter</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(AuthorizationServerEndpointsConfigurer endpoints)</span> </span>&#123;</span><br><span class="line">        endpoints</span><br><span class="line">                .allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST)</span><br><span class="line">                .pathMapping(<span class="string">&quot;/oauth/token&quot;</span>,<span class="string">&quot;/login&quot;</span>);    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-获取令牌地址就变成如下</li>
-</ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">curl --location --request POST &#x27;http://oauth-server/pig4cloud/login&#x27; \</span><br><span class="line">--header &#x27;Authorization: Basic dGVzdDp0ZXN0&#x27; \</span><br><span class="line">--data-urlencode &#x27;username=admin&#x27; \</span><br><span class="line">--data-urlencode &#x27;password=123456&#x27; \</span><br><span class="line">--data-urlencode &#x27;scope=server&#x27; \</span><br><span class="line">--data-urlencode &#x27;grant_type=password&#x27;</span><br></pre></td></tr></table></figure>
-<h2 id="源码剖析"><a href="#源码剖析" class="headerlink" title="源码剖析"></a>源码剖析</h2><hr>
-<ul>
-<li>spring security oauth2 是如何实现 这种端点自定义配置的呢？</li>
-<li>AuthorizationServerEndpointsConfigurer 被写入到自定义 HandlerMapping</li>
+</li>
+<li>基于多种技术手段<ul>
+<li>应用容器化封装</li>
+<li>服务网格：Istio 服务与服务之间的调用（传统：集中式 与 P2P点到点）；基于sidecar</li>
+<li>不可变基础架构</li>
+<li><strong>声明式API</strong>：以K8s为核心，所有的被管理对象都抽象为API，联合各个厂商定制化为标准。比如管理的节点、作业、如何发布。任何request都在k8s中保存，任何API调用都可以以源代码存在git里，一切都是源代码。<strong>可追溯</strong></li>
 </ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> FrameworkEndpointHandlerMapping <span class="title">frameworkEndpointHandlerMapping</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (frameworkEndpointHandlerMapping == <span class="keyword">null</span>) &#123;</span><br><span class="line">    frameworkEndpointHandlerMapping = <span class="keyword">new</span> FrameworkEndpointHandlerMapping();</span><br><span class="line">    frameworkEndpointHandlerMapping.setMappings(patternMap);</span><br><span class="line">    frameworkEndpointHandlerMapping.setPrefix(prefix);</span><br><span class="line">    frameworkEndpointHandlerMapping.setInterceptors(interceptors.toArray());</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> frameworkEndpointHandlerMapping;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>SpringMVC DispatcherServlet 会根据新的规则 进行路由</li>
+</li>
+<li>云原生的意义<ul>
+<li>提升系统的适应性、可管理性、可观察性</li>
+<li>使工程师能以最小成本进行频繁和可预测的系统变更</li>
+<li>提升速度和效率，助理业务成长，缩短12M(Idea to Market)</li>
 </ul>
-<p><img src="https://segmentfault.com/img/bVbGTW8"></p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="云原生核心项目概览"><a href="#云原生核心项目概览" class="headerlink" title="云原生核心项目概览"></a>云原生核心项目概览</h2><hr>
+<p><img src="img/DBA678C7-A726-48C5-A8C9-0715ADAD2B2A.png"></p>
 </section>
     <!-- Tags START -->
     
       <div class="tags">
         <span>Tags:</span>
         
-  <a href="/tags#java" >
-    <span class="tag-code">java</span>
-  </a>
-
-  <a href="/tags#oauth2" >
-    <span class="tag-code">oauth2</span>
+  <a href="/tags#云原生" >
+    <span class="tag-code">云原生</span>
   </a>
 
       </div>
@@ -211,20 +209,13 @@
   <div class="nav-container">
     <!-- reverse left and right to put prev and next in a more logic postition -->
     
-      <a class="nav-left" href="/2021/08/11/%E6%A1%86%E6%9E%B6-5.oauth2%E7%9F%AD%E4%BF%A1%E9%AA%8C%E8%AF%81%E7%A0%81%E7%99%BB%E5%BD%95%E5%AE%9E%E7%8E%B0/">
+      <a class="nav-left" href="/2021/08/16/Spring-3.SpringCloudGateway%E4%B8%8Enacos%E6%95%B4%E5%90%88%E6%8A%A5503%E9%94%99%E8%AF%AF/">
         <span class="nav-arrow">← </span>
         
-          框架 | 5.oauth2短信验证码登录实现
+          Spring | 3.SpringCloudGateway与nacos整合报503错误
         
       </a>
     
-    
-      <a class="nav-right" href="/2021/08/11/%E6%A1%86%E6%9E%B6-7.OAuth2%E7%9A%84token-expire-in%E4%BD%BF%E7%94%A8/">
-        
-          框架 | 7.OAuth2的token_expire_in使用
-        
-        <span class="nav-arrow"> →</span>
-      </a>
     
   </div>
 
@@ -253,7 +244,7 @@
   <div class="toc-main">
     <strong class="toc-title">目录</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#OAuth-2-0-%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96%E4%BB%A4%E7%89%8C"><span class="toc-nav-text">OAuth 2.0 如何获取令牌</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E9%BB%98%E8%AE%A4%E8%8E%B7%E5%8F%96%E4%BB%A4%E7%89%8C%E5%9C%B0%E5%9D%80"><span class="toc-nav-text">自定义默认获取令牌地址</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E6%BA%90%E7%A0%81%E5%89%96%E6%9E%90"><span class="toc-nav-text">源码剖析</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BA%91%E5%8E%9F%E7%94%9F"><span class="toc-nav-text">什么是云原生</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%BA%91%E5%8E%9F%E7%94%9F%E6%A0%B8%E5%BF%83%E9%A1%B9%E7%9B%AE%E6%A6%82%E8%A7%88"><span class="toc-nav-text">云原生核心项目概览</span></a></li></ol>
     
   </div>
 </aside>
@@ -263,7 +254,7 @@
 
 <script>
   (function () {
-    var url = 'http://chenrongquan.github.com/2021/08/11/框架-6.oauth2发放令牌接口地址自定义/';
+    var url = 'http://chenrongquan.github.com/2021/09/22/云原生-01.引言/';
     var banner = ''
     if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
       $('#article-banner').css({
@@ -327,7 +318,7 @@
     var gitmentConfig = "chenrongquan";
     if (gitmentConfig !== 'undefined') {
       var gitment = new Gitment({
-        id: "框架 | 6.oauth2发放令牌接口地址自定义",
+        id: "云原生 | 01.引言",
         owner: "chenrongquan",
         repo: "chenrongquan.github.io",
         oauth: {
